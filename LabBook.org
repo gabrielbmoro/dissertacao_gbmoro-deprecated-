@@ -1,0 +1,78 @@
+#+TITLE: LabBook
+#+AUTHOR: Gabriel Bronzatti Moro and Lucas M. Schnorr
+#+LATEX_HEADER: \usepackage[margin=2cm,a4paper]{geometry}
+#+STARTUP: overview indent
+#+TAGS: Gabriel(G) Lucas(L) noexport(n) deprecated(d) ArqOrgProcs(p) IParProg(q)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+
+Esse documento está em pt-br
+
+* [00:18:39; 02.07.2016] Tarefas da Primeira Reunião com o Professor Lucas
+** Principais trabalhos relacionados - Artigo do Luis Felipe
+|------------+---------------------------------------+-----------------------------------------------------------+---------------------------------|
+| Autores    | Título                                | Trabalho                                                  | Diferenças                      |
+|------------+---------------------------------------+-----------------------------------------------------------+---------------------------------|
+| Freeh      | Using multiple energy gears in mpi    | O principal objetivo desse trabalho é propor uma          | 1. Uso de Desing of Experiments |
+| et al.     | programs on a power-scalable cluster  | escala de frequência para aplicações HPC, avaliando todas | 2. Uso das frequências alta e   |
+|            |                                       | as possíbilidades de frequências disponíveis.             | baixa                           |
+|            |                                       | Esse trabalho usa a biblioteca cpufreq-utils para         |                                 |
+|            |                                       | recuperar a frequência média.                             |                                 |
+|------------+---------------------------------------+-----------------------------------------------------------+---------------------------------|
+| Laurenzano | Reducing energy usage with memory and | A abordagem de Laurenzano et al. define a melhor          | 1. O foco é o código da         |
+| et al.     | computation-aware dynamic frequency   | frequência por loop. A técnica considera diferentes       | aplicação paralela              |
+|            | scaling                               | CPUs, configurações de memória para visualizar a melhor   | 2. Busca de melhor              |
+|            |                                       | relação entre as configurações de frequência, processador | configuração (tempo e energia)  |
+|            |                                       | e memória.                                                |                                 |
+|------------+---------------------------------------+-----------------------------------------------------------+---------------------------------|
+- Alguns trabalhos possíveis: 
+*** Caracterização de aplicações paralelas implementadas em OpenMP
+	=Motivativação=: Análise do comportamento da aplicação paralela
+	via contadores de hardware. A partir disso será possível
+	visualizar o perfil de execução da aplicação pelos contadores
+	de hardware. A técnica pode ser usada como uma pré-execução.
+
+	=Metodologia=: Uso da abordagem =DoE= (Desing of Experiments) para
+	projetar o experimento e analisar os resultados. Freeh et
+	al. possui um trabalho similar, mas o diferencial do nosso
+	trabalho é a metodologia e o uso da técnica DoE.
+        
+*** Modelagem de energia para aplicações híbridas OpenMP/MPI
+	=Motivativação=: Contabilizar a energia gasta em cada região
+	paralela, mas também a energia gasta dentro do nó (intra-node)
+	e a comunicação dentro do nó (se existir) e a comunicação fora
+	do nó. Esse trabalho se concentraria na estimativa da energia
+	total gasta pela aplicação híbrida implementada em
+	OpenMP/MPI.
+
+	=Metodologia=: A metodologia pode ser a seguinte (uma abordagem
+	button-up):
+        a) Estimar a energia de cada região paralela (usando
+           contadores de hardware em diferentes nós);
+        b) Estimar a energia da aplicação (fora do limite fork-join);
+        c) Estimar a energia da aplicação na comunicação intra-nó;
+        d) Estimar a energia da comunicação inter-node (fora do nó).
+
+  =Results=: O resultado seria a estimativa de energia da aplicação
+  híbrida como um todo e também a energia gasta em cada nó. Isso pode
+  oferecer uma estimativa correta de energia para essas aplicações, a
+  partir da informação obtida o desenvolvedor poderá otimizar alguma
+  parte da sua aplicação.
+* [19:10:05; 05.07.2016] Reunião Semanal com o Professor Lucas
+** Definição do assunto da dissertação
+	=Objetivo=: Detectar as fases da aplicação utilizando contadores
+	de hardware.
+
+    =Ferramentas a serem investigadas=: ScoreP (com PAPI), ExtraE e
+    TAU. Também procurar como realizar uma medição utilizando
+    contadores de hardware =along_time=.
+
+    =Tarefas=: 
+    	a) fazer os trabalhos relacionados direcionando-os na
+    temática ``Parallel Application Phase Detection'';
+    	b) implementar a detecção de fase usando contadores do PAPI +
+           ScoreP;
+       	    b.1) A parte =along_time=
+		c) Definir as fases, aplicar conhecimento para reduzir energia
+    
