@@ -66,7 +66,7 @@ Esse documento está em pt-br
 
     =Ferramentas a serem investigadas=: ScoreP (com PAPI), ExtraE e
     TAU. Também procurar como realizar uma medição utilizando
-    contadores de hardware =along_time=.
+    contadores de hardware along time.
 
     =Tarefas=: 
     	a) fazer os trabalhos relacionados direcionando-os na
@@ -189,3 +189,80 @@ normalT.c
 tiling.c
 tilingT.c
 #+end_example
+* [16:22:11; 14.07.2016] Conversa semanal com Gabriel
+
+Com relação a entrada:
+- [[*Definição do assunto da dissertação][Definição do assunto da dissertação]]
+
+Rastreamento com scorep 2.0.2, configurado da seguinte maneira:
+
+#+BEGIN_EXAMPLE
+./configure --prefix=/home/schnorr/install/scorep-2.0.2/ --enable-papi
+#+END_EXAMPLE
+
+Na saída do config.log, temos:
+
+#+BEGIN_EXAMPLE
+(...)
+    Score-P (backend):
+      C99 compiler used:        gcc
+      Pthread support:          yes, using gcc -pthread 
+      compiler constructor:     yes, using attribute syntax
+      TLS support:              yes, using __thread
+      PAPI support:             yes
+      metric perf support:      yes
+      Unwinding support:        yes
+        libunwind support:      yes, using -D_GNU_SOURCE -lunwind
+      Sampling support:         yes, using -D_GNU_SOURCE, sa_sigaction
+      getrusage support:        yes
+      RUSAGE_THREAD support:    yes, using -D_GNU_SOURCE
+      dlfcn support:            yes, using -ldl
+(...)
+#+END_EXAMPLE
+
+Depois de configurar as seguintes variáveis de ambiente:
+
+#+BEGIN_EXAMPLE
+export SCOREP_ENABLE_TRACING=true
+export SCOREP_METRIC_PAPI=PAPI_L1_TCM
+#+END_EXAMPLE
+
+O programa foi executado com =sudo -E=. O argumento =-E= foi importante
+para que as variáveis de ambiente do shell corrente sejam transferidas
+para o shell que o sudo criará para lançar a aplicação. Precisamos
+utilizar =sudo= pois a aplicação necessita acessar contadores de
+hardware que só são capazes de ser lidos pelo superusuário. Uma forma
+melhor de fazer isto é utilizar =setcap=.
+
+Depois de executar o programa que foi compilado com =scorep gcc=,
+podemos ver a evolução da métrica =PAPI_L1_TCM= ao longo do tempo
+através do seguinte comando:
+- a terceira coluna é o timestamp onde o valor da métrica foi
+  observado
+- o valor da métrica aparece depois do UINT64
+
+No caso de =PAPI_L1_TCM= o valor da métrica é a quantidade de vezes que
+ocorreu cache miss na cache L1.
+
+#+BEGIN_EXAMPLE
+schnorr@guarani:~/svn/hpcelo-gabriel/MM/src$ /home/schnorr/install/scorep-2.0.2/bin/otf2-print scorep-20160714_1559_2932482742715837/traces.otf2 | grep 12884901888 | grep METRIC
+METRIC                           12884901888     2932482706525714  Metric: 0, 1 Values: ("PAPI_L1_TCM" <8>; UINT64; 571)
+METRIC                           12884901888     2932482706534678  Metric: 0, 1 Values: ("PAPI_L1_TCM" <8>; UINT64; 776)
+METRIC                           12884901888     2932482732253601  Metric: 0, 1 Values: ("PAPI_L1_TCM" <8>; UINT64; 930)
+METRIC                           12884901888     2932482732318445  Metric: 0, 1 Values: ("PAPI_L1_TCM" <8>; UINT64; 1119)
+METRIC                           12884901888     2932482732323234  Metric: 0, 1 Values: ("PAPI_L1_TCM" <8>; UINT64; 1181)
+METRIC                           12884901888     2932482732325389  Metric: 0, 1 Values: ("PAPI_L1_TCM" <8>; UINT64; 1192)
+#+END_EXAMPLE
+
+Quais são os contadores que devem ser medidos?
+- Difícil responder, primeiro precisamos investigar quais contadores
+  poderiam (no caso de valores altos) representar uma aplicação
+  CPU-bound e uma aplicação MEMORY-bound.
+- Procurar na literatura artigos que consigam definir uma eventual
+  relação que exista entre CPU-bound e determinados contadores de
+  hardware (e o equivalente para algo MEMORY-bound)
+
+Tarefas:
+- Medir ao longo do tempo e com scorep o máximo possível de contadores
+  - Eventualmente todos os contadores disponíveis
+- Utilizar a aplicação de MM desenvolvida por ti
