@@ -9,82 +9,82 @@
 #+mode: org
 #+coding: utf-8
 
-Esse documento est· em pt-br
+Esse documento est√° em pt-br
 
-* [00:18:39; 02.07.2016] Tarefas da Primeira Reuni„o com o Professor Lucas :Gabriel:
+* [00:18:39; 02.07.2016] Tarefas da Primeira Reuni√£o com o Professor Lucas :Gabriel:
 ** Principais trabalhos relacionados - Artigo do Luis Felipe
 
 |-------------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------|
-| *Autores*           | *TÌtulo*                                                                                            | *Objetivo*                                                                                                                                                     | *Metodologia*                                                                                                                                                                                                                 | *Benchmark, Ferramenta ou Tecnologia*                                | *Resultados*                                                                                                                                                                                                              | *ObservaÁ„o*                                                                                                                                                                       | *DiferenÁa do nosso trabalho*                                      |
+| *Autores*           | *T√≠tulo*                                                                                            | *Objetivo*                                                                                                                                                     | *Metodologia*                                                                                                                                                                                                                 | *Benchmark, Ferramenta ou Tecnologia*                                | *Resultados*                                                                                                                                                                                                              | *Observa√ß√£o*                                                                                                                                                                       | *Diferen√ßa do nosso trabalho*                                      |
 |                   |                                                                                                   |                                                                                                                                                              |                                                                                                                                                                                                                             |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |                   |                                                                                                   |                                                                                                                                                              |                                                                                                                                                                                                                             |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |-------------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------|
-| Laurenzano et al. | =Reducing energy usage with memory and with memory and computation-aware dynamic frequency scaling= | - Abordagem que permite selecionar *por laÁo* a melhor frequÍncia de clock. O critÈrio de frequÍncia mais adequado est· entre desempenho e consumo de energia. | - InstrumentaÁ„o realizada atravÈs da utilizaÁ„o da ferramenta PEBIL toolkit                                                                                                                                                | - Benchmark prÛpio =pcubed= (PMaC's Performance and Power benchmark) | - Os principais resultados adquiridos pelos autores foi a economia de cerca de 7,6% de energia para a primeira plataforma de execuÁ„o (Intel Xeon E5530) e para a segunda plataforma (AMD Opteron 8380) cerca de 10,6%. | - O autor n„o chega a definir, mas menciona que uma aplicaÁ„o =memory-bound= depende primeiramente da proximidade, tamanho e do Speedup disponÌvel com as operaÁoes sob a memoria. | - Foco em aplicaÁıes paralelas (OpenMP)                          |
-|                   |                                                                                                   |                                                                                                                                                              | - Uso da biblioteca cpu-freq para alterar a frequÍncia do processador                                                                                                                                                       |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  | - Regiıes paralelas dentro da abordagem fork-join                |
-|                   |                                                                                                   |                                                                                                                                                              | - Experimento: os par‚mentos levados em consideraÁ„o para aplicaÁ„o s„o: taxa de hit dos diferentes nÌveis de cache, operaÁıes de ponto-flutuante (FP) sob a memÛria e a media de computaÁ„o de operaÁıes sob FP e inteiro. |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
-|                   |                                                                                                   |                                                                                                                                                              | - A plataforma de execuÁ„o escolhida por eles *permite a alteraÁ„o da frequÍncia independentemente de cada core* (frequÍncias avaliadas no experimento 1.6, 1.73, 1.86, 2, 2.13, 2.26, 2.39 e 2.40 GHz).                      |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
+| Laurenzano et al. | =Reducing energy usage with memory and with memory and computation-aware dynamic frequency scaling= | - Abordagem que permite selecionar *por la√ßo* a melhor frequ√™ncia de clock. O crit√©rio de frequ√™ncia mais adequado est√° entre desempenho e consumo de energia. | - Instrumenta√ß√£o realizada atrav√©s da utiliza√ß√£o da ferramenta PEBIL toolkit                                                                                                                                                | - Benchmark pr√≥pio =pcubed= (PMaC's Performance and Power benchmark) | - Os principais resultados adquiridos pelos autores foi a economia de cerca de 7,6% de energia para a primeira plataforma de execu√ß√£o (Intel Xeon E5530) e para a segunda plataforma (AMD Opteron 8380) cerca de 10,6%. | - O autor n√£o chega a definir, mas menciona que uma aplica√ß√£o =memory-bound= depende primeiramente da proximidade, tamanho e do Speedup dispon√≠vel com as opera√ßoes sob a memoria. | - Foco em aplica√ß√µes paralelas (OpenMP)                          |
+|                   |                                                                                                   |                                                                                                                                                              | - Uso da biblioteca cpu-freq para alterar a frequ√™ncia do processador                                                                                                                                                       |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  | - Regi√µes paralelas dentro da abordagem fork-join                |
+|                   |                                                                                                   |                                                                                                                                                              | - Experimento: os par√¢mentos levados em considera√ß√£o para aplica√ß√£o s√£o: taxa de hit dos diferentes n√≠veis de cache, opera√ß√µes de ponto-flutuante (FP) sob a mem√≥ria e a media de computa√ß√£o de opera√ß√µes sob FP e inteiro. |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
+|                   |                                                                                                   |                                                                                                                                                              | - A plataforma de execu√ß√£o escolhida por eles *permite a altera√ß√£o da frequ√™ncia independentemente de cada core* (frequ√™ncias avaliadas no experimento 1.6, 1.73, 1.86, 2, 2.13, 2.26, 2.39 e 2.40 GHz).                      |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |-------------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------|
-| Freeh et al.      | =Using Multiple Energy Gears in MPI Programs on a Power-Scalable Cluster=                           | - Abordagem que tem por objetivo encontrar a *frequÍncia adequada para cada fase da aplicaÁ„o MPI*, de acordo com a heurÌstica alvo (energia e/ou desempenho)  | - A aplicaÁ„o È dividida em n fases e diferentes gears (microprocessadores), para cada gear È executado as n fases da aplicaÁ„o                                                                                             | - Benchmark do =NAS=                                                 | - Os resultados apresentam a partir da combinaÁ„o adequada de frequÍncias para os benchmarks executados È possÌvel obter um bom ganho de energia caso fosse utilizado apenas a mesma frequÍncia nos diferentes nÛs.     | - Os autores introduzem a mÈtrica =OPM (Operations per Miss)=, a qual permite verificar a press„o de memÛria de uma aplicaÁ„o ou de uma fase.                                      | - Foco em aplicaÁıes paralelas de memÛria compartilhada (OpenMP) |
-|                   |                                                                                                   |                                                                                                                                                              | - Resultados obtidos de tempo e energia                                                                                                                                                                                     |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  | - Trabalho concentra-se em apenas um nÛ                          |
-|                   |                                                                                                   |                                                                                                                                                              | - O cluster aonde foi executado os experimentos permitia a configuraÁ„o de atÈ 10 diferentes frequÍncias.                                                                                                                   |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
+| Freeh et al.      | =Using Multiple Energy Gears in MPI Programs on a Power-Scalable Cluster=                           | - Abordagem que tem por objetivo encontrar a *frequ√™ncia adequada para cada fase da aplica√ß√£o MPI*, de acordo com a heur√≠stica alvo (energia e/ou desempenho)  | - A aplica√ß√£o √© dividida em n fases e diferentes gears (microprocessadores), para cada gear √© executado as n fases da aplica√ß√£o                                                                                             | - Benchmark do =NAS=                                                 | - Os resultados apresentam a partir da combina√ß√£o adequada de frequ√™ncias para os benchmarks executados √© poss√≠vel obter um bom ganho de energia caso fosse utilizado apenas a mesma frequ√™ncia nos diferentes n√≥s.     | - Os autores introduzem a m√©trica =OPM (Operations per Miss)=, a qual permite verificar a press√£o de mem√≥ria de uma aplica√ß√£o ou de uma fase.                                      | - Foco em aplica√ß√µes paralelas de mem√≥ria compartilhada (OpenMP) |
+|                   |                                                                                                   |                                                                                                                                                              | - Resultados obtidos de tempo e energia                                                                                                                                                                                     |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  | - Trabalho concentra-se em apenas um n√≥                          |
+|                   |                                                                                                   |                                                                                                                                                              | - O cluster aonde foi executado os experimentos permitia a configura√ß√£o de at√© 10 diferentes frequ√™ncias.                                                                                                                   |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |                   |                                                                                                   |                                                                                                                                                              |                                                                                                                                                                                                                             |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |                   |                                                                                                   |                                                                                                                                                              |                                                                                                                                                                                                                             |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |                   |                                                                                                   |                                                                                                                                                              |                                                                                                                                                                                                                             |                                                                    |                                                                                                                                                                                                                         |                                                                                                                                                                                  |                                                                  |
 |-------------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------|
 
-- Alguns trabalhos possÌveis: 
+- Alguns trabalhos poss√≠veis: 
 
-*** CaracterizaÁ„o de aplicaÁıes paralelas implementadas em OpenMP
-	=MotivativaÁ„o=: An·lise do comportamento da aplicaÁ„o paralela
-	via contadores de hardware. A partir disso ser· possÌvel
-	visualizar o perfil de execuÁ„o da aplicaÁ„o pelos contadores
-	de hardware. A tÈcnica pode ser usada como uma prÈ-execuÁ„o.
+*** Caracteriza√ß√£o de aplica√ß√µes paralelas implementadas em OpenMP
+	=Motivativa√ß√£o=: An√°lise do comportamento da aplica√ß√£o paralela
+	via contadores de hardware. A partir disso ser√° poss√≠vel
+	visualizar o perfil de execu√ß√£o da aplica√ß√£o pelos contadores
+	de hardware. A t√©cnica pode ser usada como uma pr√©-execu√ß√£o.
 
 	=Metodologia=: Uso da abordagem =DoE= (Desing of Experiments) para
 	projetar o experimento e analisar os resultados. Freeh et
 	al. possui um trabalho similar, mas o diferencial do nosso
-	trabalho È a metodologia e o uso da tÈcnica DoE.
+	trabalho √© a metodologia e o uso da t√©cnica DoE.
         
-*** Modelagem de energia para aplicaÁıes hÌbridas OpenMP/MPI
-	=MotivativaÁ„o=: Contabilizar a energia gasta em cada regi√£o
-	paralela, mas tambÈm a energia gasta dentro do nÛ (intra-node)
-	e a comunicaÁ„o dentro do nÛ (se existir) e a comunicaÁ„o fora
-	do nÛ. Esse trabalho se concentraria na estimativa da energia
-	total gasta pela aplicaÁ„o hÌbrida implementada em
+*** Modelagem de energia para aplica√ß√µes h√≠bridas OpenMP/MPI
+	=Motivativa√ß√£o=: Contabilizar a energia gasta em cada regi√É¬£o
+	paralela, mas tamb√©m a energia gasta dentro do n√≥ (intra-node)
+	e a comunica√ß√£o dentro do n√≥ (se existir) e a comunica√ß√£o fora
+	do n√≥. Esse trabalho se concentraria na estimativa da energia
+	total gasta pela aplica√ß√£o h√≠brida implementada em
 	OpenMP/MPI.
 
 	=Metodologia=: A metodologia pode ser a seguinte (uma abordagem
 	button-up):
-        a) Estimar a energia de cada regi„o paralela (usando
-           contadores de hardware em diferentes nÛs);
-        b) Estimar a energia da aplicaÁ„o (fora do limite fork-join);
-        c) Estimar a energia da aplicaÁ„o na comunicaÁ„o intra-nÛ;
-        d) Estimar a energia da comunicaÁ„o inter-node (fora do nÛ).
+        a) Estimar a energia de cada regi√£o paralela (usando
+           contadores de hardware em diferentes n√≥s);
+        b) Estimar a energia da aplica√ß√£o (fora do limite fork-join);
+        c) Estimar a energia da aplica√ß√£o na comunica√ß√£o intra-n√≥;
+        d) Estimar a energia da comunica√ß√£o inter-node (fora do n√≥).
 
-  =Results=: O resultado seria a estimativa de energia da aplicaÁ„o
-  hÌbrida como um todo e tambÈm a energia gasta em cada nÛ. Isso pode
-  oferecer uma estimativa correta de energia para essas aplicaÁıes, a
-  partir da informaÁ„o obtida o desenvolvedor poder· otimizar alguma
-  parte da sua aplicaÁ„o.
-* [19:10:05; 05.07.2016] Reuni„o Semanal com o Professor Lucas :Gabriel:Lucas:
-** DefiniÁ„o do assunto da dissertaÁ„o
-	=Objetivo=: Detectar as fases da aplicaÁ„o utilizando contadores
+  =Results=: O resultado seria a estimativa de energia da aplica√ß√£o
+  h√≠brida como um todo e tamb√©m a energia gasta em cada n√≥. Isso pode
+  oferecer uma estimativa correta de energia para essas aplica√ß√µes, a
+  partir da informa√ß√£o obtida o desenvolvedor poder√° otimizar alguma
+  parte da sua aplica√ß√£o.
+* [19:10:05; 05.07.2016] Reuni√£o Semanal com o Professor Lucas :Gabriel:Lucas:
+** Defini√ß√£o do assunto da disserta√ß√£o
+	=Objetivo=: Detectar as fases da aplica√ß√£o utilizando contadores
 	de hardware.
 
     =Ferramentas a serem investigadas=: ScoreP (com PAPI), ExtraE e
-    TAU. TambÈm procurar como realizar uma mediÁ„o utilizando
+    TAU. Tamb√©m procurar como realizar uma medi√ß√£o utilizando
     contadores de hardware along time.
 
     =Tarefas=: 
     	a) fazer os trabalhos relacionados direcionando-os na
-    tem·tica ``Parallel Application Phase Detection'';
-    	b) implementar a detecÁ„o de fase usando contadores do PAPI +
+    tem√°tica ``Parallel Application Phase Detection'';
+    	b) implementar a detec√ß√£o de fase usando contadores do PAPI +
            ScoreP;
        	    b.1) A parte =along_time=
 		c) Definir as fases, aplicar conhecimento para reduzir energia
     
-* [22:15:57; 08.07.2016] ConfiguraÁ„o de Ambiente Scorep e PAPI     :Gabriel:
-** InstalaÁ„o do PAPI
+* [22:15:57; 08.07.2016] Configura√ß√£o de Ambiente Scorep e PAPI     :Gabriel:
+** Instala√ß√£o do PAPI
 #+begin_src sh :results output :exports both
 cd $HOME/Downloads/
 wget http://icl.cs.utk.edu/projects/papi/downloads/papi-5.4.3.tar.gz
@@ -95,7 +95,7 @@ make
 sudo make install
 #+end_src
 
-- Verificando se a instalaÁ„o foi realizada com sucesso
+- Verificando se a instala√ß√£o foi realizada com sucesso
 
 #+begin_src sh :results output :exports both
 cd /usr/local/lib/
@@ -120,9 +120,9 @@ ls | grep -i papi.h
 : fpapi.h
 : papi.h
 
-** InstalaÁ„o do Scorep
+** Instala√ß√£o do Scorep
 
-- Um dos prÈ-requisitos de instalaÁ„o do Scorep e a instalaÁ„o do
+- Um dos pr√©-requisitos de instala√ß√£o do Scorep e a instala√ß√£o do
   =Qt_app=.
 
 #+begin_src sh :results output :exports both
@@ -150,7 +150,7 @@ sudo make install
 
 #+END_EXAMPLE
 
-- Compilando aplicaÁ„o com OpenMP com Scorep
+- Compilando aplica√ß√£o com OpenMP com Scorep
 
 #+begin_src sh :results output :exports both
 cd benchmarks/MM/
@@ -172,7 +172,7 @@ tiling.c
 tilingT.c
 #+end_example
 
-- Habilitando o trace para a execuÁ„o da aplicaÁ„o:
+- Habilitando o trace para a execu√ß√£o da aplica√ß√£o:
 
 #+begin_src sh :results output :exports both
 cd benchmarks/MM/
@@ -205,8 +205,8 @@ tilingT.c
 #+end_example
 * [16:22:11; 14.07.2016] Conversa semanal com Gabriel         :Gabriel:Lucas:
 
-Com relaÁ„o a entrada:
-- [[*Defini√ß√£o do assunto da disserta√ß√£o][DefiniÁ„o do assunto da dissertaÁ„o]]
+Com rela√ß√£o a entrada:
+- [[*Defini√É¬ß√É¬£o do assunto da disserta√É¬ß√É¬£o][Defini√ß√£o do assunto da disserta√ß√£o]]
 
 Rastreamento com scorep 2.0.2, configurado da seguinte maneira:
 
@@ -214,7 +214,7 @@ Rastreamento com scorep 2.0.2, configurado da seguinte maneira:
 ./configure --prefix=/home/schnorr/install/scorep-2.0.2/ --enable-papi  --with-papi-lib=/usr/local/lib/ --with-papi-header=/usr/local/include/
 #+END_EXAMPLE
 
-Na saÌda do config.log, temos:
+Na sa√≠da do config.log, temos:
 
 #+BEGIN_EXAMPLE
 (...)
@@ -234,7 +234,7 @@ Na saÌda do config.log, temos:
 (...)
 #+END_EXAMPLE
 
-Depois de configurar as seguintes vari·veis de ambiente:
+Depois de configurar as seguintes vari√°veis de ambiente:
 
 #+BEGIN_EXAMPLE
 export SCOREP_ENABLE_TRACING=true
@@ -242,20 +242,20 @@ export SCOREP_METRIC_PAPI=PAPI_L1_TCM
 #+END_EXAMPLE
 
 O programa foi executado com =sudo -E=. O argumento =-E= foi importante
-para que as vari·veis de ambiente do shell corrente sejam transferidas
-para o shell que o sudo criar· para lanÁar a aplicaÁ„o. Precisamos
-utilizar =sudo= pois a aplicaÁ„o necessita acessar contadores de
-hardware que s„o capazes de ser lidos pelo superusu·rio. Uma forma
-melhor de fazer isto È utilizar =setcap=.
+para que as vari√°veis de ambiente do shell corrente sejam transferidas
+para o shell que o sudo criar√° para lan√ßar a aplica√ß√£o. Precisamos
+utilizar =sudo= pois a aplica√ß√£o necessita acessar contadores de
+hardware que s√£o capazes de ser lidos pelo superusu√°rio. Uma forma
+melhor de fazer isto √© utilizar =setcap=.
 
 Depois de executar o programa que foi compilado com =scorep gcc=,
-podemos ver a evoluÁ„o da mÈtrica =PAPI_L1_TCM= ao longo do tempo
-atravÈs do seguinte comando:
-- a terceira coluna È o timestamp onde o valor da mÈtrica foi
+podemos ver a evolu√ß√£o da m√©trica =PAPI_L1_TCM= ao longo do tempo
+atrav√©s do seguinte comando:
+- a terceira coluna √© o timestamp onde o valor da m√©trica foi
   observado
-- o valor da mÈtrica aparece depois do UINT64
+- o valor da m√©trica aparece depois do UINT64
 
-No caso de =PAPI_L1_TCM= o valor da mÈtrica È a quantidade de vezes que
+No caso de =PAPI_L1_TCM= o valor da m√©trica √© a quantidade de vezes que
 ocorreu cache miss na cache L1.
 
 #+BEGIN_EXAMPLE
@@ -269,21 +269,21 @@ METRIC                           12884901888     2932482732325389  Metric: 0, 1 
 ...
 #+END_EXAMPLE
 
-Quais s„o os contadores que devem ser medidos?
-- DifÌcil responder, primeiro precisamos investigar quais contadores
-  poderiam (no caso de valores altos) representar uma aplicaÁ„o
-  CPU-bound e uma aplicaÁ„o MEMORY-bound.
+Quais s√£o os contadores que devem ser medidos?
+- Dif√≠cil responder, primeiro precisamos investigar quais contadores
+  poderiam (no caso de valores altos) representar uma aplica√ß√£o
+  CPU-bound e uma aplica√ß√£o MEMORY-bound.
 - Procurar na literatura artigos que consigam definir uma eventual
-  relaÁ„o que exista entre CPU-bound e determinados contadores de
+  rela√ß√£o que exista entre CPU-bound e determinados contadores de
   hardware (e o equivalente para algo MEMORY-bound)
 
 Tarefas:
-- Medir ao longo do tempo e com scorep o m·ximo possÌvel de contadores
-  - Eventualmente todos os contadores disponÌveis
-- Utilizar a aplicaÁ„o de MM desenvolvida por ti
-* [23:39:31; 14.07.2016] ExecuÁ„o do benchmark MM com PAPI via Scorep :Gabriel:
+- Medir ao longo do tempo e com scorep o m√°ximo poss√≠vel de contadores
+  - Eventualmente todos os contadores dispon√≠veis
+- Utilizar a aplica√ß√£o de MM desenvolvida por ti
+* [23:39:31; 14.07.2016] Execu√ß√£o do benchmark MM com PAPI via Scorep :Gabriel:
 
-- CompilaÁ„o, utilizando o make file com a diretiva =scorep gcc=:
+- Compila√ß√£o, utilizando o make file com a diretiva =scorep gcc=:
 
 #+begin_src sh :results output :exports both
 cd benchmarks/MM/
@@ -376,7 +376,7 @@ ENTER                                      0       79633289900948  Region: "main
 
 #+end_example
 
-* DONE [09:25:09; 15.07.2016] CriaÁ„o do script para execuÁ„o do benchmark MM com PAPI via Scorep :Gabriel:
+* DONE [09:25:09; 15.07.2016] Cria√ß√£o do script para execu√ß√£o do benchmark MM com PAPI via Scorep :Gabriel:
 
 - State "DONE"       from "STARTED"    [2016-07-15 Sex 20:35]
 - State "STARTED"    from              [2016-07-15 Sex 10:14]
@@ -416,11 +416,11 @@ done
 
 #+end_src
 
-O script de execuÁ„o est· rodando corretamente, os contadores PAPI
+O script de execu√ß√£o est√° rodando corretamente, os contadores PAPI
 utilizados foram escolhidos de acordo com a disponibilidade da minha
-m·quina pessoal. Estou com problemas apenas na execuÁ„o do algoritmo
-=tiling=, isso √© porque o mesmo utiliza muito a memÛria principal para
-otimizar o uso da cache. O erro que est· acontecendo com o SCOREP È o
+m√°quina pessoal. Estou com problemas apenas na execu√ß√£o do algoritmo
+=tiling=, isso √É¬© porque o mesmo utiliza muito a mem√≥ria principal para
+otimizar o uso da cache. O erro que est√° acontecendo com o SCOREP √© o
 seguinte:
 
 #+BEGIN_EXAMPLE
@@ -478,7 +478,7 @@ done
 
 #+end_src
 
-Executando o script com a modificaÁ„o no =SCOREP_TOTAL_MEMORY= para 3
+Executando o script com a modifica√ß√£o no =SCOREP_TOTAL_MEMORY= para 3
 gigabytes, ocorreu o seguinte erro:
 
 #+BEGIN_EXAMPLE
@@ -488,11 +488,11 @@ gigabytes, ocorreu o seguinte erro:
 [Score-P] src/measurement/SCOREP_Memory.c:106: Fatal: Bug '!allocator': Cannot create memory manager for SCOREP_TOTAL_MEMORY=3221225472 and SCOREP_PAGE_SIZE=800000
 #+END_EXAMPLE
 
-Esse erro de acordo com os f√≥runs √© devido a minha limita√ß√£o de
-mem√≥ria principal. 
+Esse erro de acordo com os f√É¬≥runs √É¬© devido a minha limita√É¬ß√É¬£o de
+mem√É¬≥ria principal. 
 
 - Vou modificar o script para executar todos os algoritmos de
-  multiplicaÁ„o de matriz, exceto o =tiling=.
+  multiplica√ß√£o de matriz, exceto o =tiling=.
 
 #+begin_src sh :results output :exports both :tangle benchmarks/MM/scriptSimulation3.bash
 #!bin/bash
@@ -545,17 +545,17 @@ exec_normal_parT60
 exec_normal_parT80
 #+end_example
 
-O prÛximo passo È fazer um script para analisar esses dados e a partir
-deles gerar um arquivo csv. Esse script dever· utilizar a saÌda da
+O pr√≥ximo passo √© fazer um script para analisar esses dados e a partir
+deles gerar um arquivo csv. Esse script dever√° utilizar a sa√≠da da
 ferramenta =otf2print= disponibilizada pelo =scorep=.
-* WAITING [00:09:15; 16.07.2016] An·lise dos resultados do experimento com PAPI - benchmark MM :Gabriel:
+* WAITING [00:09:15; 16.07.2016] An√°lise dos resultados do experimento com PAPI - benchmark MM :Gabriel:
 - State "WAITING"    from "STARTED"    [2016-07-18 Seg 12:07]
-- State "STARTED"    from              [2016-07-16 S√°b 14:24]
+- State "STARTED"    from              [2016-07-16 S√É¬°b 14:24]
 
 ** Exportando o arquivo csv por thread
 Primeiramente vou fazer um script teste para gerar o csv do arquivo
-gerado na execuÁ„o da vers„o =normal_par= com =80= de entrada. O script
-vai ser criado em python, porque como s„o muitos dado
+gerado na execu√ß√£o da vers√£o =normal_par= com =80= de entrada. O script
+vai ser criado em python, porque como s√£o muitos dado
 
 #+begin_src sh :results output :exports both
 cd benchmarks/MM/exec_normal_par80/
@@ -579,7 +579,7 @@ chmod 777 exec*
 
 #+RESULTS:
 
-- Vou tentar novamente com as permissıes alteradas
+- Vou tentar novamente com as permiss√µes alteradas
 
 #+begin_src sh :results output :exports both
 cd benchmarks/MM/exec_normal_par80/
@@ -612,8 +612,8 @@ THREAD_TEAM_END 12884901888 148300137827954 Thread Team:
 THREAD_JOIN 0 148300137838547 Model: "OpenMP"        
 #+end_example
 
-A partir dessa saÌda È possÌvel visualizar o momento em que o fork
-inicia e termina. AlÈm disso È possÌvel visualizar o identificador de
+A partir dessa sa√≠da √© poss√≠vel visualizar o momento em que o fork
+inicia e termina. Al√©m disso √© poss√≠vel visualizar o identificador de
 cada thread.
 
 #+begin_src sh :results output :exports both :tangle benchmarks/MM/scriptAnalyseTest.sh
@@ -639,8 +639,8 @@ done
 : 0
 
 Agora vou utilizar um desses identificadores de thread para recuperar
-as medidas obtidas pelos =contadores de hardware= para as regiıes de
-cÛdigo daquela thread.
+as medidas obtidas pelos =contadores de hardware= para as regi√µes de
+c√≥digo daquela thread.
 
 #+begin_src sh :results output :exports both
 cd benchmarks/MM/exec_normal_par80/
@@ -665,7 +665,7 @@ LEAVE, 8589934592 148300137788125 ,Region: ,!$omp <3>
 THREAD_TEAM_END 8589934592 148300137794587 Thread Team:        
 #+end_example
 
-- O script final para gerar os arquivos =csv= para an·lise ser· criado a
+- O script final para gerar os arquivos =csv= para an√°lise ser√° criado a
   partir dos fragmentos de script anteriores
 
 #+begin_src sh :results output :exports both :tangle benchmarks/MM/scriptCSVExporter.sh
@@ -781,8 +781,8 @@ done
 ** Analizando resultados obtidos
 
 - O caso escolhido para ser o primeiro a ser analisado e plotado em
-  gr·fico È o algoritmo normal de entrada igual a 80. Seus rastros
-  est„o disponÌveis na pasta:
+  gr√°fico √© o algoritmo normal de entrada igual a 80. Seus rastros
+  est√£o dispon√≠veis na pasta:
 
 #+begin_src sh :results output :exports both :tangle benchmarks/MM/exec_normal_par80/scriptOfGraph.sh
 #path: benchmarks/MM/exec_normal_par80/
@@ -813,8 +813,8 @@ rm threadAnalyse.csv
 
 #+RESULTS:
 
-- Vou gerar um gr·fico para visualizarmos o comportamento das threads
-  nessa aplicaÁ„o, atravÈs dos 4 contadores analisados.
+- Vou gerar um gr√°fico para visualizarmos o comportamento das threads
+  nessa aplica√ß√£o, atrav√©s dos 4 contadores analisados.
 
 #+begin_src R :results output graphics :file "graph.pdf" :exports both :session *Mnormalpar80*  :tangle benchmarks/MM/exec_normal_par80/plotScript.r
 library(dplyr);
@@ -835,14 +835,14 @@ ggplot(k, aes(x=as.factor(thread), y=value, color=hardwareCounter)) +
 
 * [2016-07-18 Mon 23:57] Retorno sobre as entradas anteriores         :Lucas:
 
-N„o consegui gerar a data desta entrada no formato visto nas seÁıes
+N√£o consegui gerar a data desta entrada no formato visto nas se√ß√µes
 anteriores. Usei o atalho C-u C-c ! de acordo com o texto:
 - http://orgmode.org/manual/Creating-timestamps.html
 
-Reviso aqui o gr·fico gerado na seÁ„o (veja seÁ„o imediatamente anterior):
+Reviso aqui o gr√°fico gerado na se√ß√£o (veja se√ß√£o imediatamente anterior):
 - [[*Analizando resultados obtidos][Analizando resultados obtidos]]
 
-Vamos olhar os dados (note o caminho relativo a raiz do repositÛrio):
+Vamos olhar os dados (note o caminho relativo a raiz do reposit√≥rio):
 
 #+begin_src R :results output :session :exports both
 df <- read.csv("benchmarks/MM/exec_normal_par80/threadAnalyseOutput.csv");
@@ -860,7 +860,7 @@ head(df);
 
 O tempo desapareceu das medidas (imagino que ele deveria ser
 mantido). Para tentar entender melhor o que foi feito, vamos olhar
-para apenas uma thread e uma ˙nica mÈtrica.
+para apenas uma thread e uma √∫nica m√©trica.
 
 #+begin_src R :results output :session :exports both
 head(df[df$thread == 1 & df$hardwareCounter == "PAPI_L1_DCM",]);
@@ -877,11 +877,11 @@ head(df[df$thread == 1 & df$hardwareCounter == "PAPI_L1_DCM",]);
 
 Parece estar tudo bem, o valor vai sempre aumentando.
 
-Olhando o script =scriptOfGraph.sh=, parece-me que est·s tirando fora a
-informaÁ„o de tempo. N„o entendi tambÈm de onde tiraste a
-informaÁ„o das threads, pois olhando o arquivo =execNormal80.csv= (que
-parece ser a origem dos dados), n„o tem dados sobre threads nas linhas
-com as mÈtricas. Veja:
+Olhando o script =scriptOfGraph.sh=, parece-me que est√°s tirando fora a
+informa√ß√£o de tempo. N√£o entendi tamb√©m de onde tiraste a
+informa√ß√£o das threads, pois olhando o arquivo =execNormal80.csv= (que
+parece ser a origem dos dados), n√£o tem dados sobre threads nas linhas
+com as m√©tricas. Veja:
 
 #+begin_src sh :results output :session :exports both
 ls -hl benchmarks/MM/execNormal80.csv
@@ -894,15 +894,15 @@ head benchmarks/MM/execNormal80.csv | grep METRIC
 : METRIC, 148299959647641 ,Metric: 0, PAPI_L1_DCM, 4412, PAPI_L1_TCM, 12150, PAPI_L2_ICM, 4795, PAPI_L2_TCM, 7592,
 : METRIC, 148299959668347 ,Metric: 0, PAPI_L1_DCM, 4523, PAPI_L1_TCM, 12576, PAPI_L2_ICM, 4846, PAPI_L2_TCM, 7690,
 
-Olhando para o gr·fico (e o cÛdigo que o gerou):
+Olhando para o gr√°fico (e o c√≥digo que o gerou):
 [[file:benchmarks/MM/exec_normal_par80/graph.pdf]]
 
-Alguns equÌvocos sobre o gr·fico:
-- est·s desenhando com linha, quando deverias usar =geom_point()=
+Alguns equ√≠vocos sobre o gr√°fico:
+- est√°s desenhando com linha, quando deverias usar =geom_point()=
 - evitar _sempre_ escalas logaritmicas, prefira escalas lineares
 
-Existem alguns equÌvocos sobre os dados tambÈm. Por exemplo, apÛs
-agrupar com =group_by= nenhuma transformaÁ„o nos dados È feita. AlÈm
+Existem alguns equ√≠vocos sobre os dados tamb√©m. Por exemplo, ap√≥s
+agrupar com =group_by= nenhuma transforma√ß√£o nos dados √© feita. Al√©m
 disso, entendo que como os valores dos contadores apenas aumentam
 (veja acima), o ideal seria subtrair o maior valor do contador pelo
 menor valor do mesmo contador. Isso permitiria tu obteres o valor
@@ -916,7 +916,7 @@ nrow(k);
 #+RESULTS:
 : [1] 76884
 
-Existem v·rias medidas, vamos ver a diferenÁa:
+Existem v√°rias medidas, vamos ver a diferen√ßa:
 
 #+begin_src R :results output :session :exports both
 head(k);
@@ -941,10 +941,10 @@ tail(k);
 307533      1     PAPI_L1_DCM 339604
 #+end_example
 
-Como n„o temos a coluna do tempo (foi removida desse CSV pelo script
-mencionado acima), vamos plotar este valor em funÁ„o da ordem das
-mediÁıes. Mas primeiro, adicionar uma nova coluna com um identificador
-de cada mediÁ„o:
+Como n√£o temos a coluna do tempo (foi removida desse CSV pelo script
+mencionado acima), vamos plotar este valor em fun√ß√£o da ordem das
+medi√ß√µes. Mas primeiro, adicionar uma nova coluna com um identificador
+de cada medi√ß√£o:
 
 #+begin_src R :results output :session :exports both
 k$seq = seq(1,nrow(k));
@@ -970,7 +970,7 @@ tail(k);
 307533      1     PAPI_L1_DCM 339604 76884
 #+end_example
 
-”timo, agora vamos ao gr·fico:
+√ìtimo, agora vamos ao gr√°fico:
 
 #+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 600 :height 400 :session
 library(ggplot2);
@@ -980,11 +980,11 @@ ggplot(k, aes(x=seq, y=value)) + geom_point() + theme_bw();
 #+RESULTS:
 [[file:/tmp/babel-10319ASZ/figure10319Cnl.png]]
 
-Veja j· que grave, o contador bate no limite e volta para 0. Isso È um
-problema pois n„o podemos simplesmente considerar a diferenÁas entre o
-valor m·ximo e o mÌnimo para ter um sum·rio do valor para cada thread.
+Veja j√° que grave, o contador bate no limite e volta para 0. Isso √© um
+problema pois n√£o podemos simplesmente considerar a diferen√ßas entre o
+valor m√°ximo e o m√≠nimo para ter um sum√°rio do valor para cada thread.
 
-Qual seria a soluÁ„o para isso?
+Qual seria a solu√ß√£o para isso?
 
 Veja o momento onde isso acontece.
 
@@ -1001,8 +1001,8 @@ head(k[k$seq > 38439,]);
 : 153773      1     PAPI_L1_DCM   4412 38444
 : 153777      1     PAPI_L1_DCM   4523 38445
 
-Isso È relativamente simples de detectar no momento do
-rastreamento. N„o h· nenhum evento do Score-P que informa que houve
+Isso √© relativamente simples de detectar no momento do
+rastreamento. N√£o h√° nenhum evento do Score-P que informa que houve
 uma quebra do contador (pelo seu tamanho limitado)?
 
 Isso deve ser resolvido antes de qualquer coisa.
@@ -1011,7 +1011,164 @@ _Tarefas_:
 - adicionar uma coluna de tempo ao CSV
 - tentar detectar a quebra do contador no Score-p
 
-A ferramenta ReDFST parece que rastrea alguns contadores (n„o tenho
-total certeza), e me parece tambÈm que ela detectaria. Mas os valores
-de contadores obtidos s„o sempre globais. O que queremos È a evoluÁ„o
+A ferramenta ReDFST parece que rastrea alguns contadores (n√£o tenho
+total certeza), e me parece tamb√©m que ela detectaria. Mas os valores
+de contadores obtidos s√£o sempre globais. O que queremos √© a evolu√ß√£o
 do valor dos contadores _ao longo do tempo_.
+* [13:44:21; 04.08.2016] Reexecu√ß√£o do benchmark MM com PAPI via Scorep - Contadores principais :Gabriel:
+- Os principais contadores para visualizarmos o comportamento da
+  aplica√ß√£o via PAPI s√£o: =PAPI_L1_DCH=, =PAPI_L2_DCH=, =PAPI_L3_TCM=,
+  =PAPI_L1_DCA=, =PAPI_L2_DCA=, =PAPI_L3_DCA= e =PAPI_FP_OPS=.
+
+Primeiramente vamos visualizar quais contadores temos dispon√≠veis na
+  m√°quina =turing= (terceira coluna √© a disponibilidade do contador) :
+
+#+begin_src sh :results output :exports both
+sudo papi_avail | grep -i DCH
+#+end_src
+
+#+RESULTS:
+| PAPI_L3_DCH  0x8000001d  No    No   Level 3 data cache hits |
+| PAPI_L1_DCH  0x8000003e  Yes   Yes  Level 1 data cache hits |
+| PAPI_L2_DCH  0x8000003f  Yes   Yes  Level 2 data cache hits |
+
+#+begin_src sh :results output :exports both
+sudo papi_avail | grep -i TCM
+#+end_src
+
+#+RESULTS:
+| PAPI_L1_TCM  0x80000006  Yes   Yes  Level 1 cache misses |
+| PAPI_L2_TCM  0x80000007  Yes   No   Level 2 cache misses |
+| PAPI_L3_TCM  0x80000008  Yes   No   Level 3 cache misses |
+
+#+begin_src sh :results output :exports both
+sudo papi_avail | grep -i DCA
+#+end_src
+
+#+RESULTS:
+|PAPI_L1_DCA  0x80000040  Yes   No   Level 1 data cache accesses|
+|PAPI_L2_DCA  0x80000041  Yes   No   Level 2 data cache accesses|
+|PAPI_L3_DCA  0x80000042  Yes   Yes  Level 3 data cache accesses|
+
+#+begin_src sh :results output :exports both
+sudo papi_avail | grep -i OPS
+#+end_src
+
+#+RESULTS:
+| PAPI_FP_OPS  0x80000066  Yes   Yes  Floating point operations                                                               |
+| PAPI_SP_OPS  0x80000067  Yes   Yes  Floating point operations; optimized to count scaled single precision vector operations |
+| PAPI_DP_OPS  0x80000068  Yes   Yes  Floating point operations; optimized to count scaled double precision vector operations |
+
+- Todos os contadores que ser√£o utilizados no experimento s√£o
+  dispon√≠veis na =turing=.
+
+** Experimento
+
+*** Projeto do Experimento
+
+- Defini√ß√£o do projeto do experimento a ser realizado:
+
+#+begin_src R :results output :session *experiment* :exports both :tangle scripts/exportationOfDesign.r
+require(DoE.base);
+  expDesign_MM <- fac.design (
+           nfactors=3,
+           replications=20,
+           repeat.only=FALSE,
+           blocks=1,
+           randomize=TRUE,
+           seed=10373,
+           nlevels=c(6,3,5),
+           factor.names=list(
+               app=c("normal_par","continuos_par","tiling_par","normal_parT","continuos_parT","tiling_parT"), 
+               size=c(100,300,500),
+		   threads=c(1,16,32,48,64)));
+
+  export.design(expDesign_MM,
+                path=".",
+                filename=NULL,
+                type="csv",
+                replace=TRUE,
+                response.names=c("timeOfExecution","PAPI_L1_DCH","PAPI_L2_DCH",
+"PAPI_L1_DCA","PAPI_L2_DCA","PAPI_L3_DCA",
+"PAPI_L3_TCM","PAPI_FP_OPS"));
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Loading required package: DoE.base
+Loading required package: grid
+Loading required package: conf.design
+
+Attaching package: ‚ÄòDoE.base‚Äô
+
+The following objects are masked from ‚Äòpackage:stats‚Äô:
+
+    aov, lm
+
+The following object is masked from ‚Äòpackage:graphics‚Äô:
+
+    plot.design
+
+The following object is masked from ‚Äòpackage:base‚Äô:
+
+    lengths
+ creating full factorial with 90 runs ...
+#+end_example
+
+- O full factorial pode ser visualizado na imagem gerada pelo seguinte
+  script:
+
+#+begin_src R :results output graphics :file "imagens/fullFactorialExpMM.png") :exports both :width 600 :height 400 :session *R* 
+library(SixSigma)
+library(grid)
+
+effect<-"Hit, Misses das Caches e Opera√ß√µes FP"
+causes.gr<-c("Vers√£o", "Tamanho", "Threads")
+causes<-vector(mode="list", length=length(causes.gr))
+
+causes[1]<-list(c("normal_par","normal_parT", "continuos_par", "continuos_parT", "tiling_par", "tiling_parT"))
+causes[2]<-list(c(100, 300, 500))
+causes[3]<-list(c(1,16,32, 48, 64))
+
+ss.ceDiag(effect, causes.gr, causes, sub="Experiment")
+
+#+end_src
+
+#+RESULTS:
+[[file:imagens/fullFactorialExpMM.png]]
+
+*** Plataforma de Execu√ß√£o
+
+- As principais caracter√≠sticas da =turing= s√£o:
+
+#+begin_src sh :results output :exports both
+lscpu
+#+end_src
+
+#+RESULTS:
+| Architecture:          x86_64                                         |
+| CPU op-mode(s):        32-bit, 64-bit                                |
+| Byte Order:            Little Endian                                 |
+| CPU(s):                64                                            |
+| On-line CPU(s) list:   0-63                                          |
+| Thread(s) per core:    2                                             |
+| Core(s) per socket:    8                                             |
+| Socket(s):             4                                             |
+| NUMA node(s):          4                                             |
+| Vendor ID:             GenuineIntel                                  |
+| CPU family:            6                                             |
+| Model:                 46                                            |
+| Stepping:              6                                             |
+| CPU MHz:               1994.765                                      |
+| BogoMIPS:              3989.90                                       |
+| Virtualization:        VT-x                                          |
+| L1d cache:             32K                                           |
+| L1i cache:             32K                                           |
+| L2 cache:              256K                                          |
+| L3 cache:              18432K                                        |
+| NUMA node0 CPU(s):     0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60  |
+| NUMA node1 CPU(s):     1,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61  |
+| NUMA node2 CPU(s):     2,6,10,14,18,22,26,30,34,38,42,46,50,54,58,62 |
+| NUMA node3 CPU(s):     3,7,11,15,19,23,27,31,35,39,43,47,51,55,59,63 |
+
