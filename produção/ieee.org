@@ -1,0 +1,252 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Title (appears only in the PDF properties)
+#+AUTHOR: Lucas Mello Schnorr
+
+#+STARTUP: overview indent
+#+LANGUAGE: pt-br
+#+OPTIONS: H:3 creator:nil timestamp:nil skip:nil toc:nil num:t ^:nil ~:~
+#+OPTIONS: author:nil title:nil date:nil
+#+TAGS: noexport(n) deprecated(d) ignore(i)  Gabriel(G) Lucas(L)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+#+LATEX_CLASS: IEEEtran
+#+LATEX_CLASS_OPTIONS: [conference,letter,10pt,final]
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+
+# You need Org 8.3.5 and Emacs 24 to make this work.
+# If you do, just type make (thanks Luka Stanisic for this).
+
+* Conversas e definições sobre o artigo
+** Proposta de Estrutura para o Artigo                              :Gabriel:
+- Professor, acho interessante a seguinte estrutura para escrevermos
+  nosso artigo:
+
+#+BEGIN_EXAMPLE
+1. Introduction 
+    p1: contextualizar o problema, relacionando o trabalho já feito pelo Luís Felipe, o porque pensar numa detecção automatizada da troca de fase entre as threads, o que o trabalho poderá somar ao projeto existente.
+    p2: apresentar o objetivo do trabalho, o qual será apresentado como um "estudo de viabilidade" do trabalho, mostrando que é possível realizá-lo técnicamente e que esse é um dos passos fundamentais para colocá-lo em prática
+     p3: análisar os resultados preliminares 
+     p4: apresentar a organização do artigo
+
+2. Related Works PRAZO - ATÉ Sexta-feira 05/08
+     - Utilizar os trabalhos: Laurenzano e Freeh 
+     - Procurar mais alguns a apartir de um mapeamento sistemático da literatura
+
+3. Methodology
+     - Penso aqui em apresentar as características do DoE realizado para executar o experimento (PRAZO - ATÉ Segunda-feira 08/08)
+
+4. Preliminary Results PRAZO - ATÉ Terça-feira 09/08
+      - Penso aqui em usar o benchmark Rodinia executando duas aplicações, uma chamada BFS (representando uma aplicação memory-bound) e a Back Propagation (representando uma aplicação cpu-bound)
+
+5. Conclusion PRAZO - ATÉ Terça-feira 09/08
+      p1: comentar resultados
+
+    5.1 Future Work
+#+END_EXAMPLE
+
+** Por que BFS e Back Propagation como benchmarks?                   :Lucas:
+
+Estávamos usando a orion3 para realizar os experimentos relacionados a
+energia, pois a turing não tem suporte RAPL para isso. Mas como tu por
+enquanto não está medindo isso, apenas os contadores, acho que tudo
+bem. É importante ter consciência que os contadores disponíveis em uma
+máquina com suporte de medição de energia podem potencialmente ser
+diferentes dos contadores disponíveis na turing. Estou curioso para
+ver as primeiras medições. Todas as medidas devem ser registradas em
+arquivos CSV no próprio repositório (quando o tamanho é adequado para
+git - arquivos de mais de 10 mega começam a ser questionáveis). 
+
+Teus deadlines me parecem adequados, mas o ideal é que o processo
+fosse iterativo. O ideal seria terminar tudo até essa sexta 5/ago para
+permitir bons refinamentos. Avisa-me quando estiver com algo passível
+de leitura. 
+
+*** Resposta:                                                     :Gabriel:
+Olá professor, perfeitamente, o senhor sabe que estávamos pensando em
+quais contadores usar, nisso avaliando a fundo o artigo do *Laurenzano
+et al.*, foi possível encontrar que no experimento ele utilizou
+contadores para estimar a taxa de hit dos diferentes níveis de cache,
+outro contador para contabilizar a quantidade de operações de
+ponto-flutuante realizadas e a quantidade de operações FP realizadas
+sobre inteiro. A partir disso, eu investiguei os contadores
+disponibilizados pelo PAPI, e dentre eles, para identificar o que
+queremos, podemos usar os seguintes: *PAPI_L1_DCA* (acessos à L1),
+*PAPI_L2_DCA* (acessos à L2), *PAPI_L3_DCA* (acessos à L3), *PAPI_L1_DCH*
+(taxa de hits da L1), *PAPI_L2_DCH* (taxa de hits da L2) e *PAPI_L3_DCA*
+(número de misses na L3). Vale lembrar, que ainda tenho que verificar
+a disponibilidade desses contadores na =turing=, a mesma está bloqueada:
+
+#+begin_src sh :results output :exports both
+gbmoro@portal:~$ ssh -X gabrielbmoro@turing
+gabrielbmoro@turing's password: 
+Welcome to Ubuntu 12.04.5 LTS (GNU/Linux 3.13.0-48-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+  System information as of Thu Aug  4 00:19:56 BRT 2016
+
+  System load:    0.05              Processes:             602
+  Usage of /home: 31.0% of 4.51TB   Users logged in:       1
+  Memory usage:   2%                IP address for eth0:   143.54.12.105
+  Swap usage:     0%                IP address for virbr0: 192.168.122.1
+
+  Graph this data and manage this system at:
+    https://landscape.canonical.com/
+
+166 packages can be updated.
+112 updates are security updates.
+
+New release '14.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Your Hardware Enablement Stack (HWE) is supported until April 2017.
+
+Please DO NOT install packages or create users without talking to the admins.
+
+Last login: Wed Aug  3 23:08:54 2016 from portal.inf.ufrgs.br
+locked by user 'vemabaunza' at Wed Aug  3 18:43:52 BRT 2016
+-m Victor Martinez - sera liberada 4/08/2016 de manha
+Connection to turing closed.
+
+#+end_src
+
+- Quanto aos traces gerados, esses estão na turing, e não os commitei
+  para o git por causa do tamanho. Vou fazer uma execução na =turing=
+  usando o minibench o que o senhor acha?
+  Esse minibench tem mini-aplicações (ideia sugerida pelo Matthias),
+  as quais são rápidas de executar, permitindo que o experimento seja
+  executado mais rapidamente e que eu possa já na sexta-feira ter um
+  volume de trabalho significativo (primeira versão do artigo). Nunca
+  trabalhei com o minibench, mas acho uma boa ideia. 
+
+Mensionei o BFS, porque aplicações que utilizam grafos, tendem a ser
+memory-bound, pois o índice de cache miss nessas aplicações é muito
+alto, visto que o grafo não é armazenado de maneira contínua na
+memória é via referência, o processo de busca envolve vários
+acessos à memória, podendo gerar vários misses. Depois pensei na Back
+Propagation, porque comparado ao BFS, ela é uma aplicação mais
+CPU-bound, o que seria interessante analisar nas diferentes fases o
+comportamento dessas duas aplicações paralelas. Mas depois, o Matthias
+me falou do MiniBench, o que achei interessante e que pode nos ajudar,
+o que o senhor acha?
+
+
+* IEEETran configuration for org export + ignore tag (Start Here)  :noexport:
+
+#+begin_src emacs-lisp :results output :session :exports both
+(add-to-list 'load-path ".")
+(require 'ox-extra)
+(ox-extras-activate '(ignore-headlines))
+(add-to-list 'org-latex-classes
+             '("IEEEtran"
+               "\\documentclass{IEEEtran}"
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+#+end_src
+
+#+RESULTS:
+
+* *The Paper*                                                       :ignore:
+** Latex configurations                                             :ignore:
+** Frontpage                                                        :ignore:
+#+BEGIN_LaTeX
+\title{This is the Real Title}
+
+\author{
+\IEEEauthorblockN{
+   Lucas Mello Schnorr\IEEEauthorrefmark{1},
+   Somebody Else\IEEEauthorrefmark{2}}
+
+\IEEEauthorblockA{\IEEEauthorrefmark{1}
+Graduate Program in Computer Science (PPGC/UFRGS), Porto Alegre, Brazil}
+
+\IEEEauthorblockA{\IEEEauthorrefmark{2}
+Somebody else's Institution, Brazil}
+}
+#+END_LaTeX
+
+#+LaTeX: \maketitle
+
+** Abstract                                                         :ignore:
+
+#+LaTeX: \begin{abstract}
+
+Put the abstract here.
+
+#+LaTeX: \end{abstract}
+
+** Introduction
+
+This is just an example to show how Orgmode\cite{orgmode} can be
+neatly used to write papers following the IEEEtran latex style. Feel
+free to modify and distributed this as you wish.
+
+** Background and Experimental Context
+\label{sec.context}
+*** Background
+\label{sec.background}
+*** Experimental Context and Workload Details
+\label{sec.setup}
+** Related Work and Motivation
+\label{sec.relatedwork}
+
+Check this paper\cite{schnorr2013visualizing} about how you need to
+semantically aggregate data.
+
+** Your Great Contribution to Computer Science
+\label{sec.proposal}
+** Your Super Results
+** Conclusion
+** Acknowledgments                                                  :ignore:
+
+#+LATEX:\section*{Acknowledgements}
+
+Who paid for this?
+
+** References                                                        :ignore:
+
+# See next section to understand how refs.bib file is created.
+
+#+LATEX: \bibliographystyle{IEEEtran}
+#+LATEX: \bibliography{refs}
+
+* Bib file is here                                                 :noexport:
+
+Tangle this file with C-c C-v t
+
+#+begin_src bib :tangle refs.bib
+@article{orgmode,
+  author =	"Eric Schulte and Dan Davison and Thomas Dye and Carsten Dominik",
+  title =	"A Multi-Language Computing Environment for Literate Programming and Reproducible Research",
+  journal =	"J. of Stat. Soft.",
+  volume =	"46",
+  number =	"3",
+  day =  	"25",
+  year = 	"2012",
+  CODEN =	"JSSOBK",
+  ISSN = 	"1548-7660",
+  bibdate =	"2011-10-03",
+  accepted =	"2011-10-03",
+  acknowledgement = "",
+  submitted =	"2010-12-22",
+}
+
+@incollection{schnorr2013visualizing,
+  title={Visualizing More Performance Data Than What Fits on Your Screen},
+  author={Schnorr, Lucas M and Legrand, Arnaud},
+  booktitle={Tools for High Performance Computing 2012},
+  pages={149--162},
+  year={2013},
+  publisher={Springer}
+}
+
+
+#+end_src
