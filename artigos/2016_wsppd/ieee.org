@@ -2,7 +2,7 @@
 # -*- mode: org -*-
 
 #+TITLE: Title (appears only in the PDF properties)
-#+AUTHOR: Lucas Mello Schnorr
+#+AUTHOR: Gabriel Bronzatti Moro, Lucas Mello Schnorr
 
 #+STARTUP: overview indent
 #+LANGUAGE: pt-br
@@ -20,17 +20,14 @@
 # You need Org 8.3.5 and Emacs 24 to make this work.
 # If you do, just type make (thanks Luka Stanisic for this).
 
-* Conversas e definições sobre o artigo
+* Conversas e definições sobre o artigo                            :noexport:
 ** Proposta de Estrutura para o Artigo                              :Gabriel:
 - Professor, acho interessante a seguinte estrutura para escrevermos
   nosso artigo:
 
 #+BEGIN_EXAMPLE
 1. Introduction 
-    p1: contextualizar o problema, relacionando o trabalho já feito pelo Luís Felipe, o porque pensar numa detecção automatizada da troca de fase entre as threads, o que o trabalho poderá somar ao projeto existente.
-    p2: apresentar o objetivo do trabalho, o qual será apresentado como um "estudo de viabilidade" do trabalho, mostrando que é possível realizá-lo técnicamente e que esse é um dos passos fundamentais para colocá-lo em prática
-     p3: análisar os resultados preliminares 
-     p4: apresentar a organização do artigo
+
 
 2. Related Works PRAZO - ATÉ Sexta-feira 05/08
      - Utilizar os trabalhos: Laurenzano e Freeh 
@@ -135,7 +132,6 @@ comportamento dessas duas aplicações paralelas. Mas depois, o Matthias
 me falou do MiniBench, o que achei interessante e que pode nos ajudar,
 o que o senhor acha?
 
-
 * IEEETran configuration for org export + ignore tag (Start Here)  :noexport:
 
 #+begin_src emacs-lisp :results output :session :exports both
@@ -161,15 +157,8 @@ o que o senhor acha?
 \title{This is the Real Title}
 
 \author{
-\IEEEauthorblockN{
-   Lucas Mello Schnorr\IEEEauthorrefmark{1},
-   Somebody Else\IEEEauthorrefmark{2}}
-
-\IEEEauthorblockA{\IEEEauthorrefmark{1}
-Graduate Program in Computer Science (PPGC/UFRGS), Porto Alegre, Brazil}
-
-\IEEEauthorblockA{\IEEEauthorrefmark{2}
-Somebody else's Institution, Brazil}
+\IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr}
+\IEEEauthorblockA{Institute of Informatics, Federal University of Rio Grande do Sul, Porto Alegre, Brazil}
 }
 #+END_LaTeX
 
@@ -185,26 +174,24 @@ Put the abstract here.
 
 ** Introduction
 
-This is just an example to show how Orgmode\cite{orgmode} can be
-neatly used to write papers following the IEEEtran latex style. Feel
-free to modify and distributed this as you wish.
+1. contextualizar o problema, relacionando o trabalho já feito pelo Luís Felipe, o porque pensar numa detecção automatizada da troca de fase entre as threads, o que o trabalho poderá somar ao projeto existente.
+2. apresentar o objetivo do trabalho, o qual será apresentado como um "estudo de viabilidade" do trabalho, mostrando que é possível realizá-lo técnicamente e que esse é um dos passos fundamentais para colocá-lo em prática
+3. análisar os resultados preliminares
+4. apresentar a organização do artigo
 
-** Background and Experimental Context
-\label{sec.context}
-*** Background
-\label{sec.background}
-*** Experimental Context and Workload Details
-\label{sec.setup}
-** Related Work and Motivation
-\label{sec.relatedwork}
+** Methodology
 
-Check this paper\cite{schnorr2013visualizing} about how you need to
-semantically aggregate data.
+- Penso aqui em apresentar as características do DoE realizado para executar o experimento (PRAZO - ATÉ Segunda-feira 08/08)
 
-** Your Great Contribution to Computer Science
-\label{sec.proposal}
-** Your Super Results
+** Preliminary Results
+
+- Penso aqui em usar o benchmark Rodinia executando duas aplicações, uma chamada BFS (representando uma aplicação memory-bound) e a Back Propagation (representando uma aplicação cpu-bound)
+
 ** Conclusion
+
+- p1: comentar resultados
+- 5.1 Future Work
+
 ** Acknowledgments                                                  :ignore:
 
 #+LATEX:\section*{Acknowledgements}
