@@ -174,10 +174,54 @@ Put the abstract here.
 
 ** Introduction
 
-1. contextualizar o problema, relacionando o trabalho já feito pelo Luís Felipe, o porque pensar numa detecção automatizada da troca de fase entre as threads, o que o trabalho poderá somar ao projeto existente.
-2. apresentar o objetivo do trabalho, o qual será apresentado como um "estudo de viabilidade" do trabalho, mostrando que é possível realizá-lo técnicamente e que esse é um dos passos fundamentais para colocá-lo em prática
-3. análisar os resultados preliminares
-4. apresentar a organização do artigo
+- Large HPC applications are usually composed by many parallel regions
+  - Give some examples
+- Each code region has its own memory/cpu/io resource requirements
+  - Some might be more memory-bound, others cpu-bound, for example
+- Automatically detecting such regions could potentially lead to
+  per-parallel region improvements such as energy and performance
+  improvements by adopting an appropriate processor frequency to
+  execute
+- There is no definitive solution to detect if a code region is more
+  memory or CPU bound.
+  - Usually hard. counters are globally aggregated
+  - Automatic techniques usually rely on specific hardware counters
+- The idea of this work is to measure hardware counters along time in
+  order to correlate their values against the different code region
+  - With this information, we intend to detect memory-bound code
+    regions that could be potential candidates for energy reduction
+    strategies (mainly DVFS)
+  - Once the memory-bound code regions have been detected, we intend
+    to apply Design of Experiments techniques to find the best
+    processor frequency configuration for each region, pretty similar
+    to what has been done already\cite{lfgmillani2016reppar}, but
+    automatically.
+- The preliminary results indicate ...
+  - Put here what you'll observed in the next days
+- Paper structure
+
+*** Previous structure (in portuguese)                           :noexport:
+
+- contextualizar o problema, relacionando o trabalho já feito pelo
+  Luís Felipe, o porque pensar numa detecção automatizada da troca de
+  fase entre as threads, o que o trabalho poderá somar ao projeto
+  existente.
+
+- apresentar o objetivo do trabalho, o qual será apresentado como um
+  "estudo de viabilidade" do trabalho, mostrando que é possível
+  realizá-lo técnicamente e que esse é um dos passos fundamentais para
+  colocá-lo em prática
+
+- análisar os resultados preliminares
+
+- apresentar a organização do artigo
+
+_Revisão Lucas_
+
+- Cuidar a escrita em português, veja o acento nestas palavras
+  - tecnicamente
+  - analisar
+- 
 
 ** Methodology
 
