@@ -1021,7 +1021,7 @@ do valor dos contadores _ao longo do tempo_.
   =PAPI_L1_DCA=, =PAPI_L2_DCA=, =PAPI_L3_DCA= e =PAPI_FP_OPS=.
 
 Primeiramente vamos visualizar quais contadores temos disponíveis na
-  máquina =turing= (terceira coluna é a disponibilidade do contador) :
+  máquina =beagle1= (terceira coluna é a disponibilidade do contador) :
 
 #+begin_src sh :results output :exports both
 sudo papi_avail | grep -i DCH
@@ -1029,7 +1029,7 @@ sudo papi_avail | grep -i DCH
 
 #+RESULTS:
 | PAPI_L3_DCH  0x8000001d  No    No   Level 3 data cache hits |
-| PAPI_L1_DCH  0x8000003e  Yes   Yes  Level 1 data cache hits |
+| PAPI_L1_DCH  0x8000003e  No    No   Level 1 data cache hits |
 | PAPI_L2_DCH  0x8000003f  Yes   Yes  Level 2 data cache hits |
 
 #+begin_src sh :results output :exports both
@@ -1046,9 +1046,9 @@ sudo papi_avail | grep -i DCA
 #+end_src
 
 #+RESULTS:
-|PAPI_L1_DCA  0x80000040  Yes   No   Level 1 data cache accesses|
-|PAPI_L2_DCA  0x80000041  Yes   No   Level 2 data cache accesses|
-|PAPI_L3_DCA  0x80000042  Yes   Yes  Level 3 data cache accesses|
+| PAPI_L1_DCA  0x80000040  No    No   Level 1 data cache accesses |
+| PAPI_L2_DCA  0x80000041  Yes   No   Level 2 data cache accesses |
+| PAPI_L3_DCA  0x80000042  Yes   Yes  Level 3 data cache accesses |
 
 #+begin_src sh :results output :exports both
 sudo papi_avail | grep -i OPS
@@ -1060,7 +1060,7 @@ sudo papi_avail | grep -i OPS
 | PAPI_DP_OPS  0x80000068  Yes   Yes  Floating point operations; optimized to count scaled double precision vector operations |
 
 - Todos os contadores que serão utilizados no experimento são
-  disponíveis na =turing=.
+  disponíveis na =beagle1=.
 
 ** Experimento
 
@@ -1068,53 +1068,33 @@ sudo papi_avail | grep -i OPS
 
 - Definição do projeto do experimento a ser realizado:
 
-#+begin_src R :results output :session *experiment* :exports both :tangle scripts/exportationOfDesign.r
+#+begin_src R :results output :session *experiment* :exports both
 require(DoE.base);
   expDesign_MM <- fac.design (
-           nfactors=3,
+           nfactors=2,
            replications=20,
            repeat.only=FALSE,
            blocks=1,
            randomize=TRUE,
            seed=10373,
-           nlevels=c(6,3,5),
+           nlevels=c(6,2),
            factor.names=list(
-               app=c("normal_par","continuos_par","tiling_par","normal_parT","continuos_parT","tiling_parT"), 
-               size=c(100,300,500),
-		   threads=c(1,16,32,48,64)));
+               app=c("normal_par","continuos_par","tiling_par","normal_parT","continuos_parT","tiling_parT"),
+			size=c(50,80)));
 
   export.design(expDesign_MM,
                 path=".",
                 filename=NULL,
                 type="csv",
                 replace=TRUE,
-                response.names=c("timeOfExecution","PAPI_L1_DCH","PAPI_L2_DCH",
-"PAPI_L1_DCA","PAPI_L2_DCA","PAPI_L3_DCA",
+                response.names=c("timeOfExecution","thread_region","idThread","PAPI_L2_DCH",
+"PAPI_L2_DCA","PAPI_L1_TCM","PAPI_L2_TCM",
 "PAPI_L3_TCM","PAPI_FP_OPS"));
 
 #+end_src
 
 #+RESULTS:
-#+begin_example
-Loading required package: DoE.base
-Loading required package: grid
-Loading required package: conf.design
-
-Attaching package: ‘DoE.base’
-
-The following objects are masked from ‘package:stats’:
-
-    aov, lm
-
-The following object is masked from ‘package:graphics’:
-
-    plot.design
-
-The following object is masked from ‘package:base’:
-
-    lengths
- creating full factorial with 90 runs ...
-#+end_example
+:  creating full factorial with 12 runs ...
 
 - O full factorial pode ser visualizado na imagem gerada pelo seguinte
   script:
@@ -1128,8 +1108,8 @@ causes.gr<-c("Versão", "Tamanho", "Threads")
 causes<-vector(mode="list", length=length(causes.gr))
 
 causes[1]<-list(c("normal_par","normal_parT", "continuos_par", "continuos_parT", "tiling_par", "tiling_parT"))
-causes[2]<-list(c(100, 300, 500))
-causes[3]<-list(c(1,16,32, 48, 64))
+causes[2]<-list(c(50,80))
+causes[3]<-list(c(32))
 
 ss.ceDiag(effect, causes.gr, causes, sub="Experiment")
 
@@ -1140,35 +1120,89 @@ ss.ceDiag(effect, causes.gr, causes, sub="Experiment")
 
 *** Plataforma de Execução
 
-- As principais características da =turing= são:
+- As principais características da =beagle1= são:
 
 #+begin_src sh :results output :exports both
 lscpu
 #+end_src
 
 #+RESULTS:
-| Architecture:          x86_64                                         |
-| CPU op-mode(s):        32-bit, 64-bit                                |
-| Byte Order:            Little Endian                                 |
-| CPU(s):                64                                            |
-| On-line CPU(s) list:   0-63                                          |
-| Thread(s) per core:    2                                             |
-| Core(s) per socket:    8                                             |
-| Socket(s):             4                                             |
-| NUMA node(s):          4                                             |
-| Vendor ID:             GenuineIntel                                  |
-| CPU family:            6                                             |
-| Model:                 46                                            |
-| Stepping:              6                                             |
-| CPU MHz:               1994.765                                      |
-| BogoMIPS:              3989.90                                       |
-| Virtualization:        VT-x                                          |
-| L1d cache:             32K                                           |
-| L1i cache:             32K                                           |
-| L2 cache:              256K                                          |
-| L3 cache:              18432K                                        |
-| NUMA node0 CPU(s):     0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60  |
-| NUMA node1 CPU(s):     1,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61  |
-| NUMA node2 CPU(s):     2,6,10,14,18,22,26,30,34,38,42,46,50,54,58,62 |
-| NUMA node3 CPU(s):     3,7,11,15,19,23,27,31,35,39,43,47,51,55,59,63 |
+| Architecture:          x86_64                                      |    |
+| CPU op-mode(s):        32-bit, 64-bit                             |    |
+| Byte Order:            Little Endian                              |    |
+| CPU(s):                32                                         |    |
+| On-line CPU(s) list:   0-                                         | 31 |
+| Thread(s) per core:    2                                          |    |
+| Core(s) per socket:    8                                          |    |
+| Socket(s):             2                                          |    |
+| NUMA node(s):          2                                          |    |
+| Vendor ID:             GenuineIntel                               |    |
+| CPU family:            6                                          |    |
+| Model:                 45                                         |    |
+| Stepping:              7                                          |    |
+| CPU MHz:               2000.141                                   |    |
+| BogoMIPS:              4001.23                                    |    |
+| Virtualization:        VT-x                                       |    |
+| L1d cache:             32K                                        |    |
+| L1i cache:             32K                                        |    |
+| L2 cache:              256K                                       |    |
+| L3 cache:              20480K                                     |    |
+| NUMA node0 CPU(s):     0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30 |    |
+| NUMA node1 CPU(s):     1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31 |    |
+
+*** Script de simulação do experimento
+
+#+begin_src sh :results output :exports :tangle dados/scriptOfSimulationExpMM.sh
+#!bin/bash
+
+pathOfScorepInstallation=/home/aulapinroot/Programs/scorep-2.0.2/bin
+
+cat expDesign_MM.csv | head -1 >> Results_expMM.csv
+
+lines=$(cat expDesign_MM.csv)
+
+count=0
+
+for i in ${lines[@]}; do
+
+  export SCOREP_ENABLE_TRACING=true
+	export SCOREP_METRIC_RUSAGE=ru_utime,ru_stime
+	export SCOREP_EXPERIMENT_DIRECTORY="tmp"
+	export SCOREP_TOTAL_MEMORY=2G
+
+	name=$(echo $i | cut -d ',' -f1)
+  runNoInStdOrder=$(echo $i | cut -d ',' -f2)
+  runNo=$(echo $i | cut -d ',' -f3)
+  runRP=$(echo $i | cut -d ',' -f4)
+  app=$(echo $i | cut -d ',' -f5 | sed 's/\"//g')
+	size=$(echo $i | cut -d ',' -f6 | sed 's/\"//g')
+	
+	export SCOREP_METRIC_PAPI=PAPI_L2_DCH,PAPI_L2_DCA,PAPI_L1_TCM
+
+	timeOfExecution=$(sudo -E ./$app $size | sed 's/HPCELO://g')
+
+	#agora vamos interpretar os dados gerados com os contadores
+	$result1=$($pathOfScorepInstallation/otf2-print tmp/traces.otf2 | awk ' { print $1,$3,$11,$15,$19,$20} ' | sed 's/[\")(,]//g') 
+
+	rm -R tmp
+
+	export SCOREP_METRIC_PAPI=PAPI_L2_TCM,PAPI_L3_TCM,PAPI_FP_OPS
+
+	sudo -E ./$app $size
+
+	$result2=$($pathOfScorepInstallation/otf2-print tmp/traces.otf2 | awk ' { print $1,$3,$11,$15,$19,$20} ' | sed 's/[\")(,]//g') 
+	
+	rm -R tmp
+
+	sizeOfElements=$(echo $result1 | wc -l)
+
+	while [ $count -lt $sizeOfElements ];
+	do
+		$name,$runNoInStdOrder,$runNo,$runRP,$app,$size,$timeOfExecution,${result1[$count]},${result2[$count]} >> Results_expMM.csv
+		let count=$count+1;
+	done;
+
+done
+
+#+end_src
 
