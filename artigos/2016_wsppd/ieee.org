@@ -174,31 +174,87 @@ Put the abstract here.
 
 ** Introduction
 
-- Large HPC applications are usually composed by many parallel regions
-  - Give some examples
-- Each code region has its own memory/cpu/io resource requirements
-  - Some might be more memory-bound, others cpu-bound, for example
-- Automatically detecting such regions could potentially lead to
-  per-parallel region improvements such as energy and performance
-  improvements by adopting an appropriate processor frequency to
-  execute
-- There is no definitive solution to detect if a code region is more
-  memory or CPU bound.
-  - Usually hard. counters are globally aggregated
-  - Automatic techniques usually rely on specific hardware counters
-- The idea of this work is to measure hardware counters along time in
-  order to correlate their values against the different code region
-  - With this information, we intend to detect memory-bound code
-    regions that could be potential candidates for energy reduction
-    strategies (mainly DVFS)
-  - Once the memory-bound code regions have been detected, we intend
-    to apply Design of Experiments techniques to find the best
-    processor frequency configuration for each region, pretty similar
-    to what has been done already\cite{lfgmillani2016reppar}, but
-    automatically.
-- The preliminary results indicate ...
-  - Put here what you'll observed in the next days
-- Paper structure
+- *Large HPC applications are usually composed by many parallel regions*
+  - *Give some examples*
+
+Large HPC applications are composed of parallel regions, these regions
+may be regarded program fragments that are executed by different
+threads. For example, in an application that calculates heat exchange
+in a metal plate, could be considered a problem which has two parallel
+regions, the first region calculate the initial state of the plate,
+and another part would be responsible for calculating the heat
+exchange in different points of the plate.
+
+- *Each code region has its own memory/cpu/io resource requirements*
+  - *Some might be more memory-bound, others cpu-bound, for example*
+
+Each parallel region has its own characteristic, some may be
+considered memory-bound, where there is a high rate of the
+cache miss, while others may be considered more cpu-bound, which
+expects more by cpu resource and more io-bound when the thread is
+limited by waiting for input or output operations. In the previous
+example of the heat plate, the second problem of the parallel region
+can be considered more memory-bound than the first.
+
+- *Automatically detecting such regions could potentially lead to*
+  *per-parallel region improvements such as energy and performance*
+  *improvements by adopting an appropriate processor frequency to*
+  *execute*
+
+Automatically detecting parallel regions of an application you can
+adjust the appropriate processor frequency to perform a certain
+parallel region, according to its characteristics (memory,
+CPU bound), which enables to improve the energy consumption and the
+application performance as a whole. 
+
+*- There is no definitive solution to detect if a code region is more*
+  *memory or CPU bound.*
+  - *Usually hard. counters are globally aggregated*
+  - *Automatic techniques usually rely on specific hardware counters*
+
+Spiliopoulos et al.\cite{spiliopoulos2012power} present in his work a
+tool that analyzes the behavior of a sequential application by
+detailed analysis of its phases of execution, based on cache misses of
+the different levels of cache, the tool identifies the best processor
+frequency to be used in each phase to best performance and reduce
+energy consumption. Moreover, Laurenzano et
+al.\cite{laurenzano2011reducing} present an approach finer granularity
+for identifying the most appropriate processor frequency for each loop
+of application. From the executions, it is defined a model of multiple
+dimensions that allows find given loop frequency that best defines the
+behavior of energy and expected performance. For parallel
+applications, Freeh et al.\cite{freeh2005exploring} present an
+approach that to provide the most suitable frequency for each phase of
+an MPI application, the application of this approach is divided
+according to the number of cluster processors used. There is no
+definitive solution that can detect whether a region code is more
+memory or CPU bound for parallel applications shared memory.  
+
+- *The idea of this work is to measure hardware counters along time in*
+  *order to correlate their values against the different code region*
+  - *With this information, we intend to detect memory-bound code*
+    *regions that could be potential candidates for energy reduction*
+    *strategies (mainly DVFS)*
+  - *Once the memory-bound code regions have been detected, we intend*
+    *to apply Design of Experiments techniques to find the best*
+    *processor frequency configuration for each region, pretty similar*
+    *to what has been done already lfgmillani2016reppar, but*
+    *automatically*.
+
+
+The main objective of this study is to measure hardware counters
+specific for each parallel region code to define regions
+having more memory-bound behavior, which could be
+candidates for strategies to reduce energy consumption (using
+DVFS). After identifying a region of parallel code memory-bound,
+we intend to apply the technique of Design of
+Experiments\cite{jain1990art} to find the best frequency setting for
+each region automatically and with a lower level of intrusion compared
+to instrumentation of the source code. 
+
+- *The preliminary results indicate ...*
+  - *Put here what you'll observed in the next days*
+- *Paper structure*
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -267,7 +323,35 @@ Tangle this file with C-c C-v t
   bibdate =	"2011-10-03",
   accepted =	"2011-10-03",
   acknowledgement = "",
-  submitted =	"2010-12-22",
+  submitted =	"2010-12-22"
+}
+
+
+@inproceedings{freeh2005exploring,
+  title={Exploring the energy-time tradeoff in mpi programs on a power-scalable cluster},
+  author={Freeh, Vincent W and Pan, Feng and Kappiah, Nandini and Lowenthal, David K and Springer, Robert},
+  booktitle={19th IEEE International Parallel and Distributed Processing Symposium},
+  pages={4a--4a},
+  year={2005},
+  organization={IEEE}
+}
+
+@inproceedings{laurenzano2011reducing,
+  title={Reducing energy usage with memory and computation-aware dynamic frequency scaling},
+  author={Laurenzano, Michael A and Meswani, Mitesh and Carrington, Laura and Snavely, Allan and Tikir, Mustafa M and Poole, Stephen},
+  booktitle={European Conference on Parallel Processing},
+  pages={79--90},
+  year={2011},
+  organization={Springer}
+}
+
+@inproceedings{spiliopoulos2012power,
+  title={Power-Sleuth: A Tool for Investigating Your Program's Power Behavior},
+  author={Spiliopoulos, Vasileios and Sembrant, Andreas and Kaxiras, Stefanos},
+  booktitle={2012 IEEE 20th International Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication Systems},
+  pages={241--250},
+  year={2012},
+  organization={IEEE}
 }
 
 @incollection{schnorr2013visualizing,
@@ -278,6 +362,14 @@ Tangle this file with C-c C-v t
   year={2013},
   publisher={Springer}
 }
+
+@book{jain1990art,
+  title={The art of computer systems performance analysis: techniques for experimental design, measurement, simulation, and modeling},
+  author={Jain, Raj},
+  year={1990},
+  publisher={John Wiley \& Sons}
+}
+
 
 
 #+end_src
