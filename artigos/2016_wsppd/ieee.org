@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+TITLE: Title (appears only in the PDF properties)
+#+TITLE: Automatic Memory-Bound Phase Detection using Time-oriented Hardware Counters Metrics
 #+AUTHOR: Gabriel Bronzatti Moro, Lucas Mello Schnorr
 
 #+STARTUP: overview indent
@@ -154,7 +154,7 @@ o que o senhor acha?
 ** Latex configurations                                             :ignore:
 ** Frontpage                                                        :ignore:
 #+BEGIN_LaTeX
-\title{This is the Real Title}
+\title{Automatic Memory-Bound Phase Detection \\ using Time-oriented Hardware Counters Metrics}
 
 \author{
 \IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr}
