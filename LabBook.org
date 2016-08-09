@@ -1076,7 +1076,7 @@ sudo papi_avail | grep -i OPS
 require(DoE.base);
   expDesign_MM <- fac.design (
            nfactors=2,
-           replications=20,
+           replications=5,
            repeat.only=FALSE,
            blocks=1,
            randomize=TRUE,
@@ -1098,7 +1098,26 @@ require(DoE.base);
 #+end_src
 
 #+RESULTS:
-:  creating full factorial with 12 runs ...
+#+begin_example
+Loading required package: DoE.base
+Loading required package: grid
+Loading required package: conf.design
+
+Attaching package: ‘DoE.base’
+
+The following objects are masked from ‘package:stats’:
+
+    aov, lm
+
+The following object is masked from ‘package:graphics’:
+
+    plot.design
+
+The following object is masked from ‘package:base’:
+
+    lengths
+ creating full factorial with 12 runs ...
+#+end_example
 
 - O full factorial pode ser visualizado na imagem gerada pelo seguinte
   script:
