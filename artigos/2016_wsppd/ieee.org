@@ -168,7 +168,17 @@ o que o senhor acha?
 
 #+LaTeX: \begin{abstract}
 
-Put the abstract here.
+
+Besides reducing the execution time of parallel applications, the power
+consumption is an increasingly attacked problem in High-Performance
+Computing. A parallel program may be composed of different
+parallel regions, which can have particular characteristics, some more
+CPU-bound other memory-bound. The aim of this paper is to present an
+approach that allows the automated detection of memory-bound parallel
+regions. From the knowledge of these regions it is possible to configure a
+suitable processor frequency for each parallel region of the
+application, improving energy use and application performance as a
+whole. The methodology. The results...
 
 #+LaTeX: \end{abstract}
 
@@ -228,9 +238,16 @@ Experiments\cite{jain1990art} to find the best frequency setting for
 each region automatically and with a lower level of intrusion compared
 to instrumentation of the source code. 
 
-#+LaTeX: %- The preliminary results indicate ...
+The preliminary results indicate ...
 #+LaTeX: %  - Put here what you'll observed in the next days
+
+
 #+LaTeX: %- Paper structure
+
+In the section x will be presented related work, since the x + 1
+section will be presented the methodology used in our work. The
+results are presented and discussed in the x + 2 section, the work
+ends with the conclusions and next steps (x + 3 section).
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -254,7 +271,6 @@ _Revisão Lucas_
   - tecnicamente
   - analisar
 - 
-
 
 ** Related Works
 #+LaTeX: %- There is no definitive solution to detect if a code region is more
@@ -290,7 +306,22 @@ instrumentation via code to indicate the parallel regions
 \cite{millani2006fr}. Freeh et al.\cite{freeh2005exploring} present an
 approach that to provide the most suitable frequency for each phase of
 an MPI application, the application of this approach is divided
-according to the number of cluster processors used.
+according to the number of cluster processors used. Among the
+available frequencies, the approach looks at what is the best
+frequency for a given node operate during the execution of the
+application.
+
+An approach that focuses on shared memory applications in OpenMP is
+Millani and Schnorr \cite{millani2006fr}. In this work are analyzed
+parallel regions of a program, according to the study it is possible
+to reach a considerable gain in energy reduction and performance
+increase through the use of a suitable frequency for each parallel
+region of the program. Also, in this approach the parallel regions are
+instrumented, already in our work the parallel regions will be known
+during program execution, the level of intrusion of our approach is
+lower and it is possible to identify the behavior of the memory-bound
+regions and from these reduce the processor frequency, lowering power
+consumption and improving performance. 
 
 ** Methodology
 
@@ -298,18 +329,20 @@ according to the number of cluster processors used.
 
 ** Preliminary Results
 
-- Penso aqui em usar o benchmark Rodinia executando duas aplicações, uma chamada BFS (representando uma aplicação memory-bound) e a Back Propagation (representando uma aplicação cpu-bound)
+#+LaTeX: %- Penso aqui em usar o benchmark Rodinia executando duas aplicações,
+#+LaTeX: %  uma chamada BFS (representando uma aplicação memory-bound) e a Back
+#+LaTeX: %  Propagation (representando uma aplicação cpu-bound) 
 
 ** Conclusion
 
-- p1: comentar resultados
-- 5.1 Future Work
+#+LaTeX: %- p1: comentar resultados
+#+LaTeX: %- 5.1 Future Work
 
 ** Acknowledgments                                                  :ignore:
 
 #+LATEX:\section*{Acknowledgements}
 
-Who paid for this?
+#+LaTeX: %Who paid for this?
 
 ** References                                                        :ignore:
 
@@ -381,6 +414,13 @@ Tangle this file with C-c C-v t
   author={Jain, Raj},
   year={1990},
   publisher={John Wiley \& Sons}
+}
+
+@article{millani2006fr,
+author = {Millani, Luis Felipe and Schnorr, Lucas Mello},
+title={Computation-Aware Dynamic Frequency Scaling: Parsimonious Evaluation of the Time-Energy Trade-off Using Design of Experiments},
+year={2016},
+publisher={22nd International European Conference on Parallel and Distributed Computing}
 }
 
 
