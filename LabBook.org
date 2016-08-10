@@ -1256,3 +1256,71 @@ toClear
 execute
 #+end_src
 
+* 2016-08-10 Attempt to understand scorep hardware counters metrics
+
+#+begin_src sh :results output
+otf2-print scorep-20160810_1601_8543111267115196/traces.otf2 | grep METRIC | awk '{ print "Thread", "Timestamp", $8, $12, $16 }' | tr -d '(\"' | sed "s/ /,/g" | head -n1 > x.csv
+otf2-print scorep-20160810_1601_8543111267115196/traces.otf2  | grep ^METRIC | awk '{ print $2, $3, $11, $15, $19 }' | tr -d ")," | sed "s/ /,/g" >> x.csv
+#+end_src
+
+#+begin_src R :results output :session :exports both
+df <- read.csv("artigos/2016_wsppd/idgraf_2016_08_10.csv");
+df$Timestamp <- df$Timestamp - min(df$Timestamp); #obtain a zero
+df$Timestamp <- df$Timestamp/1000000000; #in seconds now
+library(reshape);
+df <- melt(df, id=c("Thread", "Timestamp"));
+head(df);
+#+end_src
+
+#+RESULTS:
+:       Thread Timestamp    variable  value
+: 1          0  0.000000 PAPI_L2_DCH    219
+: 2          0  1.461988 PAPI_L2_DCH 177452
+: 3          0  1.462043 PAPI_L2_DCH 177463
+: 4          0  1.466827 PAPI_L2_DCH 179331
+: 5          0  1.466844 PAPI_L2_DCH 179357
+: 6 8589934592  1.493765 PAPI_L2_DCH    121
+
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1200 :height 800 :session
+library(ggplot2);
+ggplot(df, aes(x=Timestamp, y=value, color=variable)) + geom_line() + theme_bw() + facet_grid(Thread~variable);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-24178Tyx/figure24178HZf.png]]
+
+Data is clearly missing. There is no measurements from timestamp 0 to
+more than 200s. It might be some issue related to tracing. Let's check
+the dataframe textually, for thread 0:
+
+#+begin_src R :results output :session :exports both
+df[df$Thread == 0 & df$variable == "PAPI_L2_DCH",];
+#+end_src
+
+#+RESULTS:
+#+begin_example
+    Thread  Timestamp    variable      value
+1        0   0.000000 PAPI_L2_DCH        219
+2        0   1.461988 PAPI_L2_DCH     177452
+3        0   1.462043 PAPI_L2_DCH     177463
+4        0   1.466827 PAPI_L2_DCH     179331
+5        0   1.466844 PAPI_L2_DCH     179357
+52       0   2.126407 PAPI_L2_DCH    1072592
+119      0   2.228808 PAPI_L2_DCH    1072636
+137      0   2.228837 PAPI_L2_DCH    1072636
+146      0   2.228846 PAPI_L2_DCH    1072636
+148      0   2.228958 PAPI_L2_DCH    1072677
+190      0   2.228974 PAPI_L2_DCH    1072686
+204      0 240.032126 PAPI_L2_DCH 7164116273
+233      0 267.039035 PAPI_L2_DCH 7164116324
+250      0 267.039065 PAPI_L2_DCH 7164116324
+264      0 267.039075 PAPI_L2_DCH 7164116324
+292      0 267.046954 PAPI_L2_DCH 7164116352
+293      0 267.046964 PAPI_L2_DCH 7164116361
+294      0 267.499745 PAPI_L2_DCH 7164116381
+#+end_example
+
+We should get a much finer granularity when measuring. I believe
+scorep is only measuring the metrics when something is actually traced
+(from the application level). That's very bad, since in the meantime
+(from 2.228974 to 240.032126) we got nothing.
