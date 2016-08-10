@@ -174,8 +174,8 @@ Put the abstract here.
 
 ** Introduction
 
-- *Large HPC applications are usually composed by many parallel regions*
-  - *Give some examples*
+#+LaTeX: %- Large HPC applications are usually composed by many parallel regions
+  #+LaTeX: %- Give some examples
 
 Large HPC applications are composed of parallel regions, these regions
 may be regarded program fragments that are executed by different
@@ -185,76 +185,52 @@ regions, the first region calculate the initial state of the plate,
 and another part would be responsible for calculating the heat
 exchange in different points of the plate.
 
-- *Each code region has its own memory/cpu/io resource requirements*
-  - *Some might be more memory-bound, others cpu-bound, for example*
+#+LaTeX: %- Each code region has its own memory/cpu/io resource requirements
+  #+LaTeX: %- Some might be more memory-bound, others cpu-bound, for example
 
 Each parallel region has its own characteristic, some may be
 considered memory-bound, where there is a high rate of the
-cache miss, while others may be considered more cpu-bound, which
-expects more by cpu resource and more io-bound when the thread is
+cache miss, while others may be considered more CPU-bound, which
+expects more by cpu resource and more IO-bound when the thread is
 limited by waiting for input or output operations. In the previous
 example of the heat plate, the second problem of the parallel region
 can be considered more memory-bound than the first.
 
-- *Automatically detecting such regions could potentially lead to*
-  *per-parallel region improvements such as energy and performance*
-  *improvements by adopting an appropriate processor frequency to*
-  *execute*
+#+LaTeX: %- Automatically detecting such regions could potentially lead to
+  #+LaTex: % per-parallel region improvements such as energy and performance
+  #+LaTeX: % improvements by adopting an appropriate processor frequency to
+  #+LaTeX: % execute
 
-Automatically detecting parallel regions of an application you can
-adjust the appropriate processor frequency to perform a certain
-parallel region, according to its characteristics (memory,
-CPU bound), which enables to improve the energy consumption and the
-application performance as a whole. 
+From an automatic detection of parallel regions of an application it
+is possible to adjust the processor to frequency appropriate to the
+region, according to its features (memory, CPU bound), which may allow
+a reduction in energy consumption and/or an increase application
+performance as a whole. 
 
-*- There is no definitive solution to detect if a code region is more*
-  *memory or CPU bound.*
-  - *Usually hard. counters are globally aggregated*
-  - *Automatic techniques usually rely on specific hardware counters*
-
-Spiliopoulos et al.\cite{spiliopoulos2012power} present in his work a
-tool that analyzes the behavior of a sequential application by
-detailed analysis of its phases of execution, based on cache misses of
-the different levels of cache, the tool identifies the best processor
-frequency to be used in each phase to best performance and reduce
-energy consumption. Moreover, Laurenzano et
-al.\cite{laurenzano2011reducing} present an approach finer granularity
-for identifying the most appropriate processor frequency for each loop
-of application. From the executions, it is defined a model of multiple
-dimensions that allows find given loop frequency that best defines the
-behavior of energy and expected performance. For parallel
-applications, Freeh et al.\cite{freeh2005exploring} present an
-approach that to provide the most suitable frequency for each phase of
-an MPI application, the application of this approach is divided
-according to the number of cluster processors used. There is no
-definitive solution that can detect whether a region code is more
-memory or CPU bound for parallel applications shared memory.  
-
-- *The idea of this work is to measure hardware counters along time in*
-  *order to correlate their values against the different code region*
-  - *With this information, we intend to detect memory-bound code*
-    *regions that could be potential candidates for energy reduction*
-    *strategies (mainly DVFS)*
-  - *Once the memory-bound code regions have been detected, we intend*
-    *to apply Design of Experiments techniques to find the best*
-    *processor frequency configuration for each region, pretty similar*
-    *to what has been done already lfgmillani2016reppar, but*
-    *automatically*.
-
+#+LaTeX: %- The idea of this work is to measure hardware counters along time in
+#+LaTeX: %  order to correlate their values against the different code region
+#+LaTeX: %  - With this information, we intend to detect memory-bound code
+#+LaTeX: %    regions that could be potential candidates for energy reduction
+#+LaTeX: %    strategies (mainly DVFS)
+#+LaTeX: %  - Once the memory-bound code regions have been detected, we intend
+#+LaTeX: %    to apply Design of Experiments techniques to find the best
+#+LaTeX: %    processor frequency configuration for each region, pretty similar
+#+LaTeX: %    to what has been done already lfgmillani2016reppar, but
+#+LaTeX: %    automatically.
 
 The main objective of this study is to measure hardware counters
 specific for each parallel region code to define regions
 having more memory-bound behavior, which could be
 candidates for strategies to reduce energy consumption (using
 DVFS). After identifying a region of parallel code memory-bound,
-we intend to apply the technique of Design of
+We intend to apply the technique of Design of
 Experiments\cite{jain1990art} to find the best frequency setting for
 each region automatically and with a lower level of intrusion compared
 to instrumentation of the source code. 
 
-- *The preliminary results indicate ...*
-  - *Put here what you'll observed in the next days*
-- *Paper structure*
+#+LaTeX: %- The preliminary results indicate ...
+#+LaTeX: %  - Put here what you'll observed in the next days
+#+LaTeX: %- Paper structure
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -278,6 +254,43 @@ _Revisão Lucas_
   - tecnicamente
   - analisar
 - 
+
+
+** Related Works
+#+LaTeX: %- There is no definitive solution to detect if a code region is more
+#+LaTeX:  %memory or CPU bound.
+#+LaTeX:  %- Usually hard. counters are globally aggregated
+#+LaTeX:  %- Automatic techniques usually rely on specific hardware counters
+
+There is no definitive solution to detect if a code region is more
+memory or CPU bound. The main focus of this work is to characterize
+the behavior of code regions of a parallel application, classifying
+them into memory and/or CPU bound. For thereafter to be able to find
+an appropriate frequency for each region, using Dynamic Voltage
+Frequency Scaling (DVFS) technique.
+
+Some works focus more on phase detection to sequential applications
+\cite{spiliopoulos2012power}\cite{laurenzano2011reducing}. Spiliopoulos
+et al.\cite{spiliopoulos2012power} present in his work a tool that
+analyzes the behavior of a sequential application by detailed analysis
+of its phases of execution, based on cache misses of the different
+levels of cache, the tool identifies the best processor frequency to
+be used in each phase to best performance and reduce energy
+consumption. In addition to this approach, Laurenzano et
+al.\cite{laurenzano2011reducing} present an approach finer granularity
+for identifying the most appropriate processor frequency for each loop
+of application. From the executions, it is defined a model of multiple
+dimensions that allows find given loop frequency that best defines the
+behavior of energy and expected performance. 
+
+For parallel applications, there is advances in the detection of
+stages for MPI applications \cite{freeh2005exploring}, already to
+OpenMP applications, there is one approach that allows the
+instrumentation via code to indicate the parallel regions
+\cite{millani2006fr}. Freeh et al.\cite{freeh2005exploring} present an
+approach that to provide the most suitable frequency for each phase of
+an MPI application, the application of this approach is divided
+according to the number of cluster processors used.
 
 ** Methodology
 
