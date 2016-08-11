@@ -271,6 +271,8 @@ _Revisão Lucas_
 - 
 
 ** Related Work
+\label{sec:relatedwork}
+
 #+LaTeX: %- There is no definitive solution to detect if a code region is more
 #+LaTeX:  %memory or CPU bound.
 #+LaTeX:  %- Usually hard. counters are globally aggregated
@@ -322,16 +324,19 @@ regions and from these reduce the processor frequency, lowering power
 consumption and improving performance. 
 
 ** Methodology
+\label{sec:methodology}
 
 - Penso aqui em apresentar as características do DoE realizado para executar o experimento (PRAZO - ATÉ Segunda-feira 08/08)
 
 ** Preliminary Results
+\label{sec:results}
 
 #+LaTeX: %- Penso aqui em usar o benchmark Rodinia executando duas aplicações,
 #+LaTeX: %  uma chamada BFS (representando uma aplicação memory-bound) e a Back
 #+LaTeX: %  Propagation (representando uma aplicação cpu-bound) 
 
 ** Conclusion
+\label{sec:conclusion}
 
 #+LaTeX: %- p1: comentar resultados
 #+LaTeX: %- 5.1 Future Work
