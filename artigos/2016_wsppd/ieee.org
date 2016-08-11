@@ -168,19 +168,16 @@ Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\}
 ** Abstract                                                         :ignore:
 
 #+LaTeX: \begin{abstract}
-
-
 Besides reducing the execution time of parallel applications, the power
-consumption is an increasingly attacked problem in High-Performance
+consumption is an increasingly addressed problem in High-Performance
 Computing. A parallel program may be composed of different
-parallel regions, which can have particular characteristics, some more
-CPU-bound other memory-bound. The aim of this paper is to present an
+parallel regions, which can have particular characteristics, for instance,
+CPU-bound or memory-bound. This paper presents an
 approach that allows the automated detection of memory-bound parallel
 regions. From the knowledge of these regions it is possible to configure a
 suitable processor frequency for each parallel region of the
 application, improving energy use and application performance as a
 whole. The methodology. The results...
-
 #+LaTeX: \end{abstract}
 
 ** Introduction
