@@ -272,7 +272,7 @@ _Revisão Lucas_
   - analisar
 - 
 
-** Related Works
+** Related Work
 #+LaTeX: %- There is no definitive solution to detect if a code region is more
 #+LaTeX:  %memory or CPU bound.
 #+LaTeX:  %- Usually hard. counters are globally aggregated
