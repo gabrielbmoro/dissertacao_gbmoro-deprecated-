@@ -158,7 +158,8 @@ o que o senhor acha?
 
 \author{
 \IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr}
-\IEEEauthorblockA{Institute of Informatics, Federal University of Rio Grande do Sul, Porto Alegre, Brazil}
+\IEEEauthorblockA{Institute of Informatics, Federal University of Rio Grande do Sul \\
+Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\}
 }
 #+END_LaTeX
 
