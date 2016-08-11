@@ -1325,8 +1325,9 @@ We should get a much finer granularity when measuring. I believe
 scorep is only measuring the metrics when something is actually traced
 (from the application level). That's very bad, since in the meantime
 (from 2.228974 to 240.032126) we got nothing.
-* [23:58:15; 10.08.2016] Script protótipo para coletar em diferentes time stamps usando abordagem manual com Intel PCM
 
+* STARTED [23:58:15; 10.08.2016] Script protótipo para coletar em diferentes time stamps usando abordagem manual com Intel PCM :Gabriel:
+- State "STARTED"    from              [2016-08-11 Qui 16:40]
 - O script deve inicializar o programa-alvo, em X interações deverá
   coletar os hardwares counters específicos para gerar o rastro de
   execução. Essas interações terão como condição de parada o término
@@ -1534,3 +1535,31 @@ TimeStamp,L3miss,L2miss,L3hit,L2hit
 128.0,11264,18432,0.34,0.23
 
 #+end_example
+
+- Análise dos resultados:
+
+#+begin_src R :results output graphics :file "imagens/l3missgraph_exp1.png" :exports both :width 800 :height 600 :session *R* 
+df <- read.csv("dados/exp1_manualPCM.csv");
+
+library(ggplot2);
+ggplot(df, aes(x=TimeStamp,y=L3miss)) +
+geom_line(color='blue');
+#+end_src
+
+#+RESULTS:
+[[file:imagens/l3missgraph_exp1.png]]
+
+
+#+begin_src R :results output graphics :file "imagens/l2missgraph_exp1.png" :exports both :width 800 :height 600 :session *R* 
+df <- read.csv("dados/exp1_manualPCM.csv");
+
+library(ggplot2);
+ggplot(df, aes(x=TimeStamp,y=L2miss)) +
+geom_line(color='red');
+#+end_src
+
+#+RESULTS:
+[[file:imagens/l2missgraph_exp1.png]]
+
+- Vou pesquisar uma forma de gerar no mesmo gráfico todos os dados do
+  =.csv= 
