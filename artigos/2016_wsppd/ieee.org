@@ -242,10 +242,16 @@ The preliminary results indicate ...
 
 #+LaTeX: %- Paper structure
 
-In the section x will be presented related work, since the x + 1
-section will be presented the methodology used in our work. The
-results are presented and discussed in the x + 2 section, the work
-ends with the conclusions and next steps (x + 3 section).
+This paper has the following
+organization. Section\ref{sec:relatedwork} presents related work
+regarding automatic phase detection for HPC applications. It also
+motivates our work. Section\ref{sec:methodology} details our proposal
+and its corresponding methodology to fullfill our goal, which is the
+automatic phase detection using time-oriented hardware
+counters. Section\ref{sec:results} the plataform we have been using to
+conduct experiments and the preliminary results we have obtained so
+far. Section\ref{sec:conclusion} concludes the paper listing the main
+contributions and future work.
 
 *** Previous structure (in portuguese)                           :noexport:
 
