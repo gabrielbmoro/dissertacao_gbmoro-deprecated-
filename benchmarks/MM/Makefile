@@ -4,7 +4,7 @@
 
 # FLAGS
 FLAGS := -Wall -Wextra -O2
-COMPILER := /home/gbmoro/Programas/scorep-2.0.2/bin/scorep gcc
+COMPILER := cc
 
 # TARGET RULES
 all: normal_seq normal_par continuos_seq continuos_par tiling_seq tiling_par normal_seqT normal_parT continuos_seqT continuos_parT tiling_seqT tiling_parT
