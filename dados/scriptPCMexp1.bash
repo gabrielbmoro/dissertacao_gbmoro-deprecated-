@@ -1,25 +1,26 @@
 pathOfIntelPCM=/home/aulapinroot/Programs/IntelPerformanceCounterMonitor-V2.11
 
-app=tiling_par
+app=normal_par
 
-size=5000
+size=6000
 
 flag=0
 
 timeOfCollet=0.002 #em segundos
 timeAcc=0.0
 
+echo "The application $app is being executed..."
 #disparando a aplicação alvo
 ./$app $size &
 
-
-#rastro
+#cabeçalho do arquivo
 echo "TimeStamp,L3miss,L2miss,L3hit,L2hit" >> Results.csv
 
-while [ flag == 0 ]; do
+while [ $flag -eq 0 ]; do
+	echo "Time stamp - $timeAcc"
 
 	#recuperando o estado do processo para ver se o mesmo está executando
-	stateOfProcess=$(ps ux | grep -i $app | head -1 | awk ' { print $8 } '
+	stateOfProcess=$(ps ux | grep -i $app | head -1 | awk ' { print $8 } ')
 
 	#pegar a quantidade de Rs nesse fluxo de caracteres
 	amountOfR=$(echo $stateOfProcess | grep R | wc -l | bc)	
@@ -51,8 +52,9 @@ while [ flag == 0 ]; do
 
 	echo "$timeAcc,$l3miss,$l2miss,$l3hit,$l2hit" >> Results.csv
 
-	sleep $timeOfCollet
+	#sleep $timeOfCollet
 
-	let timeAcc=$timeAcc+$timeOfCollet
-
+	#timeAcc=$(echo "$timeAcc+$timeOfCollet" | bc)
+	timeAcc=$(echo "$timeAcc+1" | bc);
+	rm tmp.log
 done
