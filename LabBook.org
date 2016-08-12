@@ -1832,11 +1832,11 @@ Found 45 event(s) with search key L2:
 #+end_example
 
 - Outro fator pode ser a frequência, como o tempo total de execução da
-  aplicação foi aproximadamente de 2 segundos e a o tempo de cada
+  aplicação foi aproximadamente de 2 segundos e o tempo de cada
   amostragem foi realizado de acordo com o intervalo de 20ms (o que
-  representa 0,02), corresponde a =10 medidas= e pelos valores
-  apresentarem o mesmo tipo, essa alternativa pode explicar melhor o
-  rastro gerado. Só que assim, a coleta está sendo realizada apenas
+  representa 0,02 segundos), corresponderia a =100 medidas= e pelos valores
+  apresentarem o mesmo tipo, essa alternativa também não explica
+  rastro gerado. Só que assim, a coleta está sendo realizada apenas 
   para determinado evento, o qual temos que descobrir. A baixo estou
   apresentando o cabeçalho do trace e além dele mais duas linhas, para
   tentar compreender o que está acontecendo.
