@@ -1665,3 +1665,68 @@ Group 1: MEM
   somatória total dos eventos, não funcionando como uma ferramenta
   monitora coletando diferentes valores a cada =time stamp=. Posso estar
   errado, por isso vou continuar investigando seus recursos.
+* [23:15:57; 11.08.2016] Experimentando a ferramenta =tau=            :Gabriel:
+- Agora vou testar a ferramenta =tau=, ela utiliza PAPI, da mesma
+  maneira que =scorep=, vamos visualizar se para o mesmo teste no
+  benchmark da multiplicação de matrizes, o problema que encontramos
+  com scorep, não é encontrado quando utilizamos a ferramenta =tau=.
+
+** Instalação do tau
+
+- Vale lembrar que estou instalando o tau com objetivo de usar pela
+  sua ferramenta de trace os hardware counters do =PAPI=, para detectar
+  as regiões =memory-bound=. De acordo com o uso, a instalação dessa
+  ferramenta pode mudar.
+
+#+begin_src sh :results output :exports both
+cd $HOME/Programs/
+wget http://tau.uoregon.edu/tau.tgz
+tar vxf tau.tgz
+rm -rf tau.tgz
+cd tau-2.25.1/
+./configure -papi=/usr/local/bin/ -PAPIWALLCLOCK -PAPIVIRTUAL -cc=gcc -PROFILE -TRACE -openmp
+sudo make install
+#+end_src
+
+
+** Experimento teste
+
+#+begin_src sh :results output :exports both
+export TAU_MAKEFILE=$HOME/Programs/tau-2.25.1/x86_64/lib/Makefile.tau-papi-openmp-profile-trace
+/home/aulapinroot/Programs/tau-2.25.1/tools/src/tau_cc.sh hpcelo.c tiling.c -o mainTest
+export TAU_METRICS=TIME:PAPI_FP_INS:PAPI_L1_DCM
+export OMP_NUM_THREADS=32
+./mainTest 100
+#+end_src
+
+- Foi gerado vários arquivos:
+
+#+begin_src sh :results output :exports both
+cd benchmarks/MM/
+ls
+#+end_src
+
+#+RESULTS:
+#+begin_example
+continuos.c          tautrace.0.0.14.trc  tautrace.0.0.29.trc
+continuosT.c         tautrace.0.0.15.trc  tautrace.0.0.2.trc
+events.0.edf         tautrace.0.0.16.trc  tautrace.0.0.30.trc
+hpcelo.c             tautrace.0.0.17.trc  tautrace.0.0.31.trc
+hpcelo.h             tautrace.0.0.18.trc  tautrace.0.0.3.trc
+hpcelo.o             tautrace.0.0.19.trc  tautrace.0.0.4.trc
+log                  tautrace.0.0.1.trc   tautrace.0.0.5.trc
+mainTest             tautrace.0.0.20.trc  tautrace.0.0.6.trc
+Makefile             tautrace.0.0.21.trc  tautrace.0.0.7.trc
+normal.c             tautrace.0.0.22.trc  tautrace.0.0.8.trc
+normalT.c            tautrace.0.0.23.trc  tautrace.0.0.9.trc
+tautrace.0.0.0.trc   tautrace.0.0.24.trc  tiling.c
+tautrace.0.0.10.trc  tautrace.0.0.25.trc  tiling.o
+tautrace.0.0.11.trc  tautrace.0.0.26.trc  tilingT.c
+tautrace.0.0.12.trc  tautrace.0.0.27.trc
+tautrace.0.0.13.trc  tautrace.0.0.28.trc
+#+end_example
+
+- Não sei como funciona esses arquivos =.trc=, será que é possível
+  interpretá-los através de algum recurso parecido com o =otf2-print=,
+  visto que esses arquivos são binários e não de texto. Tenho que
+  descobrir como fazer...
