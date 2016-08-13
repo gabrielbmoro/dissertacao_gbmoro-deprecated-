@@ -2179,3 +2179,63 @@ tautrace.0.0.13.trc  tautrace.0.0.28.trc
   interpretá-los através de algum recurso parecido com o =otf2-print=,
   visto que esses arquivos são binários e não de texto. Tenho que
   descobrir como fazer...
+* [22:20:30; 12.08.2016] Benchmark Rodinia                :Gabriel:
+
+#+begin_src sh :results output :exports both
+cd $HOME/Programs/
+wget http://www.cs.virginia.edu/~kw5na/lava/Rodinia/Packages/Current/rodinia_3.1.tar.bz2
+tar -xvjf rodinia_3.1.tar.bz2
+rm -rf rodinia_3.1.tar.bz2
+cd rodinia_3.1/
+ls
+#+end_src
+
+#+RESULTS:
+#+begin_example
+bin
+common
+cuda
+data
+LICENSE
+Makefile
+opencl
+openmp
+others
+README
+#+end_example
+
+
+* [01:13:21; 13.08.2016] Experimento com o benchmark Rodinia
+
+- Defini o seguinte script para executar algumas aplicações que
+  julguei interessantes no benchmark rodinia, a primeira é a aplicação
+  =k_means=, um problema de mineração de dados. Outra aplicação
+  escolhida foi o =BFS=, algoritmo de busca em largura em grafo. Já
+  aplicação =leucocity= processa uma imagem médica para rastrear
+  determinados pontos. Ambos algoritmos escolhidos possuem
+  comportamentos diferentes, o que permite comparar o quanto as
+  regiões paralelas são memory-bound nas diferentes abordagens.
+
+
+#+begin_src sh :results output :exports both :tangle benchmarks/rod/scriptOfExecutionRod.bash
+#!bin/bash
+
+mkdir log_rodiniaExp1
+
+benchpath=$HOME/Programs/rodinia_3.1/openmp
+
+kmeans_command=$benchpath/kmeans/kmeans_openmp/kmeans -i ../../../data/kmeans/819200.txt -n 32
+bfs_command=$benchpath/bfs/bfs 32 ../../data/bfs/graph1MW_6.txt
+leukocyte_command=$benchpath/leukocyte/OpenMP/leukocyte 30 32 ../../../data/leukocyte/testfile.avi
+
+#aqui o rastro vai ter cerca de 11 amostras 
+sudo likwid-perfctr -t 1ms -f -c N:0-31 -g L2CACHE $bfs_command >> log_rodiniaExp1/saidaBfs_2.log 2>> log_rodiniaExp1/saidaBfs_1.log
+
+#aqui o rastro vai ter cerca de 27 amostras
+sudo likwid-perfctr -t 10ms -f -c N:0-31 -g L2CACHE $k_means_command >> log_rodiniaExp1/saidaKmeans_2.log 2>> log_rodiniaExp1/saidaKmeans_1.log
+
+#aqui o rastro vai ter cerca de 24 amostras
+sudo likwid-perfctr -t 50ms -f -c N:0-31 -g L2CACHE $leukocyte_command >> log_rodiniaExp1/saidaLeucocyte_2.log 2>> log_rodiniaExp1/saidaLeucocyte_1.log
+
+#+end_src
+
