@@ -2205,7 +2205,7 @@ README
 #+end_example
 
 
-* [01:13:21; 13.08.2016] Experimento com o benchmark Rodinia
+* [01:13:21; 13.08.2016] Experimento com o benchmark Rodinia        :Gabriel:
 
 - Defini o seguinte script para executar algumas aplicações que
   julguei interessantes no benchmark rodinia, a primeira é a aplicação
@@ -2238,4 +2238,39 @@ sudo likwid-perfctr -t 10ms -f -c N:0-31 -g L2CACHE $k_means_command >> log_rodi
 sudo likwid-perfctr -t 50ms -f -c N:0-31 -g L2CACHE $leukocyte_command >> log_rodiniaExp1/saidaLeucocyte_2.log 2>> log_rodiniaExp1/saidaLeucocyte_1.log
 
 #+end_src
+
+
+#+RESULTS
+#+begin_example
+aulapinroot@beagle1:~/Doc/dissertacao_gbmoro/benchmarks/rod/log_rodiniaExp1$
+total 628K                                                                   
+ ls -larth                                                                  
+total 628K                                                                  
+drwxrwxr-x 3 aulapinroot aulapinroot 4,0K Ago 13 10:42 ..                   
+-rw-rw-r-- 1 aulapinroot aulapinroot   96 Ago 13 10:42 saidaBfs_1.log       
+-rw-rw-r-- 1 aulapinroot aulapinroot  401 Ago 13 10:42 saidaBfs_2.log       
+-rw-rw-r-- 1 aulapinroot aulapinroot   96 Ago 13 10:42 saidaKmeans_1.log    
+-rw-rw-r-- 1 aulapinroot aulapinroot  363 Ago 13 10:42 saidaKmeans_2.log    
+drwxrwxr-x 2 aulapinroot aulapinroot 4,0K Ago 13 10:42 .                    
+-rw-rw-r-- 1 aulapinroot aulapinroot 600K Ago 13 10:42 saidaLeucocyte_1.log 
+-rw-rw-r-- 1 aulapinroot aulapinroot 1,6K Ago 13 10:42 saidaLeucocyte_2.log
+-rw-rw-r-- 1 aulapinroot aulapinroot  401 Ago 13 10:42 saidaBfs_2.log       
+-rw-rw-r-- 1 aulapinroot aulapinroot   96 Ago 13 10:42 saidaKmeans_1.log    
+-rw-rw-r-- 1 aulapinroot aulapinroot  363 Ago 13 10:42 saidaKmeans_2.log    
+drwxrwxr-x 2 aulapinroot aulapinroot 4,0K Ago 13 10:42 .                    
+-rw-rw-r-- 1 aulapinroot aulapinroot 600K Ago 13 10:42 saidaLeucocyte_1.log 
+-rw-rw-r-- 1 aulapinroot aulapinroot 1,6K Ago 13 10:42 saidaLeucocyte_2.log
+#+end_example
+
+- Pelo tamanho do rastro é possível visualizar que nas aplicações
+  =k_means= e =bfs= a amostragem não ocorreu, por que o tempo de execução
+  dessas aplicações foi muito rápido. Problema é que os benchmarks
+  executam muito rápidos, rápidos demais. E não consigo configurá-los
+  ao ponto de alterar suas entradas para o default (32 threads
+  disponíveis na =beagle1=), o algoritmo =leukocyte= é o único que consigo alterar a entrada,
+  aumentando o seu tempo de execução, mas os demais não. Como estou
+  com o tempo apertado vou executar o benchmark do =NAS=, focando em
+  algumas aplicações, o que o senhor acha professor?
+
+
 
