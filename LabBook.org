@@ -2275,12 +2275,15 @@ drwxrwxr-x 2 aulapinroot aulapinroot 4,0K Ago 13 10:42 .
 ** Instalação do benchmark NAS
 
 #+begin_src sh :results output :exports both
-cd $HOME/Programs/
+rm -rf /tmp/xxx/
+mkdir -p /tmp/xxx/
+cd /tmp/xxx/
 wget http://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
 tar vxf NPB3.3.1.tar.gz
 cd NPB3.3.1/NPB3.3-OMP/config
 cp make.def.template make.def
 cp suite.def.template suit.def
+pwd
 #+end_src
 
 - Após isso nos arquivos make.def deve ser definido o compilador c e
