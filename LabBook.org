@@ -2280,7 +2280,7 @@ wget http://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
 tar vxf NPB3.3.1.tar.gz
 cd NPB3.3.1/NPB3.3-OMP/config
 cp make.def.template make.def
-cp suit.def.template suit.def
+cp suite.def.template suit.def
 #+end_src
 
 - Após isso nos arquivos make.def deve ser definido o compilador c e
