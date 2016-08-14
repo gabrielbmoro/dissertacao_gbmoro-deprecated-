@@ -2279,7 +2279,7 @@ rm -rf /tmp/xxx/
 mkdir -p /tmp/xxx/
 cd /tmp/xxx/
 wget http://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
-tar vxf NPB3.3.1.tar.gz
+tar xf NPB3.3.1.tar.gz
 cd NPB3.3.1/NPB3.3-OMP/config
 cp make.def.template make.def
 cp suite.def.template suit.def
