@@ -2422,3 +2422,509 @@ mv *.csv ../../../dados/
 #+RESULTS:
 
 - Todos os =.csv= do experimento foram gerados.
+* 2016-08-14 Attempt to correctly parse =likwid-perfcrt= log file (timeline mode) :Lucas:
+
+See here how Gabriel obtained the timeline logs:
+- [[*Script do experimento][Script do experimento]]
+
+So, Gabriel has generated these files:
+#+begin_src sh :results output
+find benchmarks/NAS-OMP/log_* | grep _1
+#+end_src
+
+#+RESULTS:
+: benchmarks/NAS-OMP/log_NASExp1/saidaFt_1.log
+: benchmarks/NAS-OMP/log_NASExp1/saidaSp_1.log
+: benchmarks/NAS-OMP/log_NASExp1/saidaBt_1.log
+: benchmarks/NAS-OMP/log_NASExp1/saidaUa_1.log
+: benchmarks/NAS-OMP/log_NASExp1/saidaLu_1.log
+: benchmarks/NAS-OMP/log_NASExp1/saidaCg_1.log
+
+The man page of the tool is quite nice:
+
+#+begin_src sh :results output
+man likwid-perfctr
+#+end_src
+
+#+RESULTS:
+#+begin_example
+LIKWID-PERFCTR(1)           General Commands Manual          LIKWID-PERFCTR(1)
+
+NAME
+       likwid-perfctr  -  configure and read out hardware performance counters
+       on x86 CPUs
+
+SYNOPSIS
+       likwid-perfctr [-vhHmaief] [-c  core_list]  [-C  core_list_for_pinning]
+       [-g  performance_group  or  performance_event_string] [-t timeline_fre‐
+       quency] [-S monitoring_time] [-T group_switch_frequency] [-V verbosity]
+       [-M access_mode] [-o output_file] [-s skip_mask] [-E search_str]
+
+DESCRIPTION
+       likwid-perfctr  is  a lightweight command line application to configure
+       and read out hardware performance monitoring data on supported x86 pro‐
+       cessors. It can measure either as wrapper without changing the measured
+       application or with marker API functions inside the  code,  which  will
+       turn  on  and  off  the  counters.  There are preconfigured performance
+       groups with useful event sets and derived metrics. Additionally,  arbi‐
+       trary events can be measured with custom event sets. The marker API can
+       measure multiple named regions and the  results  are  accumulated  over
+       multiple region calls.
+
+OPTIONS
+       -v, --version
+              prints version information to standard output, then exits.
+
+       -h, --help
+              prints a help message to standard output, then exits.
+
+       -H     prints group help message (use together with -g switch).
+
+       -V <level>, --verbose <level>
+              verbose  output  during  execution  for  debugging.  0  for only
+              errors, 1 for informational output, 2 for detailed output and  3
+              for developer output
+
+       -m     run in marker API mode
+
+       -a     print  available  performance groups for current processor, then
+              exit.
+
+       -e     print available counters and performance events of current  pro‐
+              cessor.
+
+       -o, --output <filename>
+              store  all  output to a file instead of stdout. For the filename
+              the following placeholders are supported: %j for  PBS_JOBID,  %r
+              for MPI RANK (only Intel MPI at the moment), %h host name and %p
+              for process pid.  The placeholders must be separated  by  under‐
+              score  as, e.g., -o test_%h_%p. You must specify a suffix to the
+              filename. For txt the output is printed as is to the file. Other
+              suffixes  trigger a filter on the output.  Available filters are
+              csv (comma separated values) and xml at the moment.
+
+       -O     print  output  in  CSV  format  (conform  to   RFC   4180,   see
+              https://tools.ietf.org/html/rfc4180 for details).
+
+       -i, --info
+              print  cpuid information about processor and about Intel Perfor‐
+              mance Monitoring features, then exit.
+
+       -c <cpu expression>
+              specify a numerical list of processors.  The  list  may  contain
+              multiple  items,  separated  by  comma,  and ranges. For example
+              0,3,9-11.
+
+       -C <cpu expression>
+              specify a numerical list of processors.  The  list  may  contain
+              multiple  items,  separated  by  comma,  and ranges. For example
+              0,3,9-11. This variant will also pin the threads to  the  cores.
+              Also logical numberings can be used.
+
+       -g, --group <performance group> or <performance event set string>
+              specify  which  performance group to measure. This can be one of
+              the tags output with the -a flag.  Also a custom event  set  can
+              be specified by a comma separated list of events. Each event has
+              the format eventId:register with the the register being one of a
+              architecture supported performance counter registers.
+
+       -t <frequency of measurements>
+              timeline mode for time resolved measurements. The time unit must
+              be given on command line, e.g. 4s, 500ms or 900us.
+
+       -S <waittime between measurements>
+              End-to-end measurement using likwid-perfctr but sleep instead of
+              executing an application. The time unit must be given on command
+              line, e.g. 4s, 500ms or 900us.
+
+       -T <time between group switches>
+              Frequency to switch groups if multiple are given on commandline,
+              default  is  2s.  Value  is  ignored  for a single event set and
+              default frequency of 30s is used to catch  overflows.  The  time
+              unit must be given on command line, e.g. 4s, 500ms or 900us.
+
+       -s, --skip <mask>
+              Specify  skip  mask  as  HEX number. For each set bit the corre‐
+              sponding thread is skipped.
+
+       -f, --force
+              Force writing of registers even if they are in use.
+
+       -E <search_str>
+              Print  only   events   and   corresponding   counters   matching
+              <search_str>
+
+EXAMPLE
+       Because  likwid-perfctr  measures on processors and not single applica‐
+       tions it is necessary to ensure that processes and threads  are  pinned
+       to  dedicated resources. You can either pin the application yourself or
+       use the builtin pin functionality.
+
+       1.  As wrapper with performance group:
+
+       likwid-perfctr -C 0-2 -g TLB ./cacheBench -n 2 -l  1048576  -i  100  -t
+       Stream
+
+       The  parent  process  is pinned to processor 0, Thread 0 to processor 1
+       and Thread 1 to processor 2.
+
+       2.  As wrapper with custom event set on AMD:
+
+       likwid-perfctr          -C          0-4           -g           INSTRUC‐
+       TIONS_RETIRED_SSE:PMC0,CPU_CLOCKS_UNHALTED:PMC3 ./cacheBench
+
+       It  is specified that the event INSTRUCTIONS_RETIRED_SSE is measured on
+       counter PMC0 and the event CPU_CLOCKS_UNHALTED on counter PMC3.  It  is
+       possible   calculate   the  run  time  of  all  threads  based  on  the
+       CPU_CLOCKS_UNHALTED event. If you want this you have  to  include  this
+       event in your custom event string as shown above.
+
+       3.  As wrapper with custom event set on Intel:
+
+       likwid-perfctr                  -C                 0                 -g
+       INSTR_RETIRED_ANY:FIXC0,CPU_CLK_UNHALTED_CORE:FIXC1,UNC_L3_LINES_IN_ANY:UPMC0
+       ./stream-icc
+
+       On  Intel  processors  fixed events are measured on dedicated counters.
+       These are INSTR_RETIRED_ANY and CPU_CLK_UNHALTED_CORE.  If you  config‐
+       ure  these  fixed  counters, likwid-perfctr will calculate the run time
+       and CPI metrics for your run.
+
+       4.  Using the marker API to measure only parts of your code  (this  can
+           be used both with groups or custom event sets):
+
+       likwid-perfctr        -m        -C        0-4        -g        INSTRUC‐
+       TIONS_RETIRED_SSE:PMC0,CPU_CLOCKS_UNHALTED:PMC3 ./cacheBench
+
+       You have to link you code against liblikwid.so and use the  marker  API
+       calls.   Examples  can  be  found  in  examples  folder /usr/share/lik‐
+       wid/examples.  The following code snippet shows the necessary calls:
+
+       #include <likwid.h>
+
+       /* only one thread calls init */
+       LIKWID_MARKER_INIT;
+
+       /* Must be called by each thread the should
+        * perform measurements.
+        * If you place it in the same parallel
+        * region as LIKWID_MARKER_START, perform a
+        * barrier between the statements to avoid
+        * timing problems.
+        */
+       LIKWID_MARKER_THREADINIT;
+
+       /* If you run the code region only once, register
+        * the region tag previously to reduce the overhead
+        * of START and STOP calls. Call it once for each
+        * thread in parallel environment.
+        * Note: No whitespace characters are allowed in the region tags
+        * This call is optional, START will do the same operations.
+        */
+       LIKWID_MARKER_REGISTER("name");
+
+       /* Start measurement
+        * Note: No whitespace characters are allowed in the region tags
+        */
+       LIKWID_MARKER_START("name");
+       /*
+        * Your code to be measured is here
+        * You can also nest named regions
+        * No whitespaces are allowed in the region names!
+        */
+       LIKWID_MARKER_STOP("name");
+
+       /* If you want to measure multiple groups/event sets
+        * Switches through groups in round-robin fashion
+        */
+       LIKWID_MARKER_SWITCH;
+
+       /* Finally */
+       LIKWID_MARKER_CLOSE;
+
+       5.  Using likwid in timeline mode:
+
+       likwid-perfctr -c 0-3 -g FLOPS_DP -t 300ms ./cacheBench > out.txt
+
+       This will read out the counters every 300ms on physical cores  0-3  and
+       write  the  results  to  out.txt.  The application is not pinned to the
+       CPUs. The output syntax of the timeline mode is for custom event sets:
+
+       <groupID>      <numberOfEvents>      <numberOfThreads>      <Timestamp>
+       <Event1_Thread1>     <Event2_Thread1>    ...    <Event1_Thread2>    ...
+       <EventN_ThreadM>
+
+       For performance groups with metrics: <groupID> <numberOfMetrics>  <num‐
+       berOfThreads> <Timestamp> <Metric1_Thread1> <Metric2_Thread1> ... <Met‐
+       ric1_Thread2> ...<MetricN_ThreadM>
+
+       For timeline mode there is a frontend application  likwid-perfscope(1),
+       which  enables  live  plotting of selected events. Please be aware that
+       with high frequencies (<100ms), the values differ from the real results
+       but the behavior of them is valid.
+
+       6.  Using likwid in stethoscope mode:
+
+       likwid-perfctr -c 0-3 -g FLOPS_DP -S 2s
+
+       This  will  start  the  counters and read them out after 2s on physical
+       cores 0-3 and write the results to stdout.
+
+       7.  Using likwid with counter options:
+
+       likwid-perfctr -c S0:1@S1:1 -g  LLC_LOOKUPS_DATA_READ:CBOX0C0:STATE=0x9
+       ./cacheBench
+
+       This  will  program the counter CBOX0C0 (the counter 0 of the LLC cache
+       box 0) to measure the event LLC_LOOKUPS_DATA_READ and filter the incre‐
+       ments  by the state of a cacheline.  STATE=0x9 for this event means all
+       <invalid> and <modified> cachelines.  Which  options  are  allowed  for
+       which  box is listed in LIKWID's html documentation. The values for the
+       options can be found in the vendors performance  monitoring  documenta‐
+       tions.  Likwid  measures the first CPU of socket 0 and the first CPU of
+       socket 1. See likwid-pin(1) for details regarding the cpu  expressions.
+       For  more  code  examples have a look at the likwid WIKI pages and LIK‐
+       WID's html documentation.
+
+AUTHOR
+       Written by Thomas Roehl <thomas.roehl@googlemail.com>.
+
+BUGS
+       Report Bugs on <https://github.com/RRZE-HPC/likwid/issues>.
+
+SEE ALSO
+       likwid-topology(1), likwid-perfscope(1), likwid-pin(1), likwid-bench(1)
+
+likwid-4                          19.05.2016                 LIKWID-PERFCTR(1)
+#+end_example
+
+Especially this part where it talks about timeline mode:
+
+#+BEGIN_EXAMPLE
+   5.  Using likwid in timeline mode:
+
+       likwid-perfctr -c 0-3 -g FLOPS_DP -t 300ms ./cacheBench > out.txt
+
+       This will read out the counters every 300ms on physical cores  0-3  and
+       write  the  results  to  out.txt.  The application is not pinned to the
+       CPUs. The output syntax of the timeline mode is for custom event sets:
+
+       <groupID>      <numberOfEvents>      <numberOfThreads>      <Timestamp>
+       <Event1_Thread1>     <Event2_Thread1>    ...    <Event1_Thread2>    ...
+       <EventN_ThreadM>
+
+       For performance groups with metrics: <groupID> <numberOfMetrics>  <num‐
+       berOfThreads> <Timestamp> <Metric1_Thread1> <Metric2_Thread1> ... <Met‐
+       ric1_Thread2> ...<MetricN_ThreadM>
+
+       For timeline mode there is a frontend application  likwid-perfscope(1),
+       which  enables  live  plotting of selected events. Please be aware that
+       with high frequencies (<100ms), the values differ from the real results
+       but the behavior of them is valid.
+#+END_EXAMPLE
+
+Note that there are two types of output. When you use custom event
+sets), the second field is numberOfEvents. When you use performance
+groups with metrics (which is your case), the second field is
+numberOfMetrics. That gives us a nice headstart. Notes:
+
+- The line with CORE should be ignored
+- In the last lines we have the description of each field. The problem
+  is that these lines do not match the number of fields in all
+  remaining measurements lines. It looks like that these three fields:
+  #+BEGIN_EXAMPLE
+  <groupID> <numberOfMetrics>  <numberOfThreads> 
+  #+END_EXAMPLE
+  are part of each measurement line but they are not part of the
+  description line with the headers. So I should append to the
+  description line these three field descriptions in order to have a
+  correct CSV header.
+
+Considering these notes, let's do it:
+
+#+begin_src sh :results output
+FILE=benchmarks/NAS-OMP/log_NASExp1/saidaUa_1.log
+pwd
+ls -hl $FILE
+#preparing the header
+cat $FILE | grep timeStamp | head -n1
+#+end_src
+
+#+RESULTS:
+: /home/schnorr/svn/gabriel/dissertacao_gbmoro
+: -rw-r--r-- 1 schnorr schnorr 1.4M Aug 14 00:51 benchmarks/NAS-OMP/log_NASExp1/saidaUa_1.log
+
+That's weird. That particular file I took randomly do not have the
+header. Where the header comes from? Let's check which files have
+them:
+
+#+begin_src sh :results output
+DIR=benchmarks/NAS-OMP/log_NASExp1/
+for i in $DIR/*_1*; do
+  echo $i
+  cat $i | grep timeStamp  | wc -l
+done
+#+end_src
+
+#+RESULTS:
+#+begin_example
+benchmarks/NAS-OMP/log_NASExp1//saidaBt_1.log
+3
+benchmarks/NAS-OMP/log_NASExp1//saidaCg_1.log
+0
+benchmarks/NAS-OMP/log_NASExp1//saidaFt_1.log
+0
+benchmarks/NAS-OMP/log_NASExp1//saidaLu_1.log
+0
+benchmarks/NAS-OMP/log_NASExp1//saidaSp_1.log
+0
+benchmarks/NAS-OMP/log_NASExp1//saidaUa_1.log
+0
+#+end_example
+
+Only the first BT output has those lines. That's pretty weird.
+
+TODO: I should ask Gabriel about this.
+
+Now I am not sure if these files represent the original likwid-perfctr output.
+
+I just found out that it was Gabriel himself that put those lines in
+the files. See [[*Análise dos dados][Análise dos dados]]. I should not rely on them since they
+are not standard.
+
+I've just found this with a description of the L2CACHE group:
+- https://github.com/RRZE-HPC/likwid/blob/master/groups/broadwellD/L2CACHE.txt
+
+Ok, I will not consider that and try to rather do a headerless CSV file
+
+#+begin_src sh :results output
+test="lucas will do everything"
+while [ -n "$test" ]; do
+   echo $test
+   test=`echo $test | cut -d" " -f2-`
+done
+#+end_src
+
+#+begin_src sh :results output
+#!/bin/bash
+  function usage()
+  {
+      echo "$0 <likwid timeline log>";
+      echo "where <likwid timeline log> is a file obtained with likwid-perfctr -t (timeline mode)";
+  }
+
+  FILE=$1
+  if [ -z $FILE ]; then
+    echo "Error: file has not been provided.";
+    usage;
+    exit 1;
+  fi
+
+  echo "Time Core Metric Value"
+  TEMP=`mktemp`
+  cat $FILE | grep -v -e CORE -e ^$  > $TEMP
+  while read -r line; do
+    GROUPID=`echo $line | awk '{ print $1 }'`
+    METRICS=`echo $line | awk '{ print $2 }'`
+    CORES=`echo $line | awk '{ print $3 }'`
+    TIMESTAMP=`echo $line | awk '{ print $4 }'`
+    REST=`echo $line | cut -d" " -f5-`    
+
+    METRIC=0
+    while [ $METRIC -lt $METRICS ]; do
+      CORE=0
+      while [  $CORE -lt $CORES ]; do
+         VAL=`echo $REST | cut -d" " -f1` #awk '{ print $1 }'`
+         echo $TIMESTAMP $CORE M$METRIC $VAL
+         REST=`echo $REST | cut -d" " -f2-`
+         CORE=`echo "$CORE+1" | bc`
+      done
+      METRIC=`echo  "$METRIC+1" | bc`   
+    done
+  done < $TEMP
+  rm $TEMP
+  exit 0
+#+end_src
+
+#+RESULTS:
+
+Tangle this file C-c C-v t
+
+Use such as this:
+
+#+begin_src sh :results output
+chmod 755 ./scripts/likwid2csv.sh
+/usr/bin/time ./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaLu_1.log  > /tmp/x
+#+end_src
+
+#+RESULTS:
+
+The script is rather slow. I'll update it to make it faster.
+
+#+begin_src sh :results output :tangle scripts/likwid2csv.sh
+#!/bin/bash
+  function usage()
+  {
+      echo "$0 <likwid timeline log>";
+      echo "where <likwid timeline log> is a file obtained with likwid-perfctr -t (timeline mode)";
+  }
+
+  FILE=$1
+  if [ -z $FILE ]; then
+    echo "Error: file has not been provided.";
+    usage;
+    exit 1;
+  fi
+
+  echo "Time Core Metric Value"
+  TEMP=`mktemp`
+  cat $FILE | grep -v -e CORE -e ^$  > $TEMP
+  while read -r line; do
+    GROUPID=`echo $line | awk '{ print $1 }'`
+    METRICS=`echo $line | awk '{ print $2 }'`
+    CORES=`echo $line | awk '{ print $3 }'`
+    TIMESTAMP=`echo $line | awk '{ print $4 }'`
+    VALS=`mktemp`
+    echo $line | cut -d" " -f5- | sed "s/ /\n/g" > $VALS
+    REMS=`mktemp`
+    for METRIC in `seq 1 $METRICS`; do
+      for CORE in `seq 1 $CORES`; do
+         echo $TIMESTAMP $CORE M$METRIC
+      done
+    done > $REMS
+    paste -d " " $REMS $VALS
+    rm $VALS
+    rm $REMS
+  done < $TEMP
+  rm $TEMP
+  exit 0
+#+end_src
+
+Let's try out (don't forget to tangle this file C-c C-v t):
+
+#+begin_src sh :results output
+chmod 755 ./scripts/likwid2csv.sh
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaLu_1.log  > /tmp/x.csv
+#+end_src
+
+#+RESULTS:
+
+Here's how to read that with R:
+
+#+begin_src R :results output :session :exports both
+df <- read.csv("/tmp/x.csv", sep=" ", strip.white=T);
+head(df);
+#+end_src
+
+#+RESULTS:
+:        Time Core Metric     Value
+: 1 0.1006167    1     M1 0.1007972
+: 2 0.1006167    2     M1 0.1007972
+: 3 0.1006167    3     M1 0.1007972
+: 4 0.1006167    4     M1 0.1007972
+: 5 0.1006167    5     M1 0.1007972
+: 6 0.1006167    6     M1 0.1007972
+
+I'll let you analyze values along time.
+
+Note that metrics names should be replaced by something else.
