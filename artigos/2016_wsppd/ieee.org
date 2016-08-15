@@ -16,9 +16,53 @@
 #+LATEX_CLASS_OPTIONS: [conference,letter,10pt,final]
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage{lipsum}
 
 # You need Org 8.3.5 and Emacs 24 to make this work.
 # If you do, just type make (thanks Luka Stanisic for this).
+
+* Gráficos                                                         :noexport:
+#+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core,color=Core)) +
+  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=1) + geom_point(size=0.5) +
+      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Core);
+
+#+end_src
+
+#+RESULTS:
+[[file:img/ftBNas_Analise.pdf]]
+
+
+#+begin_src R :results output graphics :file "img/luBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core,color=Core)) +
+  geom_line(size=0.02) + geom_line(y=as.numeric(middle), color='red',size=1) +
+ labs(x = "Time stamp", y= "Miss rate in L2 cache level") +
+	facet_grid(~Core);
+
+#+end_src
+
+#+RESULTS:
+[[file:img/luBNas_Analise.pdf]]
 
 * Conversas e definições sobre o artigo                            :noexport:
 ** Proposta de Estrutura para o Artigo                              :Gabriel:
@@ -340,6 +384,18 @@ consumption and improving performance.
 #+LaTeX: %- Penso aqui em usar o benchmark Rodinia executando duas aplicações,
 #+LaTeX: %  uma chamada BFS (representando uma aplicação memory-bound) e a Back
 #+LaTeX: %  Propagation (representando uma aplicação cpu-bound) 
+
+#+LaTeX: \begin{figure*}[h]
+#+LaTeX:   \caption{Execution of the Discrete 3D fast Fourier Transform.}
+#+LaTeX:     \includegraphics[width=\textwidth]{img/ftBNas_Analise.pdf}
+#+LaTeX: \end{figure*}
+
+#+LaTeX: \begin{figure*}[h]
+#+LaTeX:   \caption{Execution of the Lower-Upper Gauss-Seidel solver.}
+#+LaTeX:     \includegraphics[width=\textwidth]{img/luBNas_Analise.pdf}
+#+LaTeX: \end{figure*}
+
+
 
 ** Conclusion
 \label{sec:conclusion}
