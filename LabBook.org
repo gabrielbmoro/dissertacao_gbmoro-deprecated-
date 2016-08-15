@@ -2449,13 +2449,17 @@ ls
 
 *** Plotando os gráficos para análise
 
-- Aplicação CG
+A métrica utilizada para gerar os gráficos é a =M7=, essa métrica
+apresenta a taxa de misses no segundo nível de cache L2 para cada
+processador, esse valor é apresentado como porcentagem.
+
+**** Aplicação CG
 
 #+begin_src R :results output graphics :file "imagens/cgBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M6') %>%
+k <-      filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
@@ -2468,13 +2472,13 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/cgBNas_Analise.pdf]]
 
-- Aplicação FT
+**** Aplicação FT
 
 #+begin_src R :results output graphics :file "imagens/ftBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M6') %>%
+k <-      filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
@@ -2487,13 +2491,13 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/ftBNas_Analise.pdf]]
 
-- Aplicação LU
+**** Aplicação LU
 
 #+begin_src R :results output graphics :file "imagens/luBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M6') %>%
+k <-      filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
@@ -2506,13 +2510,13 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/luBNas_Analise.pdf]]
 
-- Aplicação SP
+**** Aplicação SP
 
 #+begin_src R :results output graphics :file "imagens/spBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/spB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M6') %>%
+k <-      filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
@@ -2525,13 +2529,13 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/spBNas_Analise.pdf]]
 
-- Aplicação UA
+**** Aplicação UA
 
 #+begin_src R :results output graphics :file "imagens/uaBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/uaB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M6') %>%
+k <-      filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
