@@ -2137,7 +2137,6 @@ cd tau-2.25.1/
 sudo make install
 #+end_src
 
-
 ** Experimento teste
 
 #+begin_src sh :results output :exports both
@@ -2453,6 +2452,15 @@ A métrica utilizada para gerar os gráficos é a =M7=, essa métrica
 apresenta a taxa de misses no segundo nível de cache L2 para cada
 processador, esse valor é apresentado como porcentagem.
 
+- No =eixo y= de cada gráfico é possível visualizar a porcentagem de
+  cache misses na L2 de cada processador analisado, como a =beagle1=,
+  plataforma na qual o experimento foi executado possui cerca de =32
+  cores= é possível visualizar nos arquivos gerados 32 gráficos
+  respectivos de cada core, apresentando o comportamento da
+  aplicação. Já no =eixo x= é apresentado a frequência das amostras
+  realizadas (=time stamp=).
+
+
 **** Aplicação CG
 
 #+begin_src R :results output graphics :file "imagens/cgBNas_Analise.pdf" :exports both :session *RFib* 
@@ -2472,7 +2480,30 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/cgBNas_Analise.pdf]]
 
+- A aplicação CG tem uma característica interessante, ela é uma
+  aplicação que realiza acessos irregulares a memória. No gráfico é
+  possível ver que a maior porcentagem registrada de cache misses é de
+  40%. Pontos que achei interessante no gráfico gerado:
+
+	a) Para os cores 17 até 24 é possível visualizar um
+           comportamento mais linear em 40% de cache misses.
+    	b) Nos cores 25, 26, 27 e 28 é possível uma queda brusca na
+           taxa de cache misses próximo ao =time stamp= 10
+	c) A maioria dos núcleos de processamento apresentam um
+           comportamento diferente no gráfico quando comparado com os
+           demais, isso pode estar relacionado ao tipo de aplicação,
+           pela irregularidade da sua carga. Poderíamos propor por exemplo
+           neste tipo de aplicação, uma configuração de frequência
+           adequada para cada núcleo de processamento.
+
+- Um ponto que acharia interessante é separar os cores por afinidade,
+  vou tentar fazer isso em R, dizendo que os cores 1,3,5,... pertencem
+  a um socket e os outros a outro.
+
 **** Aplicação FT
+
+- A aplicação =FT= é a famosa transformada discreta de fourier, só que
+  em uma versão de 3 dimensões.
 
 #+begin_src R :results output graphics :file "imagens/ftBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
@@ -2491,7 +2522,17 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/ftBNas_Analise.pdf]]
 
+- Diferente da aplicação anterior, nessa aplicação visualizamos um
+  comportamento mais homogêneo dos diferentes cores. Visualizamos
+  também pequenos intervalos entre um pico de cache misses e um
+  aumento na taxa de hit para a cache L2.
+
+- O maior valor registrado de taxa de misses foi 30%.
+
 **** Aplicação LU
+
+- A aplicação =LU= define o método de Gauss-Seidel para resolver 'n'
+  equações lineares com um 'x' que é desconhecido.
 
 #+begin_src R :results output graphics :file "imagens/luBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
@@ -2510,8 +2551,14 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/luBNas_Analise.pdf]]
 
-**** Aplicação SP
+- Dois comportamentos identificados no gráfico, um mais linear do 1 ao
+  15º e outro mais desbalanceado 16 até o 32º core.
 
+- O maior valor registrado de taxa de cache misses foi próximo aos
+  50%. 
+
+**** STARTED Aplicação SP
+- State "STARTED"    from              [2016-08-15 Seg 02:28]
 #+begin_src R :results output graphics :file "imagens/spBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/spB.csv", sep=" ", strip.white=T);
