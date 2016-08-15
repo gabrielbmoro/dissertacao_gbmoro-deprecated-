@@ -2386,7 +2386,7 @@ timeStamp,C'0'runtime_rdstc,C'0'runtime_unshall,C'0'clock,C'0'cpi,C'0'l2reqrate,
 
 - O próximo passo é fazer filtrar os demais arquivos obtidos no
   experimento com o benchmark NAS.
-
+  
 #+begin_src sh :results output :exports both
 
 cd benchmarks/NAS-OMP/log_NASExp1/
@@ -2452,6 +2452,17 @@ A métrica utilizada para gerar os gráficos é a =M7=, essa métrica
 apresenta a taxa de misses no segundo nível de cache L2 para cada
 processador, esse valor é apresentado como porcentagem.
 
+#+BEGIN_EXAMPLE
+l2missrate = l2missrequests/totalOfInstructions
+M7 = l2missrate
+
+if M7 => min(M7_total) and M7 < mean(M7_total) then
+		the region is memory-bound;
+else
+		the region is not memory-bound;
+#+END_EXAMPLE
+
+
 - No =eixo y= de cada gráfico é possível visualizar a porcentagem de
   cache misses na L2 de cada processador analisado, como a =beagle1=,
   plataforma na qual o experimento foi executado possui cerca de =32
@@ -2467,13 +2478,15 @@ processador, esse valor é apresentado como porcentagem.
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
+middle <- mean(k$Value);
+
 library(ggplot2);
 ggplot(k, aes(x=Time, y=Value,group=Core)) +
-  geom_line(color='steelblue',size=0.2)+
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
 	facet_wrap(~Core);
 #+end_src
 
@@ -2509,14 +2522,17 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
+middle <- mean(k$Value);
+
 library(ggplot2);
 ggplot(k, aes(x=Time, y=Value,group=Core)) +
-  geom_line(color='red',size=0.2)+
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
 	facet_wrap(~Core);
+
 #+end_src
 
 #+RESULTS:
@@ -2538,14 +2554,17 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
+middle <- mean(k$Value);
+
 library(ggplot2);
 ggplot(k, aes(x=Time, y=Value,group=Core)) +
-  geom_line(color='green',size=0.2)+
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
 	facet_wrap(~Core);
+
 #+end_src
 
 #+RESULTS:
@@ -2563,14 +2582,17 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/spB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
+middle <- mean(k$Value);
+
 library(ggplot2);
 ggplot(k, aes(x=Time, y=Value,group=Core)) +
-  geom_line(color='blue',size=0.2)+
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
 	facet_wrap(~Core);
+
 #+end_src
 
 #+RESULTS:
@@ -2579,17 +2601,21 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 **** Aplicação UA
 
 #+begin_src R :results output graphics :file "imagens/uaBNas_Analise.pdf" :exports both :session *RFib* 
+
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/uaB.csv", sep=" ", strip.white=T);
 library(dplyr);
-k <-      filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 
+middle <- mean(k$Value);
+
 library(ggplot2);
 ggplot(k, aes(x=Time, y=Value,group=Core)) +
-  geom_line(color='orange',size=0.1)+
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
 	facet_wrap(~Core);
+
 #+end_src
 
 #+RESULTS:
