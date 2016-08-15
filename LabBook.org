@@ -1335,7 +1335,7 @@ scorep is only measuring the metrics when something is actually traced
   pela aplicação como um todo, por isso deverá ser informado por
   parâmetro.
 
-#+begin_src sh :results output :exports both :tangle dados/scriptPCMexp1.bash
+#+begin_src sh :results output :exports both :tangle scripts/scriptPCMexp1.bash
 pathOfIntelPCM=/home/aulapinroot/Programs/IntelPerformanceCounterMonitor-V2.11
 
 app=normal_par
@@ -2179,7 +2179,7 @@ tautrace.0.0.13.trc  tautrace.0.0.28.trc
   interpretá-los através de algum recurso parecido com o =otf2-print=,
   visto que esses arquivos são binários e não de texto. Tenho que
   descobrir como fazer...
-* [22:20:30; 12.08.2016] Benchmark Rodinia                :Gabriel:
+* [22:20:30; 12.08.2016] Benchmark Rodinia           '              :Gabriel:
 
 #+begin_src sh :results output :exports both
 cd $HOME/Programs/
@@ -2321,7 +2321,7 @@ pwd
 
 ** Script do experimento
 
-#+begin_src sh :results output :exports both :tangle benchmarks/NAS-OMP/scriptOfExecutionNAS.bash
+#+begin_src sh :results output :exports both :tangle scripts/scriptOfExecutionNAS.bash
 #!bin/bash
 rm -rf log_NASExp1
 mkdir log_NASExp1
@@ -2355,7 +2355,7 @@ sudo likwid-perfctr -t 110ms -f -c N:0-31 -g L2CACHE $ua_command >> log_NASExp1/
   os rastros gerados pela ferramenta likwid, já o =_2= são as saídas que
   não fazem parte do rastro.
 
-#+begin_src sh :results output :exports both :tangle
+#+begin_src sh :results output :exports both :tangle scripts/exp1NAS_test.bash
 cd benchmarks/NAS-OMP/log_NASExp1/
 
 numberOfCores=32
@@ -2422,6 +2422,128 @@ mv *.csv ../../../dados/
 #+RESULTS:
 
 - Todos os =.csv= do experimento foram gerados.
+
+- Utilizando o script que o professor Lucas desenvolveu vou testar
+  para as aplicações do benchmark NAS, começando pelo bt.
+
+
+#+begin_src sh :results output
+chmod 755 ./scripts/likwid2csv.sh
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaCg_1.log  > dados/exp1_NASandLikwid/cgB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaFt_1.log  > dados/exp1_NASandLikwid/ftB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaLu_1.log  > dados/exp1_NASandLikwid/luB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaSp_1.log  > dados/exp1_NASandLikwid/spB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp1/saidaUa_1.log  > dados/exp1_NASandLikwid/uaB.csv
+
+cd dados/exp1_NASandLikwid/
+ls
+#+end_src
+
+#+RESULTS:
+: cgB.csv
+: extraction1
+: ftB.csv
+: luB.csv
+: spB.csv
+: uaB.csv
+
+*** Plotando os gráficos para análise
+
+- Aplicação CG
+
+#+begin_src R :results output graphics :file "imagens/cgBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-      filter(df, df$Metric=='M6') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='steelblue',size=0.2)+
+	facet_wrap(~Core);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/cgBNas_Analise.pdf]]
+
+- Aplicação FT
+
+#+begin_src R :results output graphics :file "imagens/ftBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-      filter(df, df$Metric=='M6') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='red',size=0.2)+
+	facet_wrap(~Core);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/ftBNas_Analise.pdf]]
+
+- Aplicação LU
+
+#+begin_src R :results output graphics :file "imagens/luBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-      filter(df, df$Metric=='M6') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='green',size=0.2)+
+	facet_wrap(~Core);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/luBNas_Analise.pdf]]
+
+- Aplicação SP
+
+#+begin_src R :results output graphics :file "imagens/spBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp1_NASandLikwid/spB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-      filter(df, df$Metric=='M6') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='blue',size=0.2)+
+	facet_wrap(~Core);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/spBNas_Analise.pdf]]
+
+- Aplicação UA
+
+#+begin_src R :results output graphics :file "imagens/uaBNas_Analise.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp1_NASandLikwid/uaB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-      filter(df, df$Metric=='M6') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='orange',size=0.1)+
+	facet_wrap(~Core);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/uaBNas_Analise.pdf]]
+
 * 2016-08-14 Attempt to correctly parse =likwid-perfcrt= log file (timeline mode) :Lucas:
 
 See here how Gabriel obtained the timeline logs:
