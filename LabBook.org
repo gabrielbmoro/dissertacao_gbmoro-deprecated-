@@ -2471,6 +2471,10 @@ else
   aplicação. Já no =eixo x= é apresentado a frequência das amostras
   realizadas (=time stamp=).
 
+- É possível visualizar também nos gráficos uma linha vermelha que é
+  calculada pela média de cache misses total (cache
+  L2). Possibilitando uma análise comparativa com as demais regiões da
+  aplicação.
 
 **** Aplicação CG
 
@@ -2570,14 +2574,15 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/luBNas_Analise.pdf]]
 
-- Dois comportamentos identificados no gráfico, um mais linear do 1 ao
-  15º e outro mais desbalanceado 16 até o 32º core.
+- A partir do gráfico gerado é possível visualizar um comportamento
+  mais =memory-bound= do 17 ao 32º core, especificamente nos primeiros e
+  últimos timestamps coletados (considerar que os cores não acessam a
+  memória de maneira uniforme, arquitetura NUMA)
 
-- O maior valor registrado de taxa de cache misses foi próximo aos
-  50%. 
+**** Aplicação SP
 
-**** STARTED Aplicação SP
-- State "STARTED"    from              [2016-08-15 Seg 02:28]
+- Essa aplicação resolve o problema chamado =Scalar Penta-diagonal=. 
+
 #+begin_src R :results output graphics :file "imagens/spBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("dados/exp1_NASandLikwid/spB.csv", sep=" ", strip.white=T);
@@ -2598,7 +2603,15 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/spBNas_Analise.pdf]]
 
+- Comparado as aplicações anteriores é possível visualizar que o maior
+  índice de cache misses é inferior a taxa dos outros, o que pode não
+  ser interessante usar esse gráfico no artigo.
+
 **** Aplicação UA
+
+- Essa aplicação define uma série de cálculos sobre uma malha
+  adaptativa desistruturada, o que gera acessos irregulares a memória.
+
 
 #+begin_src R :results output graphics :file "imagens/uaBNas_Analise.pdf" :exports both :session *RFib* 
 
@@ -2620,6 +2633,14 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 
 #+RESULTS:
 [[file:imagens/uaBNas_Analise.pdf]]
+
+- É possível visualizar um comportamento totalmente heterogêneo entre
+  os núcleos de processamento, de maneira geral, a taxa de misses na
+  cache L2 é baixa, mas durante a execução se altera com um intervalo
+  pequeno das frequências. O interessante seria, realizar um
+  refinamento maior das amostras para podermos compreender melhor o
+  comportamento da taxa de misses em uma granularidade mais fina de
+  amostragem.
 
 * 2016-08-14 Attempt to correctly parse =likwid-perfcrt= log file (timeline mode) :Lucas:
 
