@@ -43,6 +43,22 @@ ggplot(k, aes(x=Time, y=Value,group=Socket)) +
 #+RESULTS:
 [[file:img/ftBNas_Analise.pdf]]
 
+#+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf"  :exports both :width 8 :height 3 :session
+library(dplyr);
+df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+library(ggplot2);
+ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,100) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="CPU Socket") +
+      labs(x = "Runtime (seconds)", y= "Average L2 Cache Misses (%)");
+#+end_src
+
+#+RESULTS:
+[[file:img/ftBNas_Analise.pdf]]
 
 #+begin_src R :results output graphics :file "img/luBNas_Analise.pdf" :exports both :session *RFib* 
 
