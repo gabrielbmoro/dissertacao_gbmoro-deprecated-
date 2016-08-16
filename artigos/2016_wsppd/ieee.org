@@ -23,23 +23,20 @@
 
 * Gráficos                                                         :noexport:
 
-#+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf" :exports both :session *RFib* 
+#+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf" :exports both :session *RFib*  :width 8 :height 4
 
 library(dplyr);
 
 df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
-k <-    filter(df, df$Metric=='M7') %>% 
-		as.data.frame();
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
-
 k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
-
 middle <- mean(k$Value);
 
 library(ggplot2);
-ggplot(k, aes(x=Time, y=Value,group=Socket,color=Socket)) +
-  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=0.5) + geom_point(size=0.5) +
-      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Socket);
+ggplot(k, aes(x=Time, y=Value,group=Socket)) +
+  	geom_line(size=0.2) + geom_point(size=0.2) + theme_bw() + ylim(0,NA) +
+      labs(x = "Runtime (seconds)", y= "L2 Cache Misses") + facet_wrap(~Socket, ncol=1);
 
 #+end_src
 
