@@ -25,16 +25,16 @@
 #+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
-library(dplyr);
 k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
+k <- filter(k, k$Core < 17);
 
 middle <- mean(k$Value);
 
 library(ggplot2);
-ggplot(k, aes(x=Time, y=Value,group=Core,color=Core)) +
-  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=1) + geom_point(size=0.5) +
+ggplot(k, aes(x=as.factor(Time), y=Value,group=Core,color=Core)) +
+  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=0.5) + geom_point(size=0.5) +
       labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Core);
 
 #+end_src
@@ -46,18 +46,17 @@ ggplot(k, aes(x=Time, y=Value,group=Core,color=Core)) +
 #+begin_src R :results output graphics :file "img/luBNas_Analise.pdf" :exports both :session *RFib* 
 library(dplyr);
 df <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
-library(dplyr);
 k <-    filter(df, df$Metric=='M7') %>%
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
+k <- filter(k, (k$Core >= 1 && k$Core <=8) || (k$Core>=16 && k$Core <=32));
 
 middle <- mean(k$Value);
 
 library(ggplot2);
-ggplot(k, aes(x=Time, y=Value,group=Core,color=Core)) +
-  geom_line(size=0.02) + geom_line(y=as.numeric(middle), color='red',size=1) +
- labs(x = "Time stamp", y= "Miss rate in L2 cache level") +
-	facet_grid(~Core);
+ggplot(k, aes(x=as.factor(Time), y=Value,group=Core,color=Core)) +
+  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=1) + geom_point(size=0.5) +
+      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Core);
 
 #+end_src
 
@@ -385,16 +384,17 @@ consumption and improving performance.
 #+LaTeX: %  uma chamada BFS (representando uma aplicação memory-bound) e a Back
 #+LaTeX: %  Propagation (representando uma aplicação cpu-bound) 
 
-#+LaTeX: \begin{figure*}[h]
+
+
+#+LaTeX: \begin{figure}[!htb]
 #+LaTeX:   \caption{Execution of the Discrete 3D fast Fourier Transform.}
-#+LaTeX:     \includegraphics[width=\textwidth]{img/ftBNas_Analise.pdf}
-#+LaTeX: \end{figure*}
+#+LaTeX:     \includegraphics[width=9.5cm]{img/ftBNas_Analise.pdf}
+#+LaTeX: \end{figure}
 
-#+LaTeX: \begin{figure*}[h]
+#+LaTeX: \begin{figure}[!htb]
 #+LaTeX:   \caption{Execution of the Lower-Upper Gauss-Seidel solver.}
-#+LaTeX:     \includegraphics[width=\textwidth]{img/luBNas_Analise.pdf}
-#+LaTeX: \end{figure*}
-
+#+LaTeX:     \includegraphics[width=9.5cm]{img/luBNas_Analise.pdf}
+#+LaTeX: \end{figure}
 
 
 ** Conclusion
