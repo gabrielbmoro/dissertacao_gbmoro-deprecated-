@@ -22,20 +22,24 @@
 # If you do, just type make (thanks Luka Stanisic for this).
 
 * Gráficos                                                         :noexport:
+
 #+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf" :exports both :session *RFib* 
+
 library(dplyr);
+
 df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
-k <-    filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>% 
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
-k <- filter(k, k$Core < 17);
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
 
 middle <- mean(k$Value);
 
 library(ggplot2);
-ggplot(k, aes(x=as.factor(Time), y=Value,group=Core,color=Core)) +
+ggplot(k, aes(x=Time, y=Value,group=Socket,color=Socket)) +
   	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=0.5) + geom_point(size=0.5) +
-      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Core);
+      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Socket);
 
 #+end_src
 
@@ -44,19 +48,24 @@ ggplot(k, aes(x=as.factor(Time), y=Value,group=Core,color=Core)) +
 
 
 #+begin_src R :results output graphics :file "img/luBNas_Analise.pdf" :exports both :session *RFib* 
+
 library(dplyr);
+
 df <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
-k <-    filter(df, df$Metric=='M7') %>%
+k <-    filter(df, df$Metric=='M7') %>% 
 		as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
-k <- filter(k, (k$Core >= 1 && k$Core <=8) || (k$Core>=16 && k$Core <=32));
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
 
 middle <- mean(k$Value);
 
+
+
 library(ggplot2);
-ggplot(k, aes(x=as.factor(Time), y=Value,group=Core,color=Core)) +
-  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=1) + geom_point(size=0.5) +
-      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Core);
+ggplot(k, aes(x=Time, y=Value,group=Socket,color=Socket)) +
+  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=0.5) + geom_point(size=0.5) +
+      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Socket);
 
 #+end_src
 
