@@ -22,6 +22,7 @@
 # If you do, just type make (thanks Luka Stanisic for this).
 
 * Gráficos                                                         :noexport:
+** Plot da FT
 
 #+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf" :exports both :session *RFib*  :width 8 :height 4
 
@@ -32,20 +33,6 @@ k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
 k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
 middle <- mean(k$Value);
-
-library(ggplot2);
-ggplot(k, aes(x=Time, y=Value,group=Socket)) +
-  	geom_line(size=0.2) + geom_point(size=0.2) + theme_bw() + ylim(0,NA) +
-      labs(x = "Runtime (seconds)", y= "L2 Cache Misses") + facet_wrap(~Socket, ncol=1);
-
-#+end_src
-
-#+RESULTS:
-[[file:img/ftBNas_Analise.pdf]]
-
-#+begin_src R :results output graphics :file "img/ftBNas_Analise.pdf"  :exports both :width 8 :height 3 :session
-library(dplyr);
-df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
 k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
 g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
 library(ggplot2);
@@ -60,30 +47,204 @@ ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
 #+RESULTS:
 [[file:img/ftBNas_Analise.pdf]]
 
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+
+#identificando o maior valor
+maxG <- max(g$mean);
+g1_g <- filter(g,mean==maxG);
+g1_g
+
+#identificando o menor valor
+minG <- min(g$mean);
+g2_g <- filter(g,mean==minG);
+g2_g
+
+#+end_src
+
+#+RESULTS:
+:       Time Metric Socket  N     mean          se
+: 1 9.832468     M7      1 16 31.00176 0.002447148
+:        Time Metric Socket  N     mean          se
+: 1 0.3410059     M7      1 16 6.786985 0.005029964
+
+** Plot da LU
 #+begin_src R :results output graphics :file "img/luBNas_Analise.pdf" :exports both :session *RFib* 
 
 library(dplyr);
 
 df <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
-k <-    filter(df, df$Metric=='M7') %>% 
-		as.data.frame();
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
 k <- 	arrange(k,as.integer(k$Core));
-
 k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
-
 middle <- mean(k$Value);
-
-
-
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
 library(ggplot2);
-ggplot(k, aes(x=Time, y=Value,group=Socket,color=Socket)) +
-  	geom_line(size=0.01) + geom_line(y=as.numeric(middle), color='red',size=0.5) + geom_point(size=0.5) +
-      labs(x = "Time stamp", y= "Miss rate in L2 cache level") + facet_grid(~Socket);
+ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,100) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="CPU Socket") +
+      labs(x = "Runtime (seconds)", y= "Average L2 Cache Misses (%)");
 
 #+end_src
 
 #+RESULTS:
 [[file:img/luBNas_Analise.pdf]]
+
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+
+#identificando o maior valor
+maxG <- max(g$mean);
+g1_g <- filter(g,mean==maxG);
+g1_g
+
+#identificando o menor valor
+minG <- min(g$mean);
+g2_g <- filter(g,mean==minG);
+g2_g
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+      Time Metric Socket  N     mean         se
+1 33.42106     M7      2 16 27.99985 0.04944031
+       Time Metric Socket  N     mean         se
+1 0.1006167     M7      1 16 10.88676 0.02663008
+#+end_example
+
+
+** Plot da CG
+
+#+begin_src R :results output graphics :file "img/cgBNas_Analise.pdf" :exports both :session *RF* 
+
+library(dplyr);
+
+df <- read.csv("../../dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+middle <- mean(k$Value);
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+library(ggplot2);
+ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,100) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="CPU Socket") +
+      labs(x = "Runtime (seconds)", y= "Average L2 Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/cgBNas_Analise.pdf]]
+
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("../../dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+
+#identificando o maior valor
+maxG <- max(g$mean);
+g1_g <- filter(g,mean==maxG);
+g1_g
+
+#identificando o menor valor
+minG <- min(g$mean);
+g2_g <- filter(g,mean==minG);
+g2_g
+
+#+end_src
+
+#+RESULTS:
+:       Time Metric Socket  N    mean         se
+: 1 23.69983     M7      2 16 38.6508 0.02485503
+:         Time Metric Socket  N     mean        se
+: 1 0.05055852     M7      1 16 10.21882 0.0773729
+
+** Plot do SP
+#+begin_src R :results output graphics :file "img/spBNas_Analise.pdf" :exports both :session *RF* 
+
+library(dplyr);
+
+df <- read.csv("../../dados/exp1_NASandLikwid/spB.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+middle <- mean(k$Value);
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+library(ggplot2);
+ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,100) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="CPU Socket") +
+      labs(x = "Runtime (seconds)", y= "Average L2 Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/spBNas_Analise.pdf]]
+
+** Plot do UA
+
+#+begin_src R :results output graphics :file "img/uaBNas_Analise.pdf" :exports both :session *RF* 
+
+library(dplyr);
+
+df <- read.csv("../../dados/exp1_NASandLikwid/uaB.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+middle <- mean(k$Value);
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+library(ggplot2);
+ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,100) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="CPU Socket") +
+      labs(x = "Runtime (seconds)", y= "Average L2 Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/uaBNas_Analise.pdf]]
 
 * Conversas e definições sobre o artigo                            :noexport:
 ** Proposta de Estrutura para o Artigo                              :Gabriel:
@@ -296,14 +457,19 @@ specific for each parallel region code to define regions
 having more memory-bound behavior, which could be
 candidates for strategies to reduce energy consumption (using
 DVFS). After identifying a region of parallel code memory-bound,
-We intend to apply the technique of Design of
-Experiments\cite{jain1990art} to find the best frequency setting for
-each region automatically and with a lower level of intrusion compared
-to instrumentation of the source code. 
 
-The preliminary results indicate ...
-#+LaTeX: %  - Put here what you'll observed in the next days
+# We intend to apply the technique of Design of
+# Experiments\cite{jain1990art} to find the best frequency setting for
+# each region automatically and with a lower level of intrusion compared
+# to instrumentation of the source code. 
 
+The preliminary results indicate that the technique used in this work
+enables automated identification of the memory-bound regions in a
+parallel application with a low level of intrusion, different
+approaches investigated \cite{freeh2005exploring,millani2006fr}. In
+addition to identifying regions, it is also possible to identify the
+behavior of the application as a whole based on different hardware
+counters.  
 
 #+LaTeX: %- Paper structure
 
@@ -311,7 +477,7 @@ This paper has the following
 organization. Section\ref{sec:relatedwork} presents related work
 regarding automatic phase detection for HPC applications. It also
 motivates our work. Section\ref{sec:methodology} details our proposal
-and its corresponding methodology to fullfill our goal, which is the
+and its corresponding methodology to fullfill our goal, which is the 
 automatic phase detection using time-oriented hardware
 counters. Section\ref{sec:results} the plataform we have been using to
 conduct experiments and the preliminary results we have obtained so
@@ -397,33 +563,108 @@ consumption and improving performance.
 ** Methodology
 \label{sec:methodology}
 
-- Penso aqui em apresentar as características do DoE realizado para executar o experimento (PRAZO - ATÉ Segunda-feira 08/08)
+In the experiment were used OpenMP applications of the NAS Parallel
+Benchmarks. These applications were chosen two, the 3D Discrete Fast
+Fourier Transform (FT), Lower-Upper Gauss-Seidel Solver (LU) and
+Conjugate Gradient (CG), because in them it is possible to see two
+very different behaviors in misses rate for the L2 Cache when compared
+to other applications of the benchmark. 
+
+The applications were executed with 32 threads, both applications used
+the bigger input size (class B) of the benchmark. The execution
+platform used was a Workstation with 2 processors Intel (R) Xeon (R)
+E5-2650 CPU 2.00 GHz, each with 8 physical cores and Hyper-Threading
+technology. 
+
+To understand the behavior of the memory-bounds parallel regions was
+used to likwid tool that allowed collecting in each timestamp basic
+measures over the miss rate to the L2 Cache. The interval between
+timestamps was defined according to the total execution time of each
+application. For example, in the FT application, the interval was
+between timestamps was 30ms (milliseconds) generating about 172
+samples (for each of the 32 threads). Already for the LU application
+was defined a wider range of 100ms, which generated about 363
+samples. The wider range defined for the CG application was 50ms,
+which generated about 384 samples. 
 
 ** Preliminary Results
 \label{sec:results}
 
-#+LaTeX: %- Penso aqui em usar o benchmark Rodinia executando duas aplicações,
-#+LaTeX: %  uma chamada BFS (representando uma aplicação memory-bound) e a Back
-#+LaTeX: %  Propagation (representando uma aplicação cpu-bound) 
+The graphs have two lines, the first describes the miss
+rate behavior in the L2 cache to the first processor (socket with
+8-physical colors) and the second line to the other processor. Each
+point on the graph presents a coordinated, where was a sample
+collected on their timestamp. 
 
-
-
-#+LaTeX: \begin{figure}[!htb]
+#+LaTeX: \begin{figure}[!htb] \label{figFT}
 #+LaTeX:   \caption{Execution of the Discrete 3D fast Fourier Transform.}
-#+LaTeX:     \includegraphics[width=9.5cm]{img/ftBNas_Analise.pdf}
+#+LaTeX:     \includegraphics[width=9cm]{img/ftBNas_Analise.pdf}
 #+LaTeX: \end{figure}
 
-#+LaTeX: \begin{figure}[!htb]
+The execution of the FT application (in the Figure \ref{figFT}) show a
+similar behavior of the first processor and also the second. In the
+course of execution, it is possible to see a homogeneous behavior of
+the application, a peak occurs in a sample collected of the first CPU
+reaching about 31% to rate misses of L2 cache in 9.83 seconds of
+execution. This region can be considered more memory-bound than the
+others, but the application as a whole presents a more CPU-bound
+behavior. The lowest misses cache rate found was 6.78% at the very
+beginning of the run in 0,34 seconds.
+
+#+LaTeX: \begin{figure}[!htb] \label{figLU}
 #+LaTeX:   \caption{Execution of the Lower-Upper Gauss-Seidel solver.}
-#+LaTeX:     \includegraphics[width=9.5cm]{img/luBNas_Analise.pdf}
+#+LaTeX:     \includegraphics[width=7.8cm,height=6.8cm]{img/luBNas_Analise.pdf}
 #+LaTeX: \end{figure}
 
+Unlike the previous application, the LU application (Figure
+\ref{figLU}) has an totally erratic behavior on cache misses rate
+level L2 cache. The most memory-bound region (more misses rate) was
+found in the timestamp of 33.42 seconds run about 27.99% of misses the
+second CPU. Already the lowest rate was found in first seconds of the
+application executing on the first CPU, about 10% of misses. 
+
+#+LaTeX: \begin{figure}[!htb] \label{figLU}
+#+LaTeX:   \caption{Execution of Conjugate Gradient.}
+#+LaTeX:     \includegraphics[width=7.8cm,height=6.8cm]{img/cgBNas_Analise.pdf}
+#+LaTeX: \end{figure}
+
+
+It is possible to see the execution's graphic of the CG application,
+different of  FT and LU applications, the behavior of the running line
+starts with increasing the miss rate, then the behavior is
+static so that the rate remains linearly. The higher rate of
+miss approached 40% for this application to the CPU 2, already the
+smallest miss rate was found for the CPU 1, about 10%. This
+application  has a more behavior memory-bound than the other. If we
+find an ideal frequency for one of the parallel regions, most parts of
+the application could benefit from the same frequency since the CG
+application has its parallel regions similar rate of misses. 
 
 ** Conclusion
 \label{sec:conclusion}
 
-#+LaTeX: %- p1: comentar resultados
-#+LaTeX: %- 5.1 Future Work
+The results show that is possible to identify regions with more
+memory-bound in parallel applications. The three parallel applications
+used were chosen to visualize the behavior of an application that has
+cache misses that occur in a focused and homogeneously (FT
+application), an application a fully variable misses rate during
+runtime (LU) and an application with a considerable cache miss rate 
+(CG).
+
+Not all tools offer adequate support to collect counters in hardware
+small time intervals (msec range), the tool used (likwid) provided the
+values of the respective counters hardware of time slices requested
+timestamp defined in the experiments, allowing examine other
+characteristics to define memory-bounds areas of a parallel
+application. 
+
+The next step of the work consists of the following steps: explore
+other measures to define with greater accuracy the memory-bound
+regions, align the technique of Design of Experiments in our
+methodology and use the DVFS application (Dynamic Voltage and
+Frequency Scaling) for efficiency energy and higher performance for
+applications specifically identified in the parallel memory-bound
+regions. 
 
 ** Acknowledgments                                                  :ignore:
 
@@ -443,22 +684,6 @@ consumption and improving performance.
 Tangle this file with C-c C-v t
 
 #+begin_src bib :tangle refs.bib
-@article{orgmode,
-  author =	"Eric Schulte and Dan Davison and Thomas Dye and Carsten Dominik",
-  title =	"A Multi-Language Computing Environment for Literate Programming and Reproducible Research",
-  journal =	"J. of Stat. Soft.",
-  volume =	"46",
-  number =	"3",
-  day =  	"25",
-  year = 	"2012",
-  CODEN =	"JSSOBK",
-  ISSN = 	"1548-7660",
-  bibdate =	"2011-10-03",
-  accepted =	"2011-10-03",
-  acknowledgement = "",
-  submitted =	"2010-12-22"
-}
-
 
 @inproceedings{freeh2005exploring,
   title={Exploring the energy-time tradeoff in mpi programs on a power-scalable cluster},
@@ -494,13 +719,6 @@ Tangle this file with C-c C-v t
   pages={149--162},
   year={2013},
   publisher={Springer}
-}
-
-@book{jain1990art,
-  title={The art of computer systems performance analysis: techniques for experimental design, measurement, simulation, and modeling},
-  author={Jain, Raj},
-  year={1990},
-  publisher={John Wiley \& Sons}
 }
 
 @article{millani2006fr,
