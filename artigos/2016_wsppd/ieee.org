@@ -398,17 +398,17 @@ Besides reducing the execution time of parallel applications, the power
 consumption is an increasingly addressed problem in High-Performance
 Computing. A parallel program may be composed of different
 parallel regions, which can have particular characteristics, for instance,
-CPU-bound or memory-bound. This paper presents an
+CPU or memory bound. This paper presents an
 approach that allows the automated detection of memory-bound parallel
 regions. Our approach differs from others found in the literature
-because it detects automatically parallel regions that depend on more
-on memory, all samples collected from the application did not require
-any code instrumentation, another advantage of the present work, the
+because it detects automatically parallel regions that depend more
+of the memory, all samples collected from the application did not require
+any code instrumentation, advantage of the present work, the
 less intrusive possible. The applications used in the experiment
 were the Discrete 3D fast Fourier Transform (FT), Lower-Upper
 Gauss-Seidel solver and Conjugate Gradient, both of the NAS benchmark
-parallel, in the experiment was evaluated the miss rate for the L2
-cache. Through of experiment was possible to identify the memory-bound
+parallel. In the experiment was evaluated the miss rate for the L2
+cache. Through of the experiment was possible to identify the memory-bound
 regions by timestamps of the applications. The results show that is
 possible to identify the memory-bound regions and too the behavior of
 applications as a whole. From the knowledge of these regions it is
@@ -427,7 +427,7 @@ may be regarded program fragments that are executed by different
 threads. For example, in an application that calculates heat exchange
 in a metal plate, could be considered a problem which has two sets of
 parallel regions, the first set calculate the initial state of the
-plate, and another part would be responsible for calculating the heat
+plate and another part would be responsible for calculating the heat
 exchange in different points of the plate. In the first set there are
 various parallel regions, whether divided in "n" timestamps, it is
 possible to see various behaviors, some more memory-bound, others more
@@ -439,7 +439,7 @@ CPU-bound.
 Each parallel region has its own characteristic, some may be
 considered memory-bound, where there is a high rate of the
 cache miss, while others may be considered more CPU-bound, which
-expects more by cpu resource and more IO-bound when the thread is
+expects more by CPU resource and more IO-bound when the thread is
 limited by waiting for input or output operations. In the previous
 example of the heat plate, the second  set of parallel regions can be
 considered more memory-bound than the first set, more within of each
@@ -479,7 +479,7 @@ Dynamic Voltage Frequency Scaling).
 # to instrumentation of the source code. 
 
 The preliminary results indicate that the technique used in this work
-enables automated identification of the memory-bound regions in a
+allows automated identification of the memory-bound regions in a
 parallel application with a low level of intrusion, different
 approaches investigated \cite{freeh2005exploring,millani2006fr}. In
 addition to identifying regions, it is also possible to identify the
@@ -489,15 +489,15 @@ counters.
 #+LaTeX: %- Paper structure
 
 This paper has the following
-organization. Section\ref{sec:relatedwork} presents related work
+organization. Section \ref{sec:relatedwork} presents related work
 regarding automatic phase detection for HPC applications. It also
-motivates our work. Section\ref{sec:methodology} details our proposal
+motivates our work. Section \ref{sec:methodology} details our proposal
 and its corresponding methodology to fullfill our goal, which is the
 automatic phase detection using time-oriented hardware
-counters. Section\ref{sec:results} the plataform we have been using to
-conduct experiments and the preliminary results we have obtained so
-far. Section\ref{sec:conclusion} concludes the paper listing the main
-contributions and future work.  
+counters. Section \ref{sec:results} the plataform we have been using
+to conduct experiments and the preliminary results we have obtained so
+far. Section \ref{sec:conclusion} concludes the paper listing the main
+contributions and future work.   
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -578,9 +578,17 @@ consumption and improving performance.
 ** Methodology
 \label{sec:methodology}
 
-#+LaTeX: \begin{figure}[!htb] \label{fitMetodologia}
-#+LaTeX:   \caption{-.}
-#+LaTeX:     \includegraphics{img/metodologiaWorkWsppd2016.svg}
+The methodology used in the work first defines the compilation a
+source code into binary after that to run this program is used to a
+likwid-perfctr tool that allows you to collect events each processing
+core. These events are processed by a script we created to generate a
+detailed trace of the application for make the data analysis. In the
+Figure \ref{figMetodologia} it is possible to see an overview of the
+methodology.
+
+#+LaTeX: \begin{figure}[!htb] \label{figMetodologia}
+#+LaTeX:   \caption{Overview of the methodology.}
+#+LaTeX:     \includegraphics[width=8cm,height=9cm]{img/metodologiaWorkWsppd2016.pdf}
 #+LaTeX: \end{figure}
 
 
@@ -687,7 +695,6 @@ methodology and use the DVFS application for efficiency energy and
 higher performance for applications specifically identified in the
 parallel memory-bound regions. 
 
-                                                  :ignore:
 #+LATEX:%\section*{Acknowledgements}
 
 #+LaTeX: %Who paid for this?
