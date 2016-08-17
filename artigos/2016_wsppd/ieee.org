@@ -400,10 +400,21 @@ Computing. A parallel program may be composed of different
 parallel regions, which can have particular characteristics, for instance,
 CPU-bound or memory-bound. This paper presents an
 approach that allows the automated detection of memory-bound parallel
-regions. From the knowledge of these regions it is possible to configure a
-suitable processor frequency for each parallel region of the
-application, improving energy use and application performance as a
-whole. The methodology. The results...
+regions. Our approach differs from others found in the literature
+because it detects automatically parallel regions that depend on more
+on memory, all samples collected from the application did not require
+any code instrumentation, another advantage of the present work, the
+less intrusive possible. The applications used in the experiment
+were the Discrete 3D fast Fourier Transform (FT), Lower-Upper
+Gauss-Seidel solver and Conjugate Gradient, both of the NAS benchmark
+parallel, in the experiment was evaluated the miss rate for the L2
+cache. Through of experiment was possible to identify the memory-bound
+regions by timestamps of the applications. The results show that is
+possible to identify the memory-bound regions and too the behavior of
+applications as a whole. From the knowledge of these regions it is
+possible to configure a suitable processor frequency for each parallel
+region of the application, reducing the energy used and improving the
+performance of the application as a whole. 
 #+LaTeX: \end{abstract}
 
 ** Introduction
@@ -414,10 +425,13 @@ whole. The methodology. The results...
 Large HPC applications are composed of parallel regions, these regions
 may be regarded program fragments that are executed by different
 threads. For example, in an application that calculates heat exchange
-in a metal plate, could be considered a problem which has two parallel
-regions, the first region calculate the initial state of the plate,
-and another part would be responsible for calculating the heat
-exchange in different points of the plate.
+in a metal plate, could be considered a problem which has two sets of
+parallel regions, the first set calculate the initial state of the
+plate, and another part would be responsible for calculating the heat
+exchange in different points of the plate. In the first set there are
+various parallel regions, whether divided in "n" timestamps, it is
+possible to see various behaviors, some more memory-bound, others more
+CPU-bound. 
 
 #+LaTeX: %- Each code region has its own memory/cpu/io resource requirements
   #+LaTeX: %- Some might be more memory-bound, others cpu-bound, for example
@@ -427,8 +441,9 @@ considered memory-bound, where there is a high rate of the
 cache miss, while others may be considered more CPU-bound, which
 expects more by cpu resource and more IO-bound when the thread is
 limited by waiting for input or output operations. In the previous
-example of the heat plate, the second problem of the parallel region
-can be considered more memory-bound than the first.
+example of the heat plate, the second  set of parallel regions can be
+considered more memory-bound than the first set, more within of each
+set may exists regions with behaviors various.  
 
 #+LaTeX: %- Automatically detecting such regions could potentially lead to
   #+LaTex: % per-parallel region improvements such as energy and performance
@@ -437,9 +452,9 @@ can be considered more memory-bound than the first.
 
 From an automatic detection of parallel regions of an application it
 is possible to adjust the processor to frequency appropriate to the
-region, according to its features (memory, CPU bound), which may allow
-a reduction in energy consumption and/or an increase application
-performance as a whole. 
+region, according to its features (memory or CPU bound), which may allow
+a reduction in energy consumption and an increase application
+performance as a whole.
 
 #+LaTeX: %- The idea of this work is to measure hardware counters along time in
 #+LaTeX: %  order to correlate their values against the different code region
@@ -456,7 +471,7 @@ The main objective of this study is to measure hardware counters
 specific for each parallel region code to define regions
 having more memory-bound behavior, which could be
 candidates for strategies to reduce energy consumption (using
-DVFS). After identifying a region of parallel code memory-bound,
+Dynamic Voltage Frequency Scaling).
 
 # We intend to apply the technique of Design of
 # Experiments\cite{jain1990art} to find the best frequency setting for
@@ -477,12 +492,12 @@ This paper has the following
 organization. Section\ref{sec:relatedwork} presents related work
 regarding automatic phase detection for HPC applications. It also
 motivates our work. Section\ref{sec:methodology} details our proposal
-and its corresponding methodology to fullfill our goal, which is the 
+and its corresponding methodology to fullfill our goal, which is the
 automatic phase detection using time-oriented hardware
 counters. Section\ref{sec:results} the plataform we have been using to
 conduct experiments and the preliminary results we have obtained so
 far. Section\ref{sec:conclusion} concludes the paper listing the main
-contributions and future work.
+contributions and future work.  
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -519,8 +534,8 @@ There is no definitive solution to detect if a code region is more
 memory or CPU bound. The main focus of this work is to characterize
 the behavior of code regions of a parallel application, classifying
 them into memory and/or CPU bound. For thereafter to be able to find
-an appropriate frequency for each region, using Dynamic Voltage
-Frequency Scaling (DVFS) technique.
+an appropriate frequency for each region, using DVFS (Dynamic Voltage
+Frequency Scaling) technique.
 
 Some works focus more on phase detection to sequential applications
 \cite{spiliopoulos2012power}\cite{laurenzano2011reducing}. Spiliopoulos
@@ -540,7 +555,7 @@ For parallel applications, there is advances in the detection of
 stages for MPI applications \cite{freeh2005exploring}, already to
 OpenMP applications, there is one approach that allows the
 instrumentation via code to indicate the parallel regions
-\cite{millani2006fr}. Freeh et al.\cite{freeh2005exploring} present an
+\cite{millani2006fr}. Freeh et al.\cite{freeh2005exploring} present an 
 approach that to provide the most suitable frequency for each phase of
 an MPI application, the application of this approach is divided
 according to the number of cluster processors used. Among the
@@ -562,6 +577,13 @@ consumption and improving performance.
 
 ** Methodology
 \label{sec:methodology}
+
+#+LaTeX: \begin{figure}[!htb] \label{fitMetodologia}
+#+LaTeX:   \caption{-.}
+#+LaTeX:     \includegraphics{img/metodologiaWorkWsppd2016.svg}
+#+LaTeX: \end{figure}
+
+
 
 In the experiment were used OpenMP applications of the NAS Parallel
 Benchmarks. These applications were chosen two, the 3D Discrete Fast
@@ -661,14 +683,12 @@ application.
 The next step of the work consists of the following steps: explore
 other measures to define with greater accuracy the memory-bound
 regions, align the technique of Design of Experiments in our
-methodology and use the DVFS application (Dynamic Voltage and
-Frequency Scaling) for efficiency energy and higher performance for
-applications specifically identified in the parallel memory-bound
-regions. 
+methodology and use the DVFS application for efficiency energy and
+higher performance for applications specifically identified in the
+parallel memory-bound regions. 
 
-** Acknowledgments                                                  :ignore:
-
-#+LATEX:\section*{Acknowledgements}
+                                                  :ignore:
+#+LATEX:%\section*{Acknowledgements}
 
 #+LaTeX: %Who paid for this?
 
