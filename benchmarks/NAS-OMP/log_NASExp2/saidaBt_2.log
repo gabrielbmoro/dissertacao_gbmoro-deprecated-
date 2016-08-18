@@ -1,0 +1,73 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 0 @ 2.00GHz
+CPU type:	Intel Xeon SandyBridge EN/EP processor
+CPU clock:	2.00 GHz
+--------------------------------------------------------------------------------
+
+
+ NAS Parallel Benchmarks (NPB3.3-OMP) - BT Benchmark
+
+ No input file inputbt.data. Using compiled defaults
+ Size:  102x 102x 102
+ Iterations:  200       dt:   0.0003000
+ Number of available threads:    32
+
+ Time step    1
+ Time step   20
+ Time step   40
+ Time step   60
+ Time step   80
+ Time step  100
+ Time step  120
+ Time step  140
+ Time step  160
+ Time step  180
+ Time step  200
+ Verification being performed for class B
+ accuracy setting for epsilon =  0.1000000000000E-07
+ Comparison of RMS-norms of residual
+           1 0.1423359722929E+04 0.1423359722929E+04 0.1006389412470E-13
+           2 0.9933052259015E+02 0.9933052259015E+02 0.3290525912144E-14
+           3 0.3564602564454E+03 0.3564602564454E+03 0.8930116047014E-14
+           4 0.3248544795908E+03 0.3248544795908E+03 0.9274002326880E-14
+           5 0.3270754125466E+04 0.3270754125466E+04 0.7229789014705E-14
+ Comparison of RMS-norms of solution error
+           1 0.5296984714094E+02 0.5296984714094E+02 0.3219383588718E-14
+           2 0.4463289611567E+01 0.4463289611567E+01 0.1094480021124E-13
+           3 0.1312257334221E+02 0.1312257334221E+02 0.7309791062022E-14
+           4 0.1200692532356E+02 0.1200692532356E+02 0.1065199366118E-13
+           5 0.1245957615104E+03 0.1245957615104E+03 0.1186179106308E-13
+ Verification Successful
+
+
+ BT Benchmark Completed.
+ Class           =                        B
+ Size            =            102x 102x 102
+ Iterations      =                      200
+ Time in seconds =                    38.08
+ Total threads   =                       32
+ Avail threads   =                       32
+ Mop/s total     =                 18437.67
+ Mop/s/thread    =                   576.18
+ Operation type  =           floating point
+ Verification    =               SUCCESSFUL
+ Version         =                    3.3.1
+ Compile date    =              13 Aug 2016
+
+ Compile options:
+    F77          = gfortran
+    FLINK        = $(F77)
+    F_LIB        = -fopenmp
+    F_INC        = -fopenmp
+    FFLAGS       = -O -fopenmp 
+    FLINKFLAGS   = -O
+    RAND         = (none)
+
+
+ Please send all errors/feedbacks to:
+
+ NPB Development Team
+ npb@nas.nasa.gov
+
+
+--------------------------------------------------------------------------------
