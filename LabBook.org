@@ -3458,3 +3458,41 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 
 #+RESULTS:
 [[file:imagens/uaBNas_Analise_exp2.pdf]]
+* [17:29:08; 18.08.2016] Experimento com o benchmark Graph500 - L2 CACHE e L3 CACHE :Gabriel:
+** Instalação da ferramenta
+
+#+begin_src sh :results output :exports both
+cd benchmarks/
+git clone https://github.com/graph500/graph500
+cd graph500
+cp make-incs/make.inc-gcc make.inc
+sed -i "s/gcc-4.6/gcc/" make.inc
+sed -i "s/BUILD_OPENMP = No/BUILD_OPENMP = Yes/" Makefile
+make
+#+end_src
+
+#+RESULTS:
+: gcc -flto -fwhole-program -g -std=c99 -Wall -O3 -march=native -I./generator   seq-list/seq-list.c graph500.c options.c rmat.c kronecker.c verify.c prng.c xalloc.c timer.c generator/splittable_mrg.c generator/graph_generator.c generator/make_graph.c generator/utils.c  -lm -lrt -o seq-list/seq-list
+: gcc -flto -fwhole-program -g -std=c99 -Wall -O3 -march=native -I./generator   seq-csr/seq-csr.c graph500.c options.c rmat.c kronecker.c verify.c prng.c xalloc.c timer.c generator/splittable_mrg.c generator/graph_generator.c generator/make_graph.c generator/utils.c  -lm -lrt -o seq-csr/seq-csr
+: gcc -flto -fwhole-program -g -std=c99 -Wall -O3 -march=native  -I./generator   make-edgelist.c options.c rmat.c kronecker.c prng.c xalloc.c timer.c generator/splittable_mrg.c generator/graph_generator.c generator/make_graph.c generator/utils.c  -lm -lrt -o make-edgelist
+: gcc -flto -fwhole-program -g -std=c99 -Wall -O3 -march=native  -I./generator   omp-csr/omp-csr.c omp-csr/bitmap.h graph500.c options.c rmat.c kronecker.c verify.c prng.c xalloc.c timer.c generator/splittable_mrg.c generator/graph_generator.c generator/make_graph.c generator/utils.c  -lm -lrt -o omp-csr/omp-csr
+
+** Script de experimento
+
+- Executando a aplicação com o parâmetro =-s 25=, a aplicação leva cerca
+  de 4 minutos e 48 segundos, o que pode ser compreendido como 5
+  minutos aproximadamente. 
+
+#+begin_src sh :results output :exports both :tangle scripts/scriptOfExecutionGraph500_exp.bash
+#!bin/bash
+rm -rf log_Graph500exp
+mkdir log_Graph500exp
+
+benchpath=/home/aulapinroot/Programs/graph500/omp-csr
+
+graph500_command=$benchpath/omp-csr
+
+sudo likwid-perfctr -t 30ms -f -c N:0-31 -g L2CACHE $graph500_command >> log_Graph500exp/saidaGraph500L2_2.log 2>> log_Graph500exp/saidaGraph500L2_1.log 
+sudo likwid-perfctr -t 30ms -f -c N:0-31 -g L3CACHE $graph500_command >> log_Graph500exp/saidaGraph500L3_2.log 2>> log_Graph500exp/saidaGraph500L3_1.log 
+
+#+end_src
