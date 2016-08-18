@@ -3202,3 +3202,259 @@ sudo likwid-perfctr -t 225ms -f -c N:0-31 -g L3CACHE $sp_command >> log_NASExp2/
 sudo likwid-perfctr -t 110ms -f -c N:0-31 -g L3CACHE $ua_command >> log_NASExp2/saidaUa_2.log 2>> log_NASExp2/saidaUa_1.log 
 
 #+end_src
+** Análise dos dados
+
+- Acho que o primeiro passo é tratar os arquivos gerados pelo
+  experimento que estão na extensão de =.log= para =.csv=, já formatando o
+  arquivo e adicionando o cabeçalho apropriado para facilitar a
+  análise utilizando R.
+
+- Os arquivos gerados no experimento estão no diretório
+  [[:benchmarks/NAS-OMP/log_NASExp2:]]. Os arquivos que possuem o =_1= são
+  os rastros gerados pela ferramenta likwid, já o =_2= são as saídas que
+  não fazem parte do rastro.
+
+#+begin_src sh :results output :exports both :tangle scripts/exp2NAS_test.bash
+cd benchmarks/NAS-OMP/log_NASExp1/
+
+numberOfCores=32
+count=0
+
+tmp="timeStamp"
+while [ $count -lt $numberOfCores ]
+do
+	tmp=$tmp",C'$count'runtime_rdstc,C'$count'runtime_unshall,C'$count'clock,C'$count'cpi,C'$count'l2reqrate,C'$count'l2missrate,C'$count'l2missratio"
+	count=$(echo "$count+1" | bc)
+done
+
+echo "$tmp" >> btexp2L3CACHEg.csv
+
+cat saidaBt_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> btexp2L3CACHEg.csv
+
+cat btexp2L3CACHEg.csv
+
+mv btexp2L3CACHEg.csv ../dados/
+#+end_src
+
+#+RESULTS:
+#+begin_example
+timeStamp,C'0'runtime_rdstc,C'0'runtime_unshall,C'0'clock,C'0'cpi,C'0'l2reqrate,C'0'l2missrate,C'0'l2missratio,C'1'runtime_rdstc,C'1'runtime_unshall,C'1'clock,C'1'cpi,C'1'l2reqrate,C'1'l2missrate,C'1'l2missratio,C'2'runtime_rdstc,C'2'runtime_unshall,C'2'clock,C'2'cpi,C'2'l2reqrate,C'2'l2missrate,C'2'l2missratio,C'3'runtime_rdstc,C'3'runtime_unshall,C'3'clock,C'3'cpi,C'3'l2reqrate,C'3'l2missrate,C'3'l2missratio,C'4'runtime_rdstc,C'4'runtime_unshall,C'4'clock,C'4'cpi,C'4'l2reqrate,C'4'l2missrate,C'4'l2missratio,C'5'runtime_rdstc,C'5'runtime_unshall,C'5'clock,C'5'cpi,C'5'l2reqrate,C'5'l2missrate,C'5'l2missratio,C'6'runtime_rdstc,C'6'runtime_unshall,C'6'clock,C'6'cpi,C'6'l2reqrate,C'6'l2missrate,C'6'l2missratio,C'7'runtime_rdstc,C'7'runtime_unshall,C'7'clock,C'7'cpi,C'7'l2reqrate,C'7'l2missrate,C'7'l2missratio,C'8'runtime_rdstc,C'8'runtime_unshall,C'8'clock,C'8'cpi,C'8'l2reqrate,C'8'l2missrate,C'8'l2missratio,C'9'runtime_rdstc,C'9'runtime_unshall,C'9'clock,C'9'cpi,C'9'l2reqrate,C'9'l2missrate,C'9'l2missratio,C'10'runtime_rdstc,C'10'runtime_unshall,C'10'clock,C'10'cpi,C'10'l2reqrate,C'10'l2missrate,C'10'l2missratio,C'11'runtime_rdstc,C'11'runtime_unshall,C'11'clock,C'11'cpi,C'11'l2reqrate,C'11'l2missrate,C'11'l2missratio,C'12'runtime_rdstc,C'12'runtime_unshall,C'12'clock,C'12'cpi,C'12'l2reqrate,C'12'l2missrate,C'12'l2missratio,C'13'runtime_rdstc,C'13'runtime_unshall,C'13'clock,C'13'cpi,C'13'l2reqrate,C'13'l2missrate,C'13'l2missratio,C'14'runtime_rdstc,C'14'runtime_unshall,C'14'clock,C'14'cpi,C'14'l2reqrate,C'14'l2missrate,C'14'l2missratio,C'15'runtime_rdstc,C'15'runtime_unshall,C'15'clock,C'15'cpi,C'15'l2reqrate,C'15'l2missrate,C'15'l2missratio,C'16'runtime_rdstc,C'16'runtime_unshall,C'16'clock,C'16'cpi,C'16'l2reqrate,C'16'l2missrate,C'16'l2missratio,C'17'runtime_rdstc,C'17'runtime_unshall,C'17'clock,C'17'cpi,C'17'l2reqrate,C'17'l2missrate,C'17'l2missratio,C'18'runtime_rdstc,C'18'runtime_unshall,C'18'clock,C'18'cpi,C'18'l2reqrate,C'18'l2missrate,C'18'l2missratio,C'19'runtime_rdstc,C'19'runtime_unshall,C'19'clock,C'19'cpi,C'19'l2reqrate,C'19'l2missrate,C'19'l2missratio,C'20'runtime_rdstc,C'20'runtime_unshall,C'20'clock,C'20'cpi,C'20'l2reqrate,C'20'l2missrate,C'20'l2missratio,C'21'runtime_rdstc,C'21'runtime_unshall,C'21'clock,C'21'cpi,C'21'l2reqrate,C'21'l2missrate,C'21'l2missratio,C'22'runtime_rdstc,C'22'runtime_unshall,C'22'clock,C'22'cpi,C'22'l2reqrate,C'22'l2missrate,C'22'l2missratio,C'23'runtime_rdstc,C'23'runtime_unshall,C'23'clock,C'23'cpi,C'23'l2reqrate,C'23'l2missrate,C'23'l2missratio,C'24'runtime_rdstc,C'24'runtime_unshall,C'24'clock,C'24'cpi,C'24'l2reqrate,C'24'l2missrate,C'24'l2missratio,C'25'runtime_rdstc,C'25'runtime_unshall,C'25'clock,C'25'cpi,C'25'l2reqrate,C'25'l2missrate,C'25'l2missratio,C'26'runtime_rdstc,C'26'runtime_unshall,C'26'clock,C'26'cpi,C'26'l2reqrate,C'26'l2missrate,C'26'l2missratio,C'27'runtime_rdstc,C'27'runtime_unshall,C'27'clock,C'27'cpi,C'27'l2reqrate,C'27'l2missrate,C'27'l2missratio,C'28'runtime_rdstc,C'28'runtime_unshall,C'28'clock,C'28'cpi,C'28'l2reqrate,C'28'l2missrate,C'28'l2missratio,C'29'runtime_rdstc,C'29'runtime_unshall,C'29'clock,C'29'cpi,C'29'l2reqrate,C'29'l2missrate,C'29'l2missratio,C'30'runtime_rdstc,C'30'runtime_unshall,C'30'clock,C'30'cpi,C'30'l2reqrate,C'30'l2missrate,C'30'l2missratio,C'31'runtime_rdstc,C'31'runtime_unshall,C'31'clock,C'31'cpi,C'31'l2reqrate,C'31'l2missrate,C'31'l2missratio
+0.10093558788872,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.10112607540561,0.078669250968433,0.061730678505742,0.06812005584327,0.0842342805691,0.029186527697428,0.043639749416139,0.064533694611705,0.049827747707227,0.077229596561942,0.056916491942482,0.064462121917493,0.06978676036586,0.039682751178853,0.053260176521097,0.060669666626694,0.061107531314836,0.081091103040111,0.084310360275542,0.089570930050059,0.088598344910957,0.075744063030957,0.071260555864994,0.070168528901787,0.06912742907677,0.090558811730669,0.079545640346509,0.08952201191732,0.091951127008706,0.076420834867373,0.02561146449652,0.040553241040921,0.027881183155385,2406.0595569703,2399.9940707962,2406.9960856887,2405.6520813749,2400.0714850418,2399.9947525202,2407.3830192521,2399.9888877798,2399.9935808462,2399.9930448638,2399.9912165187,2400.0395373504,2399.9941831342,2399.9956505865,2399.9948326069,2399.9941749309,2405.867401282,2400.011008724,2405.3117987948,2405.3711138561,2399.9927746907,2399.9916857807,2406.7859675129,2400
+...
+
+#+end_example
+
+- O próximo passo é fazer filtrar os demais arquivos obtidos no
+  experimento com o benchmark NAS.
+  
+#+begin_src sh :results output :exports both :tangle scriptOfFilter.bash
+
+cd benchmarks/NAS-OMP/log_NASExp1/
+
+numberOfCores=32
+
+count=0
+
+tmp="timeStamp"
+while [ $count -lt $numberOfCores ]
+do
+	tmp=$tmp",C'$count'runtime_rdstc,C'$count'runtime_unshall,C'$count'clock,C'$count'cpi,C'$count'l2reqrate,C'$count'l2missrate,C'$count'l2missratio"
+	count=$(echo "$count+1" | bc)
+done
+
+echo "$tmp" >> cgexp2L3CACHEg.csv
+echo "$tmp" >> ftexp2L2CACHEg.csv
+echo "$tmp" >> luexp2L3CACHEg.csv
+echo "$tmp" >> spexp2L3CACHEg.csv
+echo "$tmp" >> uaexp2L3CACHEg.csv
+
+cat saidaCg_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> cgexp2L3CACHEg.csv
+cat saidaFt_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> ftexp2L3CACHEg.csv
+cat saidaLu_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> luexp2L3CACHEg.csv
+cat saidaSp_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> spexp2L3CACHEg.csv
+cat saidaUa_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> uaexp2L3CACHEg.csv
+
+
+mv *.csv ../../../dados/
+#+end_src
+
+#+RESULTS:
+
+- Todos os =.csv= do experimento foram gerados.
+
+- Utilizando o script que o professor Lucas desenvolveu vou testar
+  para as aplicações do benchmark NAS, começando pelo bt.
+
+
+#+begin_src sh :results output
+chmod 755 ./scripts/likwid2csv.sh
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2/saidaCg_1.log  > dados/exp2_NASandLikwid/cgB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2/saidaFt_1.log  > dados/exp2_NASandLikwid/ftB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2/saidaLu_1.log  > dados/exp2_NASandLikwid/luB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2/saidaSp_1.log  > dados/exp2_NASandLikwid/spB.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2/saidaUa_1.log  > dados/exp2_NASandLikwid/uaB.csv
+
+cd dados/exp2_NASandLikwid/
+ls
+#+end_src
+
+#+RESULTS:
+: cgB.csv
+: extraction1
+: ftB.csv
+: luB.csv
+: spB.csv
+: uaB.csv
+*** Plotando os gráficos para análise
+
+A métrica utilizada para gerar os gráficos é a =M7=, essa métrica
+apresenta a taxa de misses no segundo nível de cache L3 para cada
+processador, esse valor é apresentado como porcentagem.
+
+#+BEGIN_EXAMPLE
+l3missrate = l3missrequests/totalOfInstructions
+M7 = l2missrate
+
+if M7 => min(M7_total) and M7 < mean(M7_total) then
+		the region is memory-bound;
+else
+		the region is not memory-bound;
+#+END_EXAMPLE
+
+
+- No =eixo y= de cada gráfico é possível visualizar a porcentagem de
+  cache misses na L2 de cada processador analisado, como a =beagle1=,
+  plataforma na qual o experimento foi executado possui cerca de =32
+  cores= é possível visualizar nos arquivos gerados 32 gráficos
+  respectivos de cada core, apresentando o comportamento da
+  aplicação. Já no =eixo x= é apresentado a frequência das amostras
+  realizadas (=time stamp=).
+
+- É possível visualizar também nos gráficos uma linha vermelha que é
+  calculada pela média de cache misses total (cache
+  L3). Possibilitando uma análise comparativa com as demais regiões da
+  aplicação.
+
+**** Aplicação CG
+
+#+begin_src R :results output graphics :file "imagens/cgBNas_Analise_exp2.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp2_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
+	facet_wrap(~Core);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/cgBNas_Analise_exp2.pdf]]
+
+
+**** Aplicação FT
+
+- A aplicação =FT= é a famosa transformada discreta de fourier, só que
+  em uma versão de 3 dimensões.
+
+#+begin_src R :results output graphics :file "imagens/ftBNas_Analise_exp2.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp2_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
+	facet_wrap(~Core);
+
+#+end_src
+
+#+RESULTS:
+[[file:imagens/ftBNas_Analise_exp2.pdf]]
+
+**** Aplicação LU
+
+- A aplicação =LU= define o método de Gauss-Seidel para resolver 'n'
+  equações lineares com um 'x' que é desconhecido.
+
+#+begin_src R :results output graphics :file "imagens/luBNas_Analise_exp2.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp2_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
+	facet_wrap(~Core);
+
+#+end_src
+
+#+RESULTS:
+[[file:imagens/luBNas_Analise_exp2.pdf]]
+
+
+**** Aplicação SP
+
+- Essa aplicação resolve o problema chamado =Scalar Penta-diagonal=. 
+
+#+begin_src R :results output graphics :file "imagens/spBNas_Analise_exp2.pdf" :exports both :session *RFib* 
+library(dplyr);
+df <- read.csv("dados/exp2_NASandLikwid/spB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
+	facet_wrap(~Core);
+
+#+end_src
+
+#+RESULTS:
+[[file:imagens/spBNas_Analise_exp2.pdf]]
+
+**** Aplicação UA
+
+- Essa aplicação define uma série de cálculos sobre uma malha
+  adaptativa desistruturada, o que gera acessos irregulares a memória.
+
+
+#+begin_src R :results output graphics :file "imagens/uaBNas_Analise_exp2.pdf" :exports both :session *RFib* 
+
+library(dplyr);
+df <- read.csv("dados/exp2_NASandLikwid/uaB.csv", sep=" ", strip.white=T);
+library(dplyr);
+k <-    filter(df, df$Metric=='M7') %>%
+		as.data.frame();
+k <- 	arrange(k,as.integer(k$Core));
+
+middle <- mean(k$Value);
+
+library(ggplot2);
+ggplot(k, aes(x=Time, y=Value,group=Core)) +
+  geom_line(color='black',size=0.02) + geom_line(y=as.numeric(middle), color='red',size=0.1) +
+	facet_wrap(~Core);
+
+#+end_src
+
+#+RESULTS:
+[[file:imagens/uaBNas_Analise_exp2.pdf]]
