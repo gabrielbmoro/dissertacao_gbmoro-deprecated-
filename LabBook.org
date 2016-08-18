@@ -2270,7 +2270,7 @@ drwxrwxr-x 2 aulapinroot aulapinroot 4,0K Ago 13 10:42 .
   com o tempo apertado vou executar o benchmark do =NAS=, focando em
   algumas aplicações, o que o senhor acha professor?
 
-* [12:59:49; 13.08.2016] Experimento com o benchmark NAS            :Gabriel:
+* [12:59:49; 13.08.2016] Experimento com o benchmark NAS - L2 CACHE :Gabriel:
 ** Instalação do benchmark NAS
 
 #+begin_src sh :results output :exports both
@@ -3148,3 +3148,57 @@ head(df);
 I'll let you analyze values along time.
 
 Note that metrics names should be replaced by something else.
+* [13:46:18; 18.08.2016] Experimento com o benchmark NAS - L3 CACHE                       :Gabriel:
+** Definições iniciais
+
+- Primeiramente vou fazer um teste para ver mais ou menos o tempo de
+  execução para cada algoritmo, usando =32 threads= (default openmp da
+  máquina). 
+
+|-----------+--------------+----------------+--------------|
+| Aplicação | Execução (s) | TimeStamp (ms) | Amostras     |
+|-----------+--------------+----------------+--------------|
+| bt.B      |        37.56 | 100ms          | ~= 37        |
+| cg.B      |        18.13 | 50ms           | ~= 36        |
+| ep.B      |         3.52 | - Descartado   | - Descartado |
+| ft.B      |         8.35 | 30ms           | ~= 27        |
+| lu.B      |        34.08 | 100ms          | ~= 34        |
+| mg.B      |          3.6 | - Descartado   | - Descartado |
+| sp.B      |        83.85 | 225ms          | ~= 37        |
+| ua.B      |        40.90 | 110ms          | ~= 37        |
+|-----------+--------------+----------------+--------------|
+
+- Na coluna =TimeStamp= e =Amostras= estou propondo uma configuração
+  adequada para deixar próximo a quantidade de amostras de acordo com
+  o tempo de execução de cada aplicação. O motivo de descartar algumas
+  aplicações para o experimento é devido ao seu tempo de execução ser
+  inferior a 4 segundos, isso porque na medida que eu defnir um
+  =TimeStamp= muito pequeno para coletar as amostras, isso pode afetar
+  os valores coletados. A maneira que encontro hoje de evitar isso é
+  descartando essas aplicações, mas pretendo investigar como resolver
+  tal problemática.
+
+** Script do experimento
+
+#+begin_src sh :results output :exports both :tangle scripts/scriptOfExecutionNAS_expL3.bash
+#!bin/bash
+rm -rf log_NASExp2
+mkdir log_NASExp2
+
+benchpath=/home/aulapinroot/Programs/NPB3.3.1/NPB3.3-OMP/bin
+
+bt_command=$benchpath/bt.B.x
+cg_command=$benchpath/cg.B.x
+ft_command=$benchpath/ft.B.x
+lu_command=$benchpath/lu.B.x
+sp_command=$benchpath/sp.B.x
+ua_command=$benchpath/ua.B.x
+
+sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L3CACHE $bt_command >> log_NASExp2/saidaBt_2.log 2>> log_NASExp2/saidaBt_1.log 
+sudo likwid-perfctr -t 50ms -f -c N:0-31 -g L3CACHE $cg_command >> log_NASExp2/saidaCg_2.log 2>> log_NASExp2/saidaCg_1.log 
+sudo likwid-perfctr -t 30ms -f -c N:0-31 -g L3CACHE $ft_command >> log_NASExp2/saidaFt_2.log 2>> log_NASExp2/saidaFt_1.log 
+sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L3CACHE $lu_command >> log_NASExp2/saidaLu_2.log 2>> log_NASExp2/saidaLu_1.log 
+sudo likwid-perfctr -t 225ms -f -c N:0-31 -g L3CACHE $sp_command >> log_NASExp2/saidaSp_2.log 2>> log_NASExp2/saidaSp_1.log 
+sudo likwid-perfctr -t 110ms -f -c N:0-31 -g L3CACHE $ua_command >> log_NASExp2/saidaUa_2.log 2>> log_NASExp2/saidaUa_1.log 
+
+#+end_src

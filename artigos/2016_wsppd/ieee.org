@@ -695,6 +695,7 @@ methodology and use the DVFS application for efficiency energy and
 higher performance for applications specifically identified in the
 parallel memory-bound regions. 
 
+
 #+LATEX:%\section*{Acknowledgements}
 
 #+LaTeX: %Who paid for this?
