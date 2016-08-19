@@ -2387,7 +2387,7 @@ timeStamp,C'0'runtime_rdstc,C'0'runtime_unshall,C'0'clock,C'0'cpi,C'0'l2reqrate,
 - O próximo passo é fazer filtrar os demais arquivos obtidos no
   experimento com o benchmark NAS.
   
-#+begin_src sh :results output :exports both
+#+begin_src sh :results output :exports both :tangle scripts/exp2NAS_test_L2.bash
 
 cd benchmarks/NAS-OMP/log_NASExp1/
 
@@ -3247,7 +3247,7 @@ timeStamp,C'0'runtime_rdstc,C'0'runtime_unshall,C'0'clock,C'0'cpi,C'0'l2reqrate,
 - O próximo passo é fazer filtrar os demais arquivos obtidos no
   experimento com o benchmark NAS.
   
-#+begin_src sh :results output :exports both :tangle scriptOfFilter.bash
+#+begin_src sh :results output :exports both :tangle scripts/scriptOfFilterNAS_L3.bash
 
 cd benchmarks/NAS-OMP/log_NASExp1/
 
@@ -3323,7 +3323,7 @@ else
 
 
 - No =eixo y= de cada gráfico é possível visualizar a porcentagem de
-  cache misses na L2 de cada processador analisado, como a =beagle1=,
+  cache misses na L3 de cada processador analisado, como a =beagle1=,
   plataforma na qual o experimento foi executado possui cerca de =32
   cores= é possível visualizar nos arquivos gerados 32 gráficos
   respectivos de cada core, apresentando o comportamento da
@@ -3356,6 +3356,10 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/cgBNas_Analise_exp2.pdf]]
 
+- Em todos os cores podemos visualizar picos que ocorrem em
+  determinados pontos, diferentes desses picos não é encontrado
+  ocorrências considerável de misses na l3, entre os intervalos de 0 e
+  0.25 na taxa de cache misses.
 
 **** Aplicação FT
 
@@ -3382,6 +3386,11 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/ftBNas_Analise_exp2.pdf]]
 
+- Nesse gráfico podemos visualizar mais índices de miss para o nível
+  da l3, os quais ocorrem principalmente no início da execução da
+  aplicação, chegando para o caso máximo próximo a 100% de misses para
+  l3.
+
 **** Aplicação LU
 
 - A aplicação =LU= define o método de Gauss-Seidel para resolver 'n'
@@ -3407,6 +3416,10 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 #+RESULTS:
 [[file:imagens/luBNas_Analise_exp2.pdf]]
 
+- Nesse gráfico é possível visualizar que para os cores 1 ao 8, o
+  comportamento de misses na l3 é maior que os demais. Outro aspecto
+  interessante é o baixo índice de miss, o maior valor encontrado foi
+  próximo a 20%. 
 
 **** Aplicação SP
 
@@ -3431,6 +3444,11 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 
 #+RESULTS:
 [[file:imagens/spBNas_Analise_exp2.pdf]]
+
+- O interessante desse gráfico é que na maior parte da execução os
+  índices de misses se manteram a baixo de 25%, mas em alguns pontos
+  ocorreu picos estressantes, os quais ultrapassaram na maior parte
+  das vezes os 75% de misses para a l3.
 
 **** Aplicação UA
 
@@ -3458,6 +3476,11 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
 
 #+RESULTS:
 [[file:imagens/uaBNas_Analise_exp2.pdf]]
+
+- Para essa aplicação o maior índice de miss que aplicação chegou foi
+  a 30% de misses na l3. Na maioria das vezes o pico de execução
+  ocorreu entre a coleta os primeiros 30 segundos. 
+
 * [17:29:08; 18.08.2016] Experimento com o benchmark Graph500 - L2 CACHE e L3 CACHE :Gabriel:
 ** Instalação da ferramenta
 
@@ -3496,3 +3519,87 @@ sudo likwid-perfctr -t 30ms -f -c N:0-31 -g L2CACHE $graph500_command >> log_Gra
 sudo likwid-perfctr -t 30ms -f -c N:0-31 -g L3CACHE $graph500_command >> log_Graph500exp/saidaGraph500L3_2.log 2>> log_Graph500exp/saidaGraph500L3_1.log 
 
 #+end_src
+
+** Análise dos dados
+
+#+begin_src sh :results output :exports both :tangle scripts/expGraph500_test.bash
+
+cd benchmarks/Graph500/log_Graph500exp/
+
+numberOfCores=32
+count=0
+
+tmp="timeStamp"
+while [ $count -lt $numberOfCores ]
+do
+	tmp=$tmp",C'$count'runtime_rdstc,C'$count'runtime_unshall,C'$count'clock,C'$count'cpi,C'$count'l2reqrate,C'$count'l2missrate,C'$count'l2missratio"
+	count=$(echo "$count+1" | bc)
+done
+
+echo "$tmp" >> graph500L2CACHEg.csv
+echo "$tmp" >> graph500L3CACHEg.csv
+
+cat saidaGraph500L2_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >>  graph500L2CACHEg.csv
+
+cat saidaGraph500L3_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >>  graph500L3CACHEg.csv
+
+mv graph500L2CACHEg.csv ../../../dados/
+mv graph500L3CACHEg.csv ../../../dados/
+
+#+end_src
+
+
+#+begin_src sh :results output :exports both :tangle scripts/scriptOfFilterGraph500.bash
+
+cd benchmarks/Graph500/log_Graph500exp/
+
+numberOfCores=32
+
+count=0
+
+tmp="timeStamp"
+while [ $count -lt $numberOfCores ]
+do
+	tmp=$tmp",C'$count'runtime_rdstc,C'$count'runtime_unshall,C'$count'clock,C'$count'cpi,C'$count'l2reqrate,C'$count'l2missrate,C'$count'l2missratio"
+	count=$(echo "$count+1" | bc)
+done
+
+echo "$tmp" >> graph500L2.csv
+echo "$tmp" >> graph500L3.csv
+
+cat saidaGraph500L2_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> graph500L2.csv
+cat saidaGraph500L3_1.log | awk ' { for(i=4; i<=NF; i++) printf "%s",$i (i==NF?ORS:OFS) } ' | sed 's/[[:space:]]/,/g' >> graph500L3.csv
+
+mv *.csv ../../../dados/
+#+end_src
+
+
+A métrica utilizada para gerar os gráficos é a =M7=, essa métrica
+apresenta a taxa de misses no segundo nível de cache L2 para cada
+processador, esse valor é apresentado como porcentagem.
+
+#+BEGIN_EXAMPLE
+l2missrate = l2missrequests/totalOfInstructions
+M7 = l2missrate
+
+if M7 => min(M7_total) and M7 < mean(M7_total) then
+		the region is memory-bound;
+else
+		the region is not memory-bound;
+#+END_EXAMPLE
+
+
+- No =eixo y= de cada gráfico é possível visualizar a porcentagem de
+  cache misses na L2 e L3 de cada processador analisado, como a =beagle1=,
+  plataforma na qual o experimento foi executado possui cerca de =32
+  cores= é possível visualizar nos arquivos gerados 32 gráficos
+  respectivos de cada core, apresentando o comportamento da
+  aplicação. Já no =eixo x= é apresentado a frequência das amostras
+  realizadas (=time stamp=).
+
+- É possível visualizar também nos gráficos uma linha vermelha que é
+  calculada pela média de cache misses total (cache
+  L2 e L3). Possibilitando uma análise comparativa com as demais regiões da
+  aplicação.
+
+
