@@ -803,11 +803,12 @@ rate behavior in the L2 and L3 cache to the first processor (socket with
 point on the graph presents a coordinated, where was a sample
 collected on their timestamp. 
 
-#+LaTeX: \begin{figure}[htp]\label{figFT}
-#+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/ftBNas_Analise.pdf}
-#+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/ftBNas_Analise_l3.pdf}
-#+LaTeX: \caption{Execution of the Discrete 3D fast Fourier Transform.}
-#+LaTeX: \end{figure}
+#+BEGIN_LaTeX
+\begin{figure}[!htb]\label{figFT}
+ \centering \includegraphics[width=\linewidth]{img/ft_L2_L3_30ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, Class B) when measuring metrics every 30 milliseconds.}
+\end{figure}
+#+END_LaTeX
 
 The execution of the FT application (Figure x) shows that for the l2
 cache there is a homogeneous behavior of the rate of misses during
@@ -987,3 +988,30 @@ booktitle={3rd International Workshop on Reproducibility in Parallel Computing (
 }
 
 #+end_src
+* 2016-08-20 New plots                                             :noexport:
+
+#+begin_src R :results output graphics :file img/ft_L2_L3_30ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "FT";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Cache Level") + facet_wrap(~Application) +
+      labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/ft_L2_L3_30ms.pdf]]
+
