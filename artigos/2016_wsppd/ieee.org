@@ -797,18 +797,15 @@ our analysis of phase detection.
 ** Preliminary Results
 \label{sec:results}
 
-The graphs have two lines, the first describes the miss
-rate behavior in the L2 and L3 cache to the first processor (socket with
-8-physical colors) and the second line to the other processor. Each
-point on the graph presents a coordinated, where was a sample
-collected on their timestamp. 
+We present the L2 and L3 cache miss rate considering the aggregated
+metrics for all cores of the two processors where we conducted
+experiments. Points in the plots represented such aggregated values,
+while lines are there only to show the metric trend along
+time. Despite the fact that we aggregated values, we have looked to
+each core cache level miss and they are all similar and homogeneous
+(because of the regular nature of the applications we used),
+justifying such aggregation to simplify the analysis.
 
-#+BEGIN_LaTeX
-\begin{figure}[!htb]\label{figFT}
- \centering \includegraphics[width=\linewidth]{img/ft_L2_L3_30ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, Class B) when measuring metrics every 30 milliseconds.}
-\end{figure}
-#+END_LaTeX
 
 The execution of the FT application (Figure x) shows that for the l2
 cache there is a homogeneous behavior of the rate of misses during
@@ -823,6 +820,14 @@ analyzing the L2 cache level should take into account the
 characteristic of the execution platform where the experiment was
 executed, which is NUMA (Non-Uniform Memory Access to) and can
 influence such behavior. 
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth]{img/ft_L2_L3_30ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, Class B) when measuring metrics every 30 milliseconds.}
+\label{figFT}
+\end{figure}
+#+END_LaTeX
 
 Besides, it is possible can see that the application for the FT L3
 cache level has a higher rate of misses equal to 37% at the beginning
