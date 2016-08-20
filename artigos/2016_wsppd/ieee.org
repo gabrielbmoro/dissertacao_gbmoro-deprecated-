@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+TITLE: Measuring Hardware Counters along Time
+#+TITLE: Measuring Hardware Counters  for HPC Application Phases Detection
 #+AUTHOR: Gabriel Bronzatti Moro, Lucas Mello Schnorr
 
 #+STARTUP: overview indent
@@ -578,7 +578,7 @@ o que o senhor acha?
 ** Latex configurations                                             :ignore:
 ** Frontpage                                                        :ignore:
 #+BEGIN_LaTeX
-\title{Measuring Hardware Counters along Time}
+\title{Measuring Hardware Counters for \\ HPC Application Phases Detection}
 
 \author{
 \IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr}
