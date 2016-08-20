@@ -806,8 +806,10 @@ each core cache level miss and they are all similar and homogeneous
 (because of the regular nature of the applications we used),
 justifying such aggregation to simplify the analysis.
 
+*** Discrete 3D Fast Fourier Transform (NAS-FT, B Class) 
+
 Figure \ref{figFT} depicts the L2 and L3 cache miss rate of the
-Discrete 3D Fast Fourier Transform (NAS-FT, Class B) when measuring
+Discrete 3D Fast Fourier Transform (NAS-FT, B Class) when measuring
 metrics every 30 milliseconds. It clearly shows phases -- represented
 by the peaks at regular intervals -- when taking into account the L2
 cache miss rate. For the L3 cache miss we observe that after the
@@ -816,8 +818,9 @@ the rate decreases towards zero with minor outliers. In such
 experience, we have set the measurement interval to 30
 milliseconds. Since likwid manual indicates that below 100ms results
 are possibly non-valid, we tend to think that such regular periods may
-be a simple artifact. \review{Executar FT com 100ms para ver o que
-dá.}  The highest L2 cache miss rate found for FT is about 31% between
+be a simple artifact.
+\review{Executar FT com 100ms para ver o que dá.}
+The highest L2 cache miss rate found for FT is about 31% between
 7.5 to 10 seconds late time execution, while generally we can see that
 the observed phases reach a level of 30% in L2 misses. The lowest L2
 miss rate is measured at 6% during the initialization phase.
@@ -825,33 +828,29 @@ miss rate is measured at 6% during the initialization phase.
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth]{img/ft_L2_L3_30ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, Class B) when measuring metrics every 30 milliseconds.}
+\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, B Classa) when measuring metrics every 30 milliseconds.}
 \label{figFT}
 \end{figure}
 #+END_LaTeX
 
-#+LaTeX: \begin{figure}[htp]\label{figLU}
-#+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/luBNas_Analise.pdf}
-#+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/luBNas_Analise_l3.pdf}
-#+LaTeX: \caption{Execution of the Lower-Upper Gauss-Seidel solver.}
-#+LaTeX: \end{figure}
+*** Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class)
 
-In the application LU it is possible to see that for the L2 cache, the
-graph (Figure \ref{figLU}) has a more amorphous behavior, different from misses
-behavior for the FT application (Figure \ref{figFT}). In some execution points,
-CPUs have a different behavior in misses of the L2 cache. Most misses
-rate in L2 for this application was 13% in the first seconds of
-running the application, already the lowest rate is less than 1% and
-occurs late in the range of 30 to 40 seconds of execution. 
+Figure \ref{figLU} shows the L2 and L3 cache miss rate of the
+Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class). Behavior is clearly
+different from the FT application, seen in Figure \ref{figFT}. We
+observe that the L2 cache miss rate fluctuates around 20%, while the
+L3 cache miss rate is about zero the whole execution, except during
+the initialization phase, where a 13% rate is observed.
 
-The behavior of the LU application misses rate in the L3 cache has the
-highest occurrence identified in the first seconds of execution, about
-13% of cache misses, the same timestamp that occurs first peak in
-missions behavior in L2. Already identified the smallest rate was
-about 0.07% of misses after 36 seconds. The two CPUs had a more
-similar behavior in this graphic can be observed a little difference
-between their miss rates at the beginning of execution and also
-between the range and 20 and 30 seconds.  
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth]{img/lu_L2_L3_100ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class) when measuring metrics every 100 milliseconds.}
+\label{figLU}
+\end{figure}
+#+END_LaTeX
+
+*** Third
 
 #+LaTeX: \begin{figure}[htp]\label{figCG}
 #+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/cgBNas_Analise.pdf}
@@ -983,7 +982,7 @@ booktitle={3rd International Workshop on Reproducibility in Parallel Computing (
 }
 
 #+end_src
-* 2016-08-20 New plots                                             :noexport:
+* 2016-08-20 FT (new plots)                                        :noexport:
 
 #+begin_src R :results output graphics :file img/ft_L2_L3_30ms.pdf :exports both :width 6 :height 3 :session
 library(dplyr);
@@ -1009,4 +1008,31 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 
 #+RESULTS:
 [[file:img/ft_L2_L3_30ms.pdf]]
+
+* 2016-08-20 LU (new plots)                                        :noexport:
+
+#+begin_src R :results output graphics :file img/lu_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "LU";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Cache Level") + facet_wrap(~Application) +
+      labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/lu_L2_L3_100ms.pdf]]
 
