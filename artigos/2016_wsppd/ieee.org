@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -*- mode: org -*-
 
-#+TITLE: Automatic Memory-Bound Phase Detection using Time-oriented Hardware Counters Metrics
+#+TITLE: Measuring Hardware Counters along Time
 #+AUTHOR: Gabriel Bronzatti Moro, Lucas Mello Schnorr
 
 #+STARTUP: overview indent
@@ -578,7 +578,7 @@ o que o senhor acha?
 ** Latex configurations                                             :ignore:
 ** Frontpage                                                        :ignore:
 #+BEGIN_LaTeX
-\title{Automatic Memory-Bound Phase Detection \\ using Time-oriented Hardware Counters Metrics}
+\title{Measuring Hardware Counters along Time}
 
 \author{
 \IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr}
