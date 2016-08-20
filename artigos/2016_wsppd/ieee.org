@@ -592,27 +592,25 @@ Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\}
 ** Abstract                                                         :ignore:
 
 #+LaTeX: \begin{abstract}
-Besides reducing the execution time of parallel applications, the power
-consumption is an increasingly addressed problem in High-Performance
-Computing. A parallel program may be composed of different
-parallel regions, which can have particular characteristics, for instance,
-CPU or memory bound. This paper presents an
-approach that allows the automated detection of memory-bound parallel
-regions. Our approach differs from others found in the literature
-because it detects automatically parallel regions that depend more
-of the memory, all samples collected from the application did not require
-any code instrumentation, advantage of the present work, the
-less intrusive possible. The applications used in the experiment
-were the Discrete 3D fast Fourier Transform (FT), Lower-Upper
-Gauss-Seidel solver and Conjugate Gradient, both of the NAS benchmark
-parallel. In the experiment was evaluated the miss rate for the L2
-cache. Through of the experiment was possible to identify the memory-bound
-regions by timestamps of the applications. The results show that is
-possible to identify the memory-bound regions and too the behavior of
-applications as a whole. From the knowledge of these regions it is
-possible to configure a suitable processor frequency for each parallel
-region of the application, reducing the energy used and improving the
-performance of the application as a whole. 
+Besides reducing the execution time of parallel applications, the
+power consumption is an increasingly addressed problem in
+High-Performance Computing. A parallel program may be composed of
+different parallel regions, which can have particular characteristics,
+for instance, CPU or memory bound. This paper presents a preliminary
+effort to measure performance counters along time to enable the
+automatic detection of memory-bound parallel regions. Once attained,
+the automatic detection differs from the previous efforts since it
+does not require any code instrumentation, making it less intrusive.
+Three NAS benchmark parallel applications are used in the experiments:
+the Discrete 3D fast Fourier Transform (FT), the Lower-Upper
+Gauss-Seidel solver (LU), and the Conjugate Gradient (CG).
+As hardware counters, we measure the L2 and L3 cache miss
+rate along time using the likwid's timeline mode, a tool to measure
+hardware counters from the user space. The experiments enable us 
+to identify possible memory-bound code regions by correlating with
+changes in cache miss rates. We intend to configure a suitable processor
+frequency for each memory-bound parallel region of the application, reducing the
+energy consumption of the application with minimal performance loss.
 #+LaTeX: \end{abstract}
 
 ** Introduction
