@@ -806,20 +806,21 @@ each core cache level miss and they are all similar and homogeneous
 (because of the regular nature of the applications we used),
 justifying such aggregation to simplify the analysis.
 
-
-The execution of the FT application (Figure x) shows that for the l2
-cache there is a homogeneous behavior of the rate of misses during
-execution of the application. The highest rate found in implementation
-of FT was 31% between 7.5 to 10 seconds late time execution. Already
-the lowest rate was found about 6% of missions in seconds of
-execution. Regarding the behavior of the CPUs it is possible to see that
-there is a closeness between the lines graphic, it may be related to
-the application has a good load balancing between threads. Some points
-have the disparity between the misses behavior of CPUs, as We are
-analyzing the L2 cache level should take into account the
-characteristic of the execution platform where the experiment was
-executed, which is NUMA (Non-Uniform Memory Access to) and can
-influence such behavior. 
+Figure \ref{figFT} depicts the L2 and L3 cache miss rate of the
+Discrete 3D Fast Fourier Transform (NAS-FT, Class B) when measuring
+metrics every 30 milliseconds. It clearly shows phases -- represented
+by the peaks at regular intervals -- when taking into account the L2
+cache miss rate. For the L3 cache miss we observe that after the
+initialization phase (where a peak of 37% L3 miss rate is measured),
+the rate decreases towards zero with minor outliers. In such
+experience, we have set the measurement interval to 30
+milliseconds. Since likwid manual indicates that below 100ms results
+are possibly non-valid, we tend to think that such regular periods may
+be a simple artifact. \review{Executar FT com 100ms para ver o que
+dá.}  The highest L2 cache miss rate found for FT is about 31% between
+7.5 to 10 seconds late time execution, while generally we can see that
+the observed phases reach a level of 30% in L2 misses. The lowest L2
+miss rate is measured at 6% during the initialization phase.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
@@ -828,17 +829,6 @@ influence such behavior.
 \label{figFT}
 \end{figure}
 #+END_LaTeX
-
-Besides, it is possible can see that the application for the FT L3
-cache level has a higher rate of misses equal to 37% at the beginning
-of the application. The higher rate of 37% of the L3 cache misses may
-be associated with the same timestamp occurred in the L2 cache, which
-can be seen in the range of 0 to 2.5 seconds. The behavior of the miss
-rate in the L3 cache is particular, the graph shows a linear range of
-the different peaks where occurs more misses, the peaks will decrease
-throughout the execution. Also, we visualize in this graph (as in the
-L2 cache) that the two CPUs have a similar behavior.
-
 
 #+LaTeX: \begin{figure}[htp]\label{figLU}
 #+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/luBNas_Analise.pdf}
