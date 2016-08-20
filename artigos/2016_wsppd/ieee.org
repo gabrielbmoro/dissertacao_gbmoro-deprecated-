@@ -872,12 +872,17 @@ processor frequency is selected.
 ** Conclusion
 \label{sec:conclusion}
 
+#+BEGIN_LaTeX
 \review{Reescrever do zero: começar lembrando a motivação, dizer
 rapidamente o objetivo e depois listar quais foram as contribuições
 deste trabalho. Lembrar que tu estás apenas medindo, não está
 detectando automaticamente as regiões pois isso envolveria aplicar um
 algoritmo nos dados que dissesse do timestamp X até o timestamp Y a
-aplicação se torna memory-bound.}
+aplicação se torna memory-bound. Terminas a conclusão com trabalhos
+futuros, onde teu objetivo será olhar outros benchmarks, e tentar
+propor uma forma de, baseado nas métricas coletadas, dizer quais são
+as regiões memory-bound.}
+#+END_LaTeX
 
 The results show cache misses rate results for the L2 cache and also
 to the L3 cache. From this result, it is possible to define the most
