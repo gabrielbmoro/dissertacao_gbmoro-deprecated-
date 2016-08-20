@@ -910,12 +910,11 @@ parallel memory-bound regions.
 
 
 #+LATEX: \section*{Acknowledgements}
-
-This research receives HPC-ELO project funds, the H2020
-program EU and MCTI / RNP-Brazil through HPC4E project
-with code 689772
-
-#+LaTeX: %Who paid for this?
+This investigation receives funds from the HPC-ELO project under the
+HPE/UFRGS agreement, the H2020 program EU and MCTI / RNP-Brazil
+through HPC4E project with code 689772, the FAPERGS / Inria ExaSE
+design, universal design CNPq 447311 / 2014-0, and international CNRS
+/ LICIA laboratory.
 
 ** References                                                        :ignore:
 
