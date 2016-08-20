@@ -850,30 +850,34 @@ the initialization phase, where a 13% rate is observed.
 \end{figure}
 #+END_LaTeX
 
-*** Third
+*** Conjugate Gradient (NAS-CG, B Class)
 
-#+LaTeX: \begin{figure}[htp]\label{figCG}
-#+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/cgBNas_Analise.pdf}
-#+LaTeX:  \centering \includegraphics[width=8cm,height=8cm]{img/cgBNas_Analise_l3.pdf}
-#+LaTeX: \caption{Execution of the Conjugate Gradient.}
-#+LaTeX: \end{figure}
+Figure \ref{figCG} shows the L2 and L3 caches miss rate for Conjugate
+Gradient (NAS-CG, B Class) application. After the initialization
+phase, behavior of both metrics becomes stable at about 38% of misses
+for L2, and around zero for L3. Comparing against the previous
+applications, we see that the L2 miss rate for CG is greater than the
+others, suggesting that it is more memory-bound. This could
+potentially lead to a more gains in energy reduction if a proper
+processor frequency is selected.
 
-
-Figure \ref{figCG} shows the misses rate for CG application in L2 cache, it is
-possible to see that at the beginning of implementation there is a
-considerable increase in cache misses rate after this peak rate
-remains linearly. The highest value was identified for when the
-application reached 23 seconds of execution, about 38% higher value
-than other applications for L2 cache, which may be related to the
-application characteristics, which has irregular access memory,
-different from other applications. The lowest index cache misses was
-identified earlier in the application, about 10%. As for the L3 cache,
-it is possible to identify an increase in cache misses rate at the
-beginning of the application, about 23% after its behavior is linear.
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth]{img/cg_L2_L3_100ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Conjugate Gradient (NAS-CG, B Class) when measuring metrics every 50 milliseconds.}
+\label{figCG}
+\end{figure}
+#+END_LaTeX
 
 ** Conclusion
 \label{sec:conclusion}
 
+\review{Reescrever do zero: começar lembrando a motivação, dizer
+rapidamente o objetivo e depois listar quais foram as contribuições
+deste trabalho. Lembrar que tu estás apenas medindo, não está
+detectando automaticamente as regiões pois isso envolveria aplicar um
+algoritmo nos dados que dissesse do timestamp X até o timestamp Y a
+aplicação se torna memory-bound.}
 
 The results show cache misses rate results for the L2 cache and also
 to the L3 cache. From this result, it is possible to define the most
@@ -1035,4 +1039,31 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 
 #+RESULTS:
 [[file:img/lu_L2_L3_100ms.pdf]]
+
+* 2016-08-20 CG (new plots)                                        :noexport:
+
+#+begin_src R :results output graphics :file img/cg_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "CG";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.4),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Cache Level") + facet_wrap(~Application) +
+      labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/cg_L2_L3_100ms.pdf]]
 
