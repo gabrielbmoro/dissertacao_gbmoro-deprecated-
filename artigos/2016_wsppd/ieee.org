@@ -53,6 +53,8 @@ ggplot(g[g$Metric == "M7",], aes(x=Time, y=mean,color=as.factor(Socket))) +
 #+RESULTS:
 [[file:img/ftBNas_Analise.pdf]]
 
+**** 30ms
+
 #+begin_src R :results output :session *R* :exports both
 library(dplyr);
 df <- read.csv("../../dados/exp1_NASandLikwid/ftB.csv", sep=" ", strip.white=T);
@@ -79,6 +81,46 @@ g2_g
 : 1 9.832468     M7      1 16 31.00176 0.002447148
 :        Time Metric Socket  N     mean          se
 : 1 0.3410059     M7      1 16 6.786985 0.005029964
+
+**** 100ms  
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("../../dados/exp3_NASandLikwid/ftl2.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+
+#identificando o maior valor
+maxG <- max(g$mean);
+g1_g <- filter(g,mean==maxG);
+g1_g
+
+#identificando o menor valor
+minG <- min(g$mean);
+g2_g <- filter(g,mean==minG);
+g2_g
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+      Time Metric Socket  N     mean          se
+1 9.615836     M7      1 16 30.81585 0.002073066
+       Time Metric Socket  N     mean         se
+1 0.3575629     M7      2 16 10.01222 0.02316528
+#+end_example
 
 *** L3
 #+begin_src R :results output graphics :file "img/ftBNas_Analise_l3.pdf" :exports both :session *RFib* 
@@ -817,7 +859,7 @@ justifying such aggregation to simplify the analysis.
 
 Figure \ref{figFT} depicts the L2 and L3 cache miss rate of the
 Discrete 3D Fast Fourier Transform (NAS-FT, B Class) when measuring
-metrics every 30 milliseconds. It clearly shows phases -- represented
+metrics every 100 milliseconds. It clearly shows phases -- represented
 by the peaks at regular intervals -- when taking into account the L2
 cache miss rate. For the L3 cache miss we observe that after the
 initialization phase (where a peak of 37% L3 miss rate is measured),
@@ -825,17 +867,16 @@ the rate decreases towards zero with minor outliers. In such
 experience, we have set the measurement interval to 30
 milliseconds. Since likwid manual indicates that below 100ms results
 are possibly non-valid, we tend to think that such regular periods may
-be a simple artifact.
-\review{Executar FT com 100ms para ver o que dá.}
-The highest L2 cache miss rate found for FT is about 31% between
-7.5 to 10 seconds late time execution, while generally we can see that
-the observed phases reach a level of 30% in L2 misses. The lowest L2
-miss rate is measured at 6% during the initialization phase.
+be a simple artifact. The highest L2 cache miss rate found for FT is
+about 30% between 7.5 to 10 seconds late time execution, while
+generally we can see that the observed phases reach a level of 30% in
+L2 misses. The lowest L2 miss rate is measured at 10% during the
+initialization phase.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth]{img/ft_L2_L3_30ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, B Classa) when measuring metrics every 30 milliseconds.}
+\includegraphics[width=\linewidth]{img/ft_L2_L3_100ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, B Class) when measuring metrics every 100 milliseconds.}
 \label{figFT}
 \end{figure}
 #+END_LaTeX
@@ -930,7 +971,7 @@ design, universal design CNPq 447311 / 2014-0, and international CNRS
 #+LATEX: \bibliographystyle{IEEEtran}
 #+LATEX: \bibliography{refs}
 
-* Bib file is here                                                 :noexport:
+* TODO Bib file is here                                            :noexport:
 
 Tangle this file with C-c C-v t
 
@@ -1023,6 +1064,31 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 
 #+RESULTS:
 [[file:img/ft_L2_L3_30ms.pdf]]
+
+#+begin_src R :results output graphics :file img/ft_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp3_NASandLikwid/ftl2.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp3_NASandLikwid/ftl3.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "FT";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Cache Level") + facet_wrap(~Application) +
+      labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/ft_L2_L3_100ms.pdf]]
 
 * 2016-08-20 LU (new plots)                                        :noexport:
 

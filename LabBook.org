@@ -3410,6 +3410,15 @@ ggplot(k, aes(x=Time, y=Value,group=Core)) +
   aplicação, chegando para o caso máximo próximo a 100% de misses para
   l3.
 
+
+***** Execução com 100ms 
+
+#+begin_src sh :results output :exports both 
+chmod 755 ./scripts/likwid2csv.sh
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2FT/saidaFt100l2_1.log  > dados/exp3_NASandLikwid/ftl2.csv
+./scripts/likwid2csv.sh ./benchmarks/NAS-OMP/log_NASExp2FT/saidaFt100l3_1.log  > dados/exp3_NASandLikwid/ftl3.csv
+#+end_src
+
 **** Aplicação LU
 
 - A aplicação =LU= define o método de Gauss-Seidel para resolver 'n'
