@@ -981,11 +981,11 @@ Tangle this file with C-c C-v t
   publisher={Springer}
 }
 
-@article{millani2006fr,
+@inproceedings{millani2006fr,
 author = {Millani, Luis Felipe and Schnorr, Lucas Mello},
 title={Computation-Aware Dynamic Frequency Scaling: Parsimonious Evaluation of the Time-Energy Trade-off Using Design of Experiments},
 year={2016},
-publisher={22nd International European Conference on Parallel and Distributed Computing}
+booktitle={3rd International Workshop on Reproducibility in Parallel Computing (REPPAR)}
 }
 
 
