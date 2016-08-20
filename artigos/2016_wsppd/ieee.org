@@ -17,6 +17,9 @@
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+LATEX_HEADER: \usepackage{lipsum}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{xspace}
+#+LATEX_HEADER: \newcommand{\review}[1]{\textcolor[rgb]{1,0,0}{[Lucas: #1]}}
 
 # You need Org 8.3.5 and Emacs 24 to make this work.
 # If you do, just type make (thanks Luka Stanisic for this).
