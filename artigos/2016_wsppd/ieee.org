@@ -746,9 +746,13 @@ reduction, eventually with no performance loss, depending on the
 characteristics of the benchmark.  Their approach use manual
 instrumentation to identify the code regions that are going to be
 analzed. We focus instead in the automatic detection of such regions
-based on hardware counters.
+based on hardware counters. In this paper we show our investigation in
+how these counters can be measured along the application execution.
 
-** Methodology
+The next section describes our measurement and evaluation methodology
+to collect hardware counters at a given frequency.
+
+** Measurement and Evaluation Methodology
 \label{sec:methodology}
 
 The methodology used in the work first defines the compilation a
