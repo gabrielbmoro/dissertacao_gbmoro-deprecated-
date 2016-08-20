@@ -617,40 +617,32 @@ energy consumption of the application with minimal performance loss.
 
 #+LaTeX: %- Large HPC applications are usually composed by many parallel regions
   #+LaTeX: %- Give some examples
-
-Large HPC applications are composed of parallel regions, these regions
-may be regarded program fragments that are executed by different
-threads. For example, in an application that calculates heat exchange
-in a metal plate, could be considered a problem which has two sets of
-parallel regions, the first set calculate the initial state of the
-plate and another part would be responsible for calculating the heat
-exchange in different points of the plate. In the first set there are
-various parallel regions, whether divided in "n" timestamps, it is
-possible to see various behaviors, some more memory-bound, others more
-CPU-bound. 
-
 #+LaTeX: %- Each code region has its own memory/cpu/io resource requirements
   #+LaTeX: %- Some might be more memory-bound, others cpu-bound, for example
 
+Large HPC applications are composed of many parallel regions that are
+executed by different threads. For example, in an application that
+simulates the heat exchange in a metal plate, we could define two
+parallel regions: the first to define the initial state of the plate
+and another part would be responsible for calculating the heat
+exchange in different points of the plate for a number of timesteps.
 Each parallel region has its own characteristic, some may be
-considered memory-bound, where there is a high rate of the
-cache miss, while others may be considered more CPU-bound, which
-expects more by CPU resource and more IO-bound when the thread is
-limited by waiting for input or output operations. In the previous
-example of the heat plate, the second  set of parallel regions can be
-considered more memory-bound than the first set, more within of each
-set may exists regions with behaviors various.  
+considered memory-bound, where there is a high rate of the cache miss,
+while others may be considered more CPU-bound, with a high instruction
+execution rate, others more IO-bound when the thread is limited by
+waiting for input or output operations. In the previous example of the
+heat plate, one could measure the hardware counters at a given
+frequency to define the main characteristic of each parallel region.
+An automatic detection of memory-bound parallel regions enable one to
+adjust the processor frequency, possibly reducing energy consumption
+with minor performance penalties in execution time.
 
 #+LaTeX: %- Automatically detecting such regions could potentially lead to
   #+LaTex: % per-parallel region improvements such as energy and performance
   #+LaTeX: % improvements by adopting an appropriate processor frequency to
   #+LaTeX: % execute
 
-From an automatic detection of parallel regions of an application it
-is possible to adjust the processor to frequency appropriate to the
-region, according to its features (memory or CPU bound), which may allow
-a reduction in energy consumption and an increase application
-performance as a whole.
+
 
 #+LaTeX: %- The idea of this work is to measure hardware counters along time in
 #+LaTeX: %  order to correlate their values against the different code region
@@ -663,37 +655,29 @@ performance as a whole.
 #+LaTeX: %    to what has been done already lfgmillani2016reppar, but
 #+LaTeX: %    automatically.
 
-The main objective of this study is to measure hardware counters
-specific for each parallel region code to define regions
-having more memory-bound behavior, which could be
-candidates for strategies to reduce energy consumption (using
-Dynamic Voltage Frequency Scaling).
-
-# We intend to apply the technique of Design of
-# Experiments\cite{jain1990art} to find the best frequency setting for
-# each region automatically and with a lower level of intrusion compared
-# to instrumentation of the source code. 
-
-The preliminary results indicate that the technique used in this work
-allows automated identification of the memory-bound regions in a
-parallel application with a low level of intrusion, different
-approaches investigated \cite{freeh2005exploring,millani2016fr}. In
-addition to identifying regions, it is also possible to identify the
-behavior of the application as a whole based on different hardware
-counters.  
+The main objective of this study is to measure hardware counters at
+every given time interval to discover memory-bound code regions.  Once
+these regions have been detected, we intend to apply Design of
+Experiments screening techniques \cite{jain1991art} to find the best
+processor frequency configuration for each region, pretty similar to
+what has been done already \cite{millani2016fr}, but
+automatically. This paper presents our preliminary results by showing
+a time-oriented method to collect hardware counters, using likwid's
+timeline mode \cite{treibig2010likwid}.  The preliminary results
+indicate that the collected data can possibly enable the automated
+identification of memory-bound code regions.
 
 #+LaTeX: %- Paper structure
 
-This paper has the following
-organization. Section \ref{sec:relatedwork} presents related work
-regarding automatic phase detection for HPC applications. It also
-motivates our work. Section \ref{sec:methodology} details our proposal
-and its corresponding methodology to fullfill our goal, which is the
-automatic phase detection using time-oriented hardware
-counters. Section \ref{sec:results} the plataform we have been using
-to conduct experiments and the preliminary results we have obtained so
-far. Section \ref{sec:conclusion} concludes the paper listing the main
-contributions and future work.   
+This paper has the following organization. Section
+\ref{sec:relatedwork} presents related work regarding automatic phase
+detection for HPC applications. It also motivates our work. Section
+\ref{sec:methodology} details our proposal and its corresponding
+methodology to fullfill our goal.  Section \ref{sec:results} describes
+the platform we have been using to conduct experiments and the
+preliminary results we have obtained so far. Section
+\ref{sec:conclusion} concludes the paper listing the main
+contributions and future work towards automatic detection.
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -986,6 +970,21 @@ year={2016},
 booktitle={3rd International Workshop on Reproducibility in Parallel Computing (REPPAR)}
 }
 
+@book{jain1991art,
+  title={Art of Computer Systems Performance Analysis: Techniques For Experimental Design Measurements Simulation and Modeling},
+  author={Jain, R.},
+  isbn={9781118858424},
+  year={1991},
+  publisher={Wiley}
+}
 
+@inproceedings{treibig2010likwid,
+  title={Likwid: A lightweight performance-oriented tool suite for x86 multicore environments},
+  author={Treibig, Jan and Hager, Georg and Wellein, Gerhard},
+  booktitle={2010 39th International Conference on Parallel Processing Workshops},
+  pages={207--216},
+  year={2010},
+  organization={IEEE}
+}
 
 #+end_src
