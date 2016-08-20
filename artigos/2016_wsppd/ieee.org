@@ -714,49 +714,39 @@ _Revisão Lucas_
 #+LaTeX:  %- Automatic techniques usually rely on specific hardware counters
 
 There is no definitive solution to detect if a code region is more
-memory or CPU bound. The main focus of this work is to characterize
-the behavior of code regions of a parallel application, classifying
-them into memory and/or CPU bound. For thereafter to be able to find
-an appropriate frequency for each region, using DVFS (Dynamic Voltage
-Frequency Scaling) technique.
-
-Some works focus more on phase detection to sequential applications
+memory or CPU bound. Some works focus more on phase detection to
+sequential applications
 \cite{spiliopoulos2012power}\cite{laurenzano2011reducing}. Spiliopoulos
 et al.\cite{spiliopoulos2012power} present in his work a tool that
 analyzes the behavior of a sequential application by detailed analysis
-of its phases of execution, based on cache misses of the different
-levels of cache, the tool identifies the best processor frequency to
+of its execution phases, based on cache misses of the different
+levels of cache \review{Could you please be more precise?}, the tool identifies the best processor frequency to
 be used in each phase to best performance and reduce energy
-consumption. In addition to this approach, Laurenzano et
+consumption
+\review{What is the problem of doing only for sequential applications?}.
+In addition to this approach, Laurenzano et
 al.\cite{laurenzano2011reducing} present an approach finer granularity
-for identifying the most appropriate processor frequency for each loop
-of application. From the executions, it is defined a model of multiple
-dimensions that allows find given loop frequency that best defines the
-behavior of energy and expected performance. 
+for identifying the most appropriate processor frequency for each
+application loop. From the executions, it is defined a model of multiple
+dimensions that allows one to find given loop frequency that best defines the
+behavior of energy and expected performance
+\review{Impossible to understand this last phrase.}.
 
-For parallel applications, there is advances in the detection of
-stages for MPI applications \cite{freeh2005exploring}, already to
-OpenMP applications, there is one approach that allows the
-instrumentation via code to indicate the parallel regions
-\cite{millani2016fr}. Freeh et al.\cite{freeh2005exploring} present an 
-approach that to provide the most suitable frequency for each phase of
-an MPI application, the application of this approach is divided
-according to the number of cluster processors used. Among the
-available frequencies, the approach looks at what is the best
-frequency for a given node operate during the execution of the
-application.
-
-An approach that focuses on shared memory applications in OpenMP is
-Millani and Schnorr \cite{millani2016fr}. In this work are analyzed
-parallel regions of a program, according to the study it is possible
-to reach a considerable gain in energy reduction and performance
-increase through the use of a suitable frequency for each parallel
-region of the program. Also, in this approach the parallel regions are
-instrumented, already in our work the parallel regions will be known
-during program execution, the level of intrusion of our approach is
-lower and it is possible to identify the behavior of the memory-bound
-regions and from these reduce the processor frequency, lowering power
-consumption and improving performance. 
+There is also investigation to consider MPI or OpenMP parallel
+applications. Freeh et al.\cite{freeh2005exploring} present an
+approach to define the most suitable frequency for each phase of an
+MPI application. Among the available frequencies, the approach looks
+at what is the best frequency for a given node operate during the
+execution of the application.  Another approach \cite{millani2016fr},
+focused in OpenMP applications, analyzes the parallel regions of a
+program using a rigorous evaluation using design of experiments and
+screening designs.  According to their analysis based on seven
+benchmarks, it is possible to reach a considerable gain in energy
+reduction, eventually with no performance loss, depending on the
+characteristics of the benchmark.  Their approach use manual
+instrumentation to identify the code regions that are going to be
+analzed. We focus instead in the automatic detection of such regions
+based on hardware counters.
 
 ** Methodology
 \label{sec:methodology}
