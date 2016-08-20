@@ -677,7 +677,7 @@ Dynamic Voltage Frequency Scaling).
 The preliminary results indicate that the technique used in this work
 allows automated identification of the memory-bound regions in a
 parallel application with a low level of intrusion, different
-approaches investigated \cite{freeh2005exploring,millani2006fr}. In
+approaches investigated \cite{freeh2005exploring,millani2016fr}. In
 addition to identifying regions, it is also possible to identify the
 behavior of the application as a whole based on different hardware
 counters.  
@@ -751,7 +751,7 @@ For parallel applications, there is advances in the detection of
 stages for MPI applications \cite{freeh2005exploring}, already to
 OpenMP applications, there is one approach that allows the
 instrumentation via code to indicate the parallel regions
-\cite{millani2006fr}. Freeh et al.\cite{freeh2005exploring} present an 
+\cite{millani2016fr}. Freeh et al.\cite{freeh2005exploring} present an 
 approach that to provide the most suitable frequency for each phase of
 an MPI application, the application of this approach is divided
 according to the number of cluster processors used. Among the
@@ -760,7 +760,7 @@ frequency for a given node operate during the execution of the
 application.
 
 An approach that focuses on shared memory applications in OpenMP is
-Millani and Schnorr \cite{millani2006fr}. In this work are analyzed
+Millani and Schnorr \cite{millani2016fr}. In this work are analyzed
 parallel regions of a program, according to the study it is possible
 to reach a considerable gain in energy reduction and performance
 increase through the use of a suitable frequency for each parallel
@@ -979,7 +979,7 @@ Tangle this file with C-c C-v t
   publisher={Springer}
 }
 
-@inproceedings{millani2006fr,
+@inproceedings{millani2016fr,
 author = {Millani, Luis Felipe and Schnorr, Lucas Mello},
 title={Computation-Aware Dynamic Frequency Scaling: Parsimonious Evaluation of the Time-Energy Trade-off Using Design of Experiments},
 year={2016},
