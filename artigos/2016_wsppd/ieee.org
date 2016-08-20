@@ -756,12 +756,12 @@ to collect hardware counters at a given frequency.
 \label{sec:methodology}
 
 The methodology used in the work first defines the compilation a
-source code into binary after that to run this program is used to a
-likwid-perfctr tool that allows you to collect events each processing
-core. These events are processed by a script we created to generate a
-detailed trace of the application for make the data analysis. In the
-Figure \ref{figMetodologia} it is possible to see an overview of the
-methodology.
+source code into binary. The program is run under the likwid-perfctr
+tool that allows you to collect hardware counters for each processing
+core. The data is processed by a script tailored to generate a
+detailed application trace to carry out the data analysis. The Figure
+\ref{figMetodologia} shows an overview of the methodology with all
+such steps.
 
 #+LaTeX: \begin{figure}[!htb] \label{figMetodologia}
 #+LaTeX:   \caption{Overview of the methodology. \review{binary, grouping script (passe o corretor com aspell). Tua figura não ocupa todo o espaço horizontal disponível, acho que deveria. Ela faz um círculo no sentido anti-horário. Acho que deveria ser mais linear.}}
