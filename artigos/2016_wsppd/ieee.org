@@ -768,29 +768,31 @@ such steps.
 #+LaTeX:    \centering \includegraphics[width=5cm,height=6cm]{img/metodologiaWorkWsppd2016.pdf}
 #+LaTeX: \end{figure}
 
-In the experiment were used OpenMP applications of the NAS Parallel
-Benchmarks. These applications were chosen two, the 3D Discrete Fast
-Fourier Transform (FT), Lower-Upper Gauss-Seidel Solver (LU) and
-Conjugate Gradient (CG), because in them it is possible to see two
-very different behaviors in misses rate for the L2 Cache when compared
-to other applications of the benchmark. 
+We employ such methodology in three NAS Parallel applications: the 3D
+Discrete Fast Fourier Transform (FT), the Lower-Upper Gauss-Seidel
+Solver (LU) and the Conjugate Gradient (CG). The choice is because
+they present very different behaviors in L2 and L3 miss rate when
+compared to other applications of the benchmark.
+\review{Não é o que dá para ver nos gráficos a seguir.}
+The applications are executed with 32 threads using the input size
+(class B) of the NAS benchmark. The execution platform used is a
+Workstation with 2 processors Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz,
+each with 8 physical cores and Hyper-Threading technology.
 
-The applications were executed with 32 threads, both applications used
-the bigger input size (class B) of the benchmark. The execution
-platform used was a Workstation with 2 processors Intel (R) Xeon (R)
-E5-2650 CPU 2.00 GHz, each with 8 physical cores and Hyper-Threading
-technology. 
-
-To understand the behavior of the memory-bounds parallel regions was
-used to likwid tool that allowed collecting in each timestamp basic
-measures over the miss rate to the L2 Cache. The interval between
-timestamps was defined according to the total execution time of each
-application. For example, in the FT application, the interval was
-between timestamps was 30ms (milliseconds) generating about 172
-samples (for each of the 32 threads). Already for the LU application
-was defined a wider range of 100ms, which generated about 363
-samples. The wider range defined for the CG application was 50ms,
-which generated about 384 samples. 
+The hardware counters are collected using likwid's timeline mode
+\cite{treibig2010likwid}, configured to measure L2 and L3 cache miss
+rate at a given time interval. Such interval between each metric
+recording is defined according to the total execution time of each
+application. For example, in the FT application, the measurement
+period is defined as 30 milliseconds, generating about 172 samples
+(for each of the 32 threads). For the LU application a 100
+milliseconds is adopted, for about 363 samples. For CG, a period of 50
+milliseconds for about 384 samples. According to the likwid authors,
+adopting a period less than 100 milliseconds might generate non-valid
+results. Even so, the global behavior is still valid if one aggregate
+such information along time. We report FT and CG results under this
+limitation in order to investigate how frequent measurements impact
+our analysis of phase detection.
 
 ** Preliminary Results
 \label{sec:results}
