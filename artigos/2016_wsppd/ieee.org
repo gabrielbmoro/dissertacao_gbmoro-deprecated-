@@ -764,7 +764,7 @@ Figure \ref{figMetodologia} it is possible to see an overview of the
 methodology.
 
 #+LaTeX: \begin{figure}[!htb] \label{figMetodologia}
-#+LaTeX:   \caption{Overview of the methodology.}
+#+LaTeX:   \caption{Overview of the methodology. \review{binary, grouping script (passe o corretor com aspell). Tua figura não ocupa todo o espaço horizontal disponível, acho que deveria. Ela faz um círculo no sentido anti-horário. Acho que deveria ser mais linear.}}
 #+LaTeX:    \centering \includegraphics[width=5cm,height=6cm]{img/metodologiaWorkWsppd2016.pdf}
 #+LaTeX: \end{figure}
 
