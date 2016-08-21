@@ -875,7 +875,7 @@ measured at 10% during the initialization phase.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth,height=5cm]{img/ft_L2_L3_100ms.pdf}
+\includegraphics[width=\linewidth]{img/ft_L2_L3_100ms.pdf}
 \caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NPB-FT, B Class) when measuring metrics every 100 milliseconds.}
 \label{figFT}
 \end{figure}
