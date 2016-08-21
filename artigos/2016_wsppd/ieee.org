@@ -932,28 +932,18 @@ processor frequency is selected.
 %as regiões memory-bound.}
 #+END_LaTeX
 
-A parallel program has regions that depend on more on memory than
-others, one of the alternatives used to save energy is to use the
-technique Dynamic Voltage and Frequency Scaling (DVFS) to set up an
-appropriate frequency at a certain time of implementation of the
-program that can be run at low frequency, which can contribute to a
-reduction in power consumption of parallel application as a whole.
-
-The main goal of this study is to measure parts more memory-bound  of
-a parallel program, these regions can be defined as program parts that
-have a similar behavior in the cache misses rate for cache levels l3
-and l2. The main contribution of this work is its methodology, which
+Parallel applications have many code regions, each one with unique
+performance characteristics. If one is capable to detect which regions
+are memory-bound, we might be able to reduce the processor frequency
+with DVFS-based techniques without affecting too much the execution
+time. The main goal of this study is to identify memory-bound code
+regions.  The main contribution of this work is its methodology, which
 defines the steps and tools necessary that should be used to identify
-memory-bound portions of a parallel application.
-
-As future work, we identify set the memory-bound parts of a parallel
-program based on the identified metrics, this work was an important
-step because was possible identified the fragments  of the parallel
-application that have a high rate of cache misses for the cache L2 and
-L3. The automated detection of memory-bound regions would involve an
-analysis of the metrics of cache, thus could be defined the specific
-timestamp where starts the memory-bound region of the program and the
-time at which it ends.
+memory-bound portions of a parallel application. By applying such
+methodology, we have been able to measure L2 and L3 cache misses for
+three NPB applications, each one with different behavior.  As future
+work, we plan to automatically identify those memory-bound regions
+based on the hardware counters we have measured so far.
 
 #+LATEX: \section*{Acknowledgements}
 This investigation receives funds from the HPC-ELO project under the
