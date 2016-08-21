@@ -3630,25 +3630,21 @@ else
   L2 e L3). Possibilitando uma análise comparativa com as demais regiões da
   aplicação.
 
-* 2016-08-20 Take a look at graph500 data
+*** Novo experimento com 100ms
 
-Convert the data
-
-#+begin_src sh :results output
-./scripts/likwid2csv.sh ./benchmarks/Graph500/log_Graph500exp/saidaGraph500L2_1.log > graph500_L2.csv
-./scripts/likwid2csv.sh ./benchmarks/Graph500/log_Graph500exp/saidaGraph500L3_1.log > graph500_L3.csv
+#+begin_src sh :results output :exports both
+./scripts/likwid2csv.sh ./benchmarks/Graph500/log_Graph500exp2/saidaGraph500L2_1.log > dados/exp2_graph500/graph500_L2.csv
+./scripts/likwid2csv.sh ./benchmarks/Graph500/log_Graph500exp2/saidaGraph500L3_1.log > dados/exp2_graph500/graph500_L3.csv
 #+end_src
 
 #+RESULTS:
 
-Read the data, aggregate
-
 #+begin_src R :results output :session :exports both
 library(dplyr);
-df2 <- read.csv("graph500_L2.csv", sep=" ", strip.white=T);
+df2 <- read.csv("dados/exp2_graph500/graph500_L2.csv", sep=" ", strip.white=T);
 df2 <- df2[df2$Metric == "M7", ];
 df2$Metric <- "L2";
-df3 <- read.csv("graph500_L3.csv", sep=" ", strip.white=T);
+df3 <- read.csv("dados/exp2_graph500/graph500_L3.csv", sep=" ", strip.white=T);
 df3 <- df3[df3$Metric == "M7", ];
 df3$Metric <- "L3";
 df <- rbind (df2, df3);
@@ -3658,15 +3654,27 @@ head(g);
 #+end_src
 
 #+RESULTS:
-:         Time Metric Application  N       mean
-: 1 0.05056907     L3    Graph500 32  4.7365908
-: 2 0.05057705     L2    Graph500 32  8.8282538
-: 3 0.11702327     L2    Graph500 32 11.3548215
-: 4 0.11772690     L3    Graph500 32  0.2876260
-: 5 0.18278533     L2    Graph500 32 13.6554586
-: 6 0.18569630     L3    Graph500 32  0.1767422
+#+begin_example
 
-#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1200 :height 400 :session
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+       Time Metric Application  N      mean
+1 0.1005658     L3    Graph500 32 19.134607
+2 0.1005688     L2    Graph500 32 21.497577
+3 0.2177010     L2    Graph500 32  7.828144
+4 0.2202722     L3    Graph500 32  7.829694
+5 0.3471098     L2    Graph500 32  8.558492
+6 0.3497140     L3    Graph500 32  8.669937
+#+end_example
+
+#+begin_src R :results output graphics :file imagens/exp2_graph500.pdf :exports both :session
 library(ggplot2);
 ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
   	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
@@ -3677,12 +3685,74 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-148475pH/figure14847nBB.png]]
+[[file:imagens/exp2_graph500.pdf]]
+
+
+* 2016-08-20 Take a look at graph500 data
+
+Convert the data
+
+#+begin_src sh :results output
+./scripts/likwid2csv.sh ./benchmarks/Graph500/log_Graph500exp/saidaGraph500L2_1.log > dados/exp1_graph500/graph500_L2.csv
+./scripts/likwid2csv.sh ./benchmarks/Graph500/log_Graph500exp/saidaGraph500L3_1.log > dados/exp1_graph500/graph500_L3.csv
+#+end_src
+
+#+RESULTS:
+
+Read the data, aggregate
+
+#+begin_src R :results output :session :exports both
+library(dplyr);
+df2 <- read.csv("dados/exp1_graph500/graph500_L2.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("dados/exp1_graph500/graph500_L3.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "Graph500";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+head(g);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+        Time Metric Application  N       mean
+1 0.05056907     L3    Graph500 32  4.7365908
+2 0.05057705     L2    Graph500 32  8.8282538
+3 0.11702327     L2    Graph500 32 11.3548215
+4 0.11772690     L3    Graph500 32  0.2876260
+5 0.18278533     L2    Graph500 32 13.6554586
+6 0.18569630     L3    Graph500 32  0.1767422
+#+end_example
+
+#+begin_src R :results output graphics :file imagens/exp1_graph500.pdf :exports both :session
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.5),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Cache Level") + facet_grid(Metric~Application) +
+      labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
+#+end_src
+
+#+RESULTS:
+[[file:imagens/exp1_graph500.pdf]]
 
 
 Let's zoom in
 
-#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1200 :height 400 :session
+#+begin_src R :results output graphics :file imagens/exp1_graph500zoom.pdf :exports both :session
 library(ggplot2);
 x = 120
 ggplot(g[g$Time < x & g$Time > x-25,], aes(x=Time, y=mean,color=as.factor(Metric))) +
@@ -3694,7 +3764,7 @@ ggplot(g[g$Time < x & g$Time > x-25,], aes(x=Time, y=mean,color=as.factor(Metric
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-148475pH/figure14847bxN.png]]
+[[file:imagens/exp1_graph500zoom.pdf]]
 
 Looks like there is a correlation between L2 and L3 miss rates at
 regular intervals. They are not completely synchronized probably

@@ -24,7 +24,7 @@
 # You need Org 8.3.5 and Emacs 24 to make this work.
 # If you do, just type make (thanks Luka Stanisic for this).
 
-* Gráficos                                                         :noexport:
+* Gráficos NAS                                                     :noexport:
 ** Plot da FT
 *** L2
 
@@ -626,9 +626,11 @@ o que o senhor acha?
 \title{Measuring Hardware Counters for \\ HPC Application Phase Detection}
 
 \author{
-\IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr}
+\IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr \\}
 \IEEEauthorblockA{Institute of Informatics, Federal University of Rio Grande do Sul \\
-Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\}
+Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\
+Email: \textit{\{gbmoro,schnorr\}@inf.ufrgs.br}\\
+}
 }
 #+END_LaTeX
 
@@ -637,25 +639,28 @@ Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\}
 ** Abstract                                                         :ignore:
 
 #+LaTeX: \begin{abstract}
+
 Besides reducing the execution time of parallel applications, the
 power consumption is an increasingly addressed problem in
-High-Performance Computing. A parallel program may be composed of
-different parallel regions, which can have particular characteristics,
-for instance, CPU or memory bound. This paper presents a preliminary
-effort to measure performance counters along time to enable the
-automatic detection of memory-bound parallel regions. Once attained,
-the automatic detection differs from the previous efforts since it
-does not require any code instrumentation, making it less intrusive.
-Three NAS benchmark parallel applications are used in the experiments:
-the Discrete 3D fast Fourier Transform (FT), the Lower-Upper
-Gauss-Seidel solver (LU), and the Conjugate Gradient (CG).
-As hardware counters, we measure the L2 and L3 cache miss
-rate along time using the likwid's timeline mode, a tool to measure
-hardware counters from the user space. The experiments enable us 
-to identify possible memory-bound code regions by correlating with
-changes in cache miss rates. We intend to configure a suitable processor
-frequency for each memory-bound parallel region of the application, reducing the
-energy consumption of the application with minimal performance loss.
+High-Performance Computing. A parallel program can be divided into
+regions, which can have particular characteristics,
+for instance, a behavior more CPU or memory bound. This paper presents
+a preliminary effort to measure performance counters along time to
+enable the automatic detection of memory-bound regions. Once
+attained, the automatic detection differs from the previous works
+since it does not require any code instrumentation, making it less 
+intrusive. Three NAS Parallel Benchmark (NPB) applications are used in the
+experiments: the Discrete 3D fast Fourier Transform (FT), the
+Lower-Upper Gauss-Seidel solver (LU), and the Conjugate Gradient
+(CG). As hardware counters, we measure the L2 and L3 cache miss rate
+along time using the likwid's timeline mode, a tool to measure
+hardware counters from the user space. The experiments enable us to
+identify possible memory-bound code regions by correlating with
+changes in cache miss rates. We intend to configure a suitable
+processor frequency for each memory-bound parallel region of the
+application, reducing the energy consumption of the application with
+minimal performance loss.
+
 #+LaTeX: \end{abstract}
 
 ** Introduction
@@ -667,15 +672,16 @@ energy consumption of the application with minimal performance loss.
 
 Large HPC applications are composed of many parallel regions that are
 executed by different threads. For example, in an application that
-simulates the heat exchange in a metal plate, we could define two
-parallel regions: the first to define the initial state of the plate
+simulates the heat transfer through of a metal plate, we could define two
+parallel regions: the first to define the initial condition of the plate
 and another part would be responsible for calculating the heat
-exchange in different points of the plate for a number of timesteps.
+transfer across different points of the plate for a number of timesteps.
 Each parallel region has its own characteristic, some may be
 considered memory-bound, where there is a high rate of the cache miss,
 while others may be considered more CPU-bound, with a high instruction
-execution rate, others more IO-bound when the thread is limited by
-waiting for input or output operations. In the previous example of the
+execution rate, others IO-bound when the thread is when the time for
+complete a task is determined principally by the speed of the central
+processor. In the previous example of the
 heat plate, one could measure the hardware counters at a given
 frequency to define the main characteristic of each parallel region.
 An automatic detection of memory-bound parallel regions enable one to
@@ -686,8 +692,6 @@ with minor performance penalties in execution time.
   #+LaTex: % per-parallel region improvements such as energy and performance
   #+LaTeX: % improvements by adopting an appropriate processor frequency to
   #+LaTeX: % execute
-
-
 
 #+LaTeX: %- The idea of this work is to measure hardware counters along time in
 #+LaTeX: %  order to correlate their values against the different code region
@@ -700,7 +704,7 @@ with minor performance penalties in execution time.
 #+LaTeX: %    to what has been done already lfgmillani2016reppar, but
 #+LaTeX: %    automatically.
 
-The main objective of this study is to measure hardware counters at
+The main objective of this work is to measure hardware counters at
 every given time interval to discover memory-bound code regions.  Once
 these regions have been detected, we intend to apply Design of
 Experiments screening techniques \cite{jain1991art} to find the best
@@ -708,7 +712,7 @@ processor frequency configuration for each region, pretty similar to
 what has been done already \cite{millani2016fr}, but
 automatically. This paper presents our preliminary results by showing
 a time-oriented method to collect hardware counters, using likwid's
-timeline mode \cite{treibig2010likwid}.  The preliminary results
+timeline mode \cite{treibig2010likwid}. The preliminary results
 indicate that the collected data can possibly enable the automated
 identification of memory-bound code regions.
 
@@ -759,7 +763,7 @@ There is no definitive solution to detect if a code region is more
 memory or CPU bound. Some works focus more on phase detection to
 sequential applications
 \cite{spiliopoulos2012power}\cite{laurenzano2011reducing}. Spiliopoulos
-et al.\cite{spiliopoulos2012power} present in his work a tool that
+et al. \cite{spiliopoulos2012power} present in his work a tool that
 analyzes the behavior of a sequential application by detailed analysis
 of its execution phases, based on cache misses of the different
 levels of cache. The identified phase may be comprised of a set of
@@ -815,18 +819,18 @@ such steps.
 
 #+LaTeX: \begin{figure}[!htb] \label{figMetodologia}
 #+LaTeX:   \caption{Overview of the methodology.}
-#+LaTeX:    \centering \includegraphics[width=8cm,height=6cm]{img/metodologiaWorkWsppd2016.pdf}
+#+LaTeX:    \centering \includegraphics[width=9cm,height=6cm]{img/metodologiaWorkWsppd2016.pdf}
 #+LaTeX: \end{figure}
 
 #+LaTeX: \vspace{-0.5cm}
 
 We employ such methodology in three NAS Parallel applications: the 3D
 Discrete Fast Fourier Transform (FT), the Lower-Upper Gauss-Seidel
-Solver (LU) and the Conjugate Gradient (CG). The applications are executed with 32 threads using the input size
-(class B) of the NAS benchmark. The execution platform used was the
-beagle1, a Workstation with 2 processors Intel (R) Xeon (R) E5-2650
-CPU 2.00 GHz, each with 8 physical cores and Hyper-Threading
-technology.
+Solver (LU) and the Conjugate Gradient (CG). The applications are
+executed with 32 threads using the input size (class B) of the NAS
+benchmark. The execution platform used was the beagle1, a Workstation
+with 2 processors Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz, each with 8
+physical cores and Hyper-Threading technology.
 
 The hardware counters are collected using likwid's timeline mode
 \cite{treibig2010likwid}, configured to measure L2 and L3 cache miss
@@ -835,8 +839,8 @@ recording is defined according to the total execution time of each
 application. For example, in the FT application, the measurement
 period is defined as 30 milliseconds, generating about 172 samples
 (for each of the 32 threads). For the LU application a 100
-milliseconds is adopted, for about 363 samples. For CG, a period of 50
-milliseconds for about 384 samples. According to the likwid authors,
+milliseconds is adopted, for 363 samples. For CG, a period of 50
+milliseconds for 384 samples. According to the likwid authors,
 adopting a period less than 100 milliseconds might generate non-valid
 results. Even so, the global behavior is still valid if one aggregate
 such information along time. We report FT and CG results under this
@@ -855,36 +859,32 @@ each core cache level miss and they are all similar and homogeneous
 (because of the regular nature of the applications we used),
 justifying such aggregation to simplify the analysis.
 
-*** Discrete 3D Fast Fourier Transform (NAS-FT, B Class) 
+*** Discrete 3D Fast Fourier Transform (NPB-FT, B Class) 
 
 Figure \ref{figFT} depicts the L2 and L3 cache miss rate of the
-Discrete 3D Fast Fourier Transform (NAS-FT, B Class) when measuring
+Discrete 3D Fast Fourier Transform (NPB-FT, B Class) when measuring
 metrics every 100 milliseconds. It clearly shows phases -- represented
 by the peaks at regular intervals -- when taking into account the L2
 cache miss rate. For the L3 cache miss we observe that after the
 initialization phase (where a peak of 37% L3 miss rate is measured),
-the rate decreases towards zero with minor outliers. In such
-experience, we have set the measurement interval to 30
-milliseconds. Since likwid manual indicates that below 100ms results
-are possibly non-valid, we tend to think that such regular periods may
-be a simple artifact. The highest L2 cache miss rate found for FT is
-about 30% between 7.5 to 10 seconds late time execution, while
-generally we can see that the observed phases reach a level of 30% in
-L2 misses. The lowest L2 miss rate is measured at 10% during the
-initialization phase.
+the rate decreases towards zero with minor outliers. The highest L2
+cache miss rate found for FT is about 30% between 7.5 to 10 seconds
+late time execution, while generally we can see that the observed
+phases reach a level of 30% in L2 misses. The lowest L2 miss rate is
+measured at 10% during the initialization phase.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth]{img/ft_L2_L3_100ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NAS-FT, B Class) when measuring metrics every 100 milliseconds.}
+\includegraphics[width=\linewidth,height=5cm]{img/ft_L2_L3_100ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NPB-FT, B Class) when measuring metrics every 100 milliseconds.}
 \label{figFT}
 \end{figure}
 #+END_LaTeX
 
-*** Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class)
+*** Lower-Upper Gauss-Seidel Solver (NPB-LU, B Class)
 
 Figure \ref{figLU} shows the L2 and L3 cache miss rate of the
-Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class). Behavior is clearly
+Lower-Upper Gauss-Seidel Solver (NPB-LU, B Class). Behavior is clearly
 different from the FT application, seen in Figure \ref{figFT}. We
 observe that the L2 cache miss rate fluctuates around 20%, while the
 L3 cache miss rate is about zero the whole execution, except during
@@ -892,16 +892,16 @@ the initialization phase, where a 13% rate is observed.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth]{img/lu_L2_L3_100ms.pdf}
+\includegraphics[width=\linewidth,height=5cm]{img/lu_L2_L3_100ms.pdf}
 \caption{The L2 and L3 cache miss rate of the Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class) when measuring metrics every 100 milliseconds.}
 \label{figLU}
 \end{figure}
 #+END_LaTeX
 
-*** Conjugate Gradient (NAS-CG, B Class)
+*** Conjugate Gradient (NPB-CG, B Class)
 
 Figure \ref{figCG} shows the L2 and L3 caches miss rate for Conjugate
-Gradient (NAS-CG, B Class) application. After the initialization
+Gradient (NPB-CG, B Class) application. After the initialization
 phase, behavior of both metrics becomes stable at about 38% of misses
 for L2, and around zero for L3. Comparing against the previous
 applications, we see that the L2 miss rate for CG is greater than the
@@ -911,8 +911,8 @@ processor frequency is selected.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth]{img/cg_L2_L3_100ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Conjugate Gradient (NAS-CG, B Class) when measuring metrics every 50 milliseconds.}
+\includegraphics[width=\linewidth,height=5cm]{img/cg_L2_L3_100ms.pdf}
+\caption{The L2 and L3 cache miss rate of the Conjugate Gradient (NPB-CG, B Class) when measuring metrics every 50 milliseconds.}
 \label{figCG}
 \end{figure}
 #+END_LaTeX
@@ -921,41 +921,39 @@ processor frequency is selected.
 \label{sec:conclusion}
 
 #+BEGIN_LaTeX
-\review{Reescrever do zero: começar lembrando a motivação, dizer
-rapidamente o objetivo e depois listar quais foram as contribuições
-deste trabalho. Lembrar que tu estás apenas medindo, não está
-detectando automaticamente as regiões pois isso envolveria aplicar um
-algoritmo nos dados que dissesse do timestamp X até o timestamp Y a
-aplicação se torna memory-bound. Terminas a conclusão com trabalhos
-futuros, onde teu objetivo será olhar outros benchmarks, e tentar
-propor uma forma de, baseado nas métricas coletadas, dizer quais são
-as regiões memory-bound.}
+%\review{Reescrever do zero: começar lembrando a motivação, dizer
+%rapidamente o objetivo e depois listar quais foram as contribuições
+%deste trabalho. Lembrar que tu estás apenas medindo, não está
+%detectando automaticamente as regiões pois isso envolveria aplicar um
+%algoritmo nos dados que dissesse do timestamp X até o timestamp Y a
+%aplicação se torna memory-bound. Terminas a conclusão com trabalhos
+%futuros, onde teu objetivo será olhar outros benchmarks, e tentar
+%propor uma forma de, baseado nas métricas coletadas, dizer quais são
+%as regiões memory-bound.}
 #+END_LaTeX
 
-The results show cache misses rate results for the L2 cache and also
-to the L3 cache. From this result, it is possible to define the most
-memory-bound regions, which have a rate of cache misses larger than
-the other, as well as more CPU-bound regions that have smaller cache
-misses rates. In our experiment, where were performed the FT
-applications (3D Discrete Fast Fourier Transform), LU (Lower-Upper
-Gauss-Seidel solver) and Conjugate Gradient (CG) is possible see which
-applications are more memory-bound than the other and in which parts
-of its execution, they are more memory-bound.
+A parallel program has regions that depend on more on memory than
+others, one of the alternatives used to save energy is to use the
+technique Dynamic Voltage and Frequency Scaling (DVFS) to set up an
+appropriate frequency at a certain time of implementation of the
+program that can be run at low frequency, which can contribute to a
+reduction in power consumption of parallel application as a whole.
 
-Not all tools offer adequate support to collect counters in hardware
-small time intervals (msec range), the tool used (likwid) provided the
-values of the respective counters hardware of time slices requested
-timestamp defined in the experiments, allowing examine other
-characteristics to define memory-bounds areas of a parallel
-application. 
+The main goal of this study is to measure parts more memory-bound  of
+a parallel program, these regions can be defined as program parts that
+have a similar behavior in the cache misses rate for cache levels l3
+and l2. The main contribution of this work is its methodology, which
+defines the steps and tools necessary that should be used to identify
+memory-bound portions of a parallel application.
 
-The next step of the work consists of the following steps: explore
-other measures to define with greater accuracy the memory-bound
-regions, align the technique of Design of Experiments in our
-methodology and use the DVFS application for efficiency energy and
-higher performance for applications specifically identified in the
-parallel memory-bound regions. 
-
+As future work, we identify set the memory-bound parts of a parallel
+program based on the identified metrics, this work was an important
+step because was possible identified the fragments  of the parallel
+application that have a high rate of cache misses for the cache L2 and
+L3. The automated detection of memory-bound regions would involve an
+analysis of the metrics of cache, thus could be defined the specific
+timestamp where starts the memory-bound region of the program and the
+time at which it ends.
 
 #+LATEX: \section*{Acknowledgements}
 This investigation receives funds from the HPC-ELO project under the
@@ -1144,3 +1142,104 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 #+RESULTS:
 [[file:img/cg_L2_L3_100ms.pdf]]
 
+* [18:00:44; 20.08.2016] Graph500 (new plots)                      :noexport:
+
+- Script que o professor Lucas fez para mostrar o graph500:
+
+#+begin_src R :results output :session :exports both
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_graph500/graph500_L2.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp1_graph500/graph500_L3.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "Graph500";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+head(g);
+#+end_src
+
+#+RESULTS:
+:         Time Metric Application  N       mean
+: 1 0.05056907     L3    Graph500 32  4.7365908
+: 2 0.05057705     L2    Graph500 32  8.8282538
+: 3 0.11702327     L2    Graph500 32 11.3548215
+: 4 0.11772690     L3    Graph500 32  0.2876260
+: 5 0.18278533     L2    Graph500 32 13.6554586
+: 6 0.18569630     L3    Graph500 32  0.1767422
+
+#+begin_src R :results output graphics :file img/exp1_graph500.pdf :exports both :session
+library(ggplot2);
+x = 120
+ggplot(g[g$Time < x & g$Time > x-25,], aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.5),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Cache Level") + facet_grid(Metric~Application) +
+      labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
+#+end_src
+
+#+RESULTS:
+[[file:img/exp1_graph500.pdf]]
+
+
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("../../dados/exp1_graph500/graph500_L2.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+
+#identificando o maior valor
+maxG <- max(g$mean);
+g1_g <- filter(g,mean==maxG);
+g1_g
+
+#identificando o menor valor
+minG <- min(g$mean);
+g2_g <- filter(g,mean==minG);
+g2_g
+
+#+end_src
+
+#+RESULTS:
+:       Time Metric Socket  N     mean         se
+: 1 104.5085     M7      1 16 40.60292 0.06767261
+:       Time Metric Socket  N       mean           se
+: 1 28.64286     M7      2 16 0.02027027 0.0006081081
+
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("../../dados/exp1_graph500/graph500_L3.csv", sep=" ", strip.white=T);
+k <-    filter(df, df$Metric=='M7') %>% as.data.frame();
+
+k$Socket <- ifelse(k$Core %% 2 == 0,1,2);
+
+g <- k %>% group_by(Time,Metric,Socket) %>% summarize (N=n(), mean=mean(Value)*100, se=3*sd(Value)/sqrt(N)) %>% as.data.frame();
+
+#identificando o maior valor
+maxG <- max(g$mean);
+g1_g <- filter(g,mean==maxG);
+g1_g
+
+#identificando o menor valor
+minG <- min(g$mean);
+g2_g <- filter(g,mean==minG);
+g2_g
+
+#+end_src
+
+#+RESULTS:
+:       Time Metric Socket  N     mean        se
+: 1 53.78313     M7      1 16 64.11706 0.1781744
+:       Time Metric Socket  N mean se
+: 1  8.61918     M7      1 16    0  0
+: 2 10.66638     M7      1 16    0  0
+: 3 10.87421     M7      1 16    0  0
+: 4 19.06684     M7      1 16    0  0
+: 5 19.27063     M7      1 16    0  0
