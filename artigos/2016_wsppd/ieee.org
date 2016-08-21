@@ -817,12 +817,13 @@ detailed application trace to carry out the data analysis. The Figure
 \ref{figMetodologia} shows an overview of the methodology with all
 such steps.
 
-#+LaTeX: \begin{figure}[!htb] \label{figMetodologia}
-#+LaTeX:   \caption{Overview of the methodology.}
-#+LaTeX:    \centering \includegraphics[width=9cm,height=6cm]{img/metodologiaWorkWsppd2016.pdf}
-#+LaTeX: \end{figure}
-
-#+LaTeX: \vspace{-0.5cm}
+#+BEGIN_LaTeX
+\begin{figure}[!htb] 
+  \caption{Overview of the methodology.}
+  \label{figMetodologia}
+   \centering \includegraphics[width=\linewidth]{img/metodologiaWorkWsppd2016.pdf}
+\end{figure}
+#+END_LaTeX
 
 We employ such methodology in three NAS Parallel applications: the 3D
 Discrete Fast Fourier Transform (FT), the Lower-Upper Gauss-Seidel
