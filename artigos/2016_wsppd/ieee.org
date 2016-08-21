@@ -676,12 +676,11 @@ simulates the heat transfer through of a metal plate, we could define two
 parallel regions: the first to define the initial condition of the plate
 and another part would be responsible for calculating the heat
 transfer across different points of the plate for a number of timesteps.
-Each parallel region has its own characteristic, some may be
-considered memory-bound, where there is a high rate of the cache miss,
+Each parallel region has its own characteristic. Some may be
+considered memory-bound, with a high rate of cache miss,
 while others may be considered more CPU-bound, with a high instruction
-execution rate, others IO-bound when the thread is when the time for
-complete a task is determined principally by the speed of the central
-processor. In the previous example of the
+execution rate, and even others might be considered IO-bound.
+In the previous example of the
 heat plate, one could measure the hardware counters at a given
 frequency to define the main characteristic of each parallel region.
 An automatic detection of memory-bound parallel regions enable one to
