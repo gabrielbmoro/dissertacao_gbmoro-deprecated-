@@ -3687,7 +3687,6 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 #+RESULTS:
 [[file:imagens/exp2_graph500.pdf]]
 
-
 * 2016-08-20 Take a look at graph500 data
 
 Convert the data

@@ -629,7 +629,7 @@ o que o senhor acha?
 \IEEEauthorblockN{Gabriel Bronzatti Moro, Lucas Mello Schnorr \\}
 \IEEEauthorblockA{Institute of Informatics, Federal University of Rio Grande do Sul \\
 Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brazil\\
-Email: \textit{\{gbmoro,schnorr\}@inf.ufrgs.br}\\
+Email: \textit{\{gabriel.bmoro,schnorr\}@inf.ufrgs.br}\\
 }
 }
 #+END_LaTeX
@@ -946,11 +946,11 @@ work, we plan to automatically identify those memory-bound regions
 based on the hardware counters we have measured so far.
 
 #+LATEX: \section*{Acknowledgements}
-This investigation receives funds from the HPC-ELO project under the
-HPE/UFRGS agreement, the H2020 program EU and MCTI / RNP-Brazil
-through HPC4E project with code 689772, the FAPERGS / Inria ExaSE
-design, universal design CNPq 447311 / 2014-0, and international CNRS
-/ LICIA laboratory.
+The results reported in this study were generated in virtue of the
+agreement between Hewlett Packard Enterprise (HPE) and the Federal
+University of Rio Grande do Sul (UFRGS), financed by resources in
+return for the exemption or reduction of the IPI tax, granted by
+Brazilian Law nº 8248, 1991, and its subsequent updates.
 
 ** References                                                        :ignore:
 
