@@ -652,11 +652,11 @@ since it does not require any code instrumentation, making it less
 intrusive. Three NAS Parallel Benchmark (NPB) applications are used in the
 experiments: the Discrete 3D fast Fourier Transform (FT), the
 Lower-Upper Gauss-Seidel solver (LU), and the Conjugate Gradient
-(CG). As hardware counters, we measure the L2 and L3 cache miss rate
+(CG). As hardware counters, we measure the L2 and L3 cache misses rate
 along time using the likwid's timeline mode, a tool to measure
 hardware counters from the user space. The experiments enable us to
 identify possible memory-bound code regions by correlating with
-changes in cache miss rates. We intend to configure a suitable
+changes in cache misses rates. We intend to configure a suitable
 processor frequency for each memory-bound parallel region of the
 application, reducing the energy consumption of the application with
 minimal performance loss.
@@ -831,7 +831,7 @@ with 2 processors Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz, each with 8
 physical cores and Hyper-Threading technology.
 
 The hardware counters are collected using likwid's timeline mode
-\cite{treibig2010likwid}, configured to measure L2 and L3 cache miss
+\cite{treibig2010likwid}, configured to measure L2 and L3 cache misses
 rate at a given time interval. Such interval between each metric
 recording is defined according to the total execution time of each
 application. For example, in the FT application, the measurement
@@ -848,7 +848,7 @@ our analysis of phase detection.
 ** Preliminary Results
 \label{sec:results}
 
-We present the L2 and L3 cache miss rate considering the aggregated
+We present the L2 and L3 cache misses rate considering the aggregated
 metrics for all cores of the two processors where we conducted
 experiments. Points in the plots represented such aggregated values,
 while lines are there only to show the metric trend along
@@ -859,16 +859,16 @@ justifying such aggregation to simplify the analysis.
 
 *** Discrete 3D Fast Fourier Transform (NPB-FT, B Class) 
 
-Figure \ref{figFT} depicts the L2 and L3 cache miss rate of the
+Figure \ref{figFT} depicts the L2 and L3 cache misses rate of the
 Discrete 3D Fast Fourier Transform (NPB-FT, B Class) when measuring
 metrics every 100 milliseconds. It clearly shows phases -- represented
 by the peaks at regular intervals -- when taking into account the L2
-cache miss rate. For the L3 cache miss we observe that after the
-initialization phase (where a peak of 37% L3 miss rate is measured),
+cache misses rate. For the L3 cache misses we observe that after the
+initialization phase (where a peak of 37% L3 misses rate is measured),
 the rate decreases towards zero with minor outliers. The highest L2
-cache miss rate found for FT is about 30% between 7.5 to 10 seconds
+cache misses rate found for FT is about 30% between 7.5 to 10 seconds
 late time execution, while generally we can see that the observed
-phases reach a level of 30% in L2 misses. The lowest L2 miss rate is
+phases reach a level of 30% in L2 misses. The lowest L2 misses rate is
 measured at 10% during the initialization phase.
 
 #+BEGIN_LaTeX
@@ -881,11 +881,11 @@ measured at 10% during the initialization phase.
 
 *** Lower-Upper Gauss-Seidel Solver (NPB-LU, B Class)
 
-Figure \ref{figLU} shows the L2 and L3 cache miss rate of the
+Figure \ref{figLU} shows the L2 and L3 cache misses rate of the
 Lower-Upper Gauss-Seidel Solver (NPB-LU, B Class). Behavior is clearly
 different from the FT application, seen in Figure \ref{figFT}. We
-observe that the L2 cache miss rate fluctuates around 20%, while the
-L3 cache miss rate is about zero the whole execution, except during
+observe that the L2 cache misses rate fluctuates around 20%, while the
+L3 cache misses rate is about zero the whole execution, except during
 the initialization phase, where a 13% rate is observed.
 
 #+BEGIN_LaTeX
@@ -898,11 +898,11 @@ the initialization phase, where a 13% rate is observed.
 
 *** Conjugate Gradient (NPB-CG, B Class)
 
-Figure \ref{figCG} shows the L2 and L3 caches miss rate for Conjugate
+Figure \ref{figCG} shows the L2 and L3 caches misses rate for Conjugate
 Gradient (NPB-CG, B Class) application. After the initialization
 phase, behavior of both metrics becomes stable at about 38% of misses
 for L2, and around zero for L3. Comparing against the previous
-applications, we see that the L2 miss rate for CG is greater than the
+applications, we see that the L2 misses rate for CG is greater than the
 others, suggesting that it is more memory-bound. This could
 potentially lead to a more gains in energy reduction if a proper
 processor frequency is selected.
