@@ -69,7 +69,7 @@ Fine-grain DVFS for HPC applications?
 
 * Per-Phase Frequency Scaling
 
-There are many strategies. Here's two widely different:
+There are many strategies. Here's two widely different
 
 \vfill
 
