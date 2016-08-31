@@ -1231,3 +1231,115 @@ g2_g
 : 3 10.87421     M7      1 16    0  0
 : 4 19.06684     M7      1 16    0  0
 : 5 19.27063     M7      1 16    0  0
+* 2016-08-31 Comments by Lucas on Reviews                          :noexport:
+
+Gabriel, abaixo segue meus comentários, precedidos de "===>".
+
+** ----------------------- REVIEW 1 ---------------------
+
+The paper discusses a methodology to identify whether a program phase
+is cpu-bound or memory-bound, in order to reduce processor frequency
+for memory bound phases, resulting in minimal performance loss with
+good energy savings.
+
+Presentation: 0 (borderline) The english is notoriously written in a
+brazilian fashion. It is easily observable by the sentence structure,
+which is plain wrong in english for a large portion of the
+paper. Regardless, it is still comprehensible. I would recommend a
+review by one of the co-authors. The graphs used are ok, although I do
+not see the point of having a gray background for gray lines, a white
+background should make the lines easier to see.
+
+===> Please, review the English! Improve your English!
+
+Relevance: 5 (Strong accept) The idea is very neat, although saying it
+has "no overhead" is a bit too much. Using a library (likwid) just to
+get hardware counters will provide some negligible overhead for large
+phases, but depending on phase granularity, this overhead can be
+substantial.
+
+===> Please, evaluate the overhead somehow. I describe a possible
+strategy (you should check if it is feasable or verify if another
+would be better): run the experiment _with_ and _without_ likwid several
+times (using a proper randomized design of experiments with one
+factor, two levels). Your outcome is the execution time. Do the
+average of such execution times to get two numbers: _with_ and _without_
+likwid, present also the standard error assuming a normal distribution
+and CI of 99%.
+
+Methodology: -2 (Reject) The three benchmarks show the same
+behavior. L3 cache miss ratio is always low, which means none of the
+benchmarks are actually accessing the main memory frequently
+enough. NAS B size is large, but NAS benchmarks memory access stream
+is well-behaved and predictable, which makes the prefetcher effective,
+and thus the L3 cache miss ratio low.  The threads in the benchmarks
+are also homogeneous, meaning they do the same type of work.  Wouldn't
+it be more interesting to observe threads that do different work? The
+technique doesn't seem so proper when you have a more complex case.
+Another problem is that the authors cite their technique is for
+sequential benchmarks, but then use parallel benchmarks. I am
+confused.
+
+===> There are many points in this paragraph.  First: regarding
+heterogeneous thread work.  For now, we are interested in simple
+applications where all threads do the same work. Of course, we could
+look into heterogeneous but let's keep it simple right now. So, I
+think you could include a comment in the future work section saying
+that heterogeneous thread behavior is for latter. Second: fix the
+place "sequential" mention; it shouldn't be there.
+
+My suggestion: 1) Pick 1 or 2 benchmarks from PARSEC that are
+irregular and pressure memory, or turn off prefetching.
+2) Does likwid support different counters for each L2 of each core?
+One cannot discern which core made a request to the L3 cache, since
+it's shared between all cores, but the L2 caches are private (and
+Intel does provide individual L2 cache hardware counters for each
+core).  So, it would be interesting to see heterogeneous workload
+(threads doing different things) and still be able to deduce, due to
+the different L2 cache misses absolute values, which threads are
+actually generating the L3 cache misses. Then you can come up with
+some metric or formula to, based on the number of memory-bound threads
+and how badly they are being bound, decide the processor frequency.
+
+===> First. It might be indeed interesting to check PARSEC
+benchmarks. Second, regarding likwid support for per-core L2 cache
+misses. We know we have support for that, but we are really looking
+into global measurements, that's why we simply do the average (see the
+R code on dplyr for this).
+
+** ----------------------- REVIEW 2 ---------------------
+
+The authors present a mechanism to detect application phases using
+hardware counters to measure L2 and L3 cache misses during execution.
+The idea is to detect memory-bound regions, in which the processor
+frequency can be lowered.  The paper contains interesting preliminary
+results and is well written, but falls short of actually performing
+the phase detection.
+
+Some recommendations for improvements:
+- with a high rate of cache miss => with a high rate of cache misses.
+- Fig. 2 shows that the L2 cache miss rate has some phase
+  behavior. However, does this correspond to the application phases.
+- in all figures, L3 cache misses are practically invisible due to the
+  scale used
+- for LU and CG, no phases are detected from the cache misses, but
+  this is not really discussed in the text. Are there no application
+  phases, or should another metric be used?
+- usually, the CPU frequency is controlled in Linux by a CPU frequency
+  governor. Shouldn't this governor be able to detect such phases of
+  higher memory pressure automatically?
+- another interesting metric to take a look at could be the IPC.
+
+===> About the (automatic phase detection) governor thing: it should
+not work, you need to learn how to explain this. Per-phase frequency
+scaling in a fine-grained manner is impossible with OS-dependent
+governors. We are in a different measurement scale to say so.
+
+===> Regarding the L3 measurements invisibility, you should say in the
+text that we did the way we did because we want to tell the reader
+that they are mostly not present, so unimportant. Adopting a different
+scale would misslead us.
+
+===> You indeed could take a look to the IPC as well (more focused in
+cpu-bound, so you would be looking for regions where you have lower
+values).
