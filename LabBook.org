@@ -3773,7 +3773,71 @@ so, an increase in L3 miss rate generates L2 misses just after.
 
 Note: Change *x* in the previous code block to see other timeslices.
 
-* [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução
+* [13:53:07; 31.08.2016] Avaliando o Overhead da técnica com e sem likwid :Gabriel:
+
+- Vou fazer um experimento para analisar o =overhead= da utilização do
+  likwid.
+
+#+begin_src R :results output :session *Rs* :exports both :tangle dados/exp4NAS_semlikwid/exp4NASDesign.csv
+require(DoE.base);
+exp4NASDesign <- fac.design (
+	nfactors=2,
+	replications=20,
+	repeat.only=FALSE,
+	blocks=1,
+	randomize=TRUE,
+	seed=10373,
+	nlevels=c(7,2),
+	factor.names=list(
+		versions=c("bt.B","cg.B","ft.B","is.B","lu.B","mg.B","sp.B"),
+		threads=c(1,32)));
+
+export.design(exp4NASDesign, 
+	path=".",
+	filename=NULL,
+	type="csv",
+	replace=TRUE,
+	response.names=c("time"));
+
+#+end_src
+
+#+RESULTS:
+:  creating full factorial with 14 runs ...
+
+- Script de execução:
+
+#+begin_src sh :results output :exports both :tangle scripts/exp4Script.bash
+#!bin/bash
+cd scripts
+
+nameFile="../dados/exp4NAS_semlikwid/exp4NASDesign.csv"
+
+ref=$(cat $nameFile)
+
+i=0
+
+for row in ${ref[@]}; do
+	if [ $i -gt 0 ]; then
+		name=$(echo "$row" | cut -d ',' -f1)
+		runId=$(echo "$row" | cut -d ',' -f2)
+		runNumber=$(echo "$row" | cut -d ',' -f3)
+		runStd=$(echo "$row" | cut -d ',' -f4)
+		version=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
+		threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
+		time=0
+		
+		export OMP_NUM_THREADS=$threads
+
+		time=$(./$version | grep -i time | sed 's/Time[[:space:]]in[[:space:]]seconds//g' | sed 's/=//g' | sed 's/[[:space:]]//g')
+		echo "$name,$runId,$runNumber,$runStd,$version,$threads,$time" >> "Results.csv"
+	else
+		echo $row | sed 's/,,/,/g' >> "Results.csv"
+		let i=$i+1
+	fi
+done
+
+#+end_src
+
 - Vamos fazer um novo experimento para o benchmark do NAS, a fim de
   verificar se existe diferença entre uma execução que usa como
   parâmetro =-g L2CACHE e L3CACHE= e duas execuções para cada grupo. A
