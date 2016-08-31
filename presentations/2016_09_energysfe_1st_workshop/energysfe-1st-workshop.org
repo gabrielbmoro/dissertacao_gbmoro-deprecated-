@@ -167,7 +167,7 @@ Automatic detection of memory-bound code regions
 \vfill
 \pause
 
-Many benchmarks @@latex: {\scriptsize@@ Graph500, MiniFE, Lulesh, NPB, Parsec, Mantevo, Coral, Bots@@latex: }@@
+Many benchmarks @@latex: {\scriptsize@@ Graph500, MiniFE, Lulesh, Rodinia, Parsec, Mantevo, Coral, Bots@@latex: }@@
 ReDFST @@latex: {\scriptsize@@ https://github.com/lfgmillani/redfst (GPL'd code) @@latex: }@@
 
 * Thanks for your attention
