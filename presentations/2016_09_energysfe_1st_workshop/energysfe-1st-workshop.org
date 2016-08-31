@@ -154,7 +154,7 @@ Only considers two frequency levels (low and high)
 Is the full factorial step really necessary?
 - We have seen no factor iteraction so far
 
-* Refining the Strategy + Directions
+* Refining the Strategy + Current Work
 
 Adopt three-level screening designs
 - Three processor frequencies, being more realistic
@@ -167,10 +167,18 @@ Automatic detection of memory-bound code regions
 \vfill
 \pause
 
+#+BEGIN_LaTeX
+\includegraphics[width=.5\linewidth]{./img/ft_L2_L3_100ms-crop.pdf}
+\includegraphics[width=.5\linewidth]{./img/lu_L2_L3_100ms-crop.pdf}
+#+END_LaTeX
+
+* Future Directions + Thanks
+
 Many benchmarks @@latex: {\scriptsize@@ Graph500, MiniFE, Lulesh, Rodinia, Parsec, Mantevo, Coral, Bots@@latex: }@@
 ReDFST @@latex: {\scriptsize@@ https://github.com/lfgmillani/redfst (GPL'd code) @@latex: }@@
 
-* Thanks for your attention
+\vfill
+\pause
 
-More details
+Thanks for your attention. See more details
 - http://www.inf.ufrgs.br/~schnorr/
