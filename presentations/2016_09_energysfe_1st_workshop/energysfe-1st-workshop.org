@@ -157,7 +157,7 @@ Is the full factorial step really necessary?
 * Refining the Strategy + Current Work
 
 Adopt three-level screening designs
-- Three processor frequencies, being more realistic
+- Three processor frequencies; to be more realistic
 - Easy to run, hard to analyze
 Automatic detection of memory-bound code regions
 - Using hardware counters: L2, L3 misses; IPC
