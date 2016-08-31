@@ -3787,9 +3787,9 @@ exp4NASDesign <- fac.design (
 	blocks=1,
 	randomize=TRUE,
 	seed=10373,
-	nlevels=c(7,2),
+	nlevels=c(3,2),
 	factor.names=list(
-		versions=c("bt.B","cg.B","ft.B","is.B","lu.B","mg.B","sp.B"),
+		versions=c("cg.B","ft.B","lu.B"),
 		threads=c(1,32)));
 
 export.design(exp4NASDesign, 
@@ -3802,7 +3802,25 @@ export.design(exp4NASDesign,
 #+end_src
 
 #+RESULTS:
-:  creating full factorial with 14 runs ...
+#+begin_example
+Carregando pacotes exigidos: DoE.base
+Carregando pacotes exigidos: grid
+Carregando pacotes exigidos: conf.design
+
+Attaching package: ‘DoE.base’
+
+The following objects are masked from ‘package:stats’:
+
+    aov, lm
+
+The following object is masked from ‘package:graphics’:
+
+    plot.design
+The following object is masked from ‘package:base’:
+
+    lengths
+ creating full factorial with 6 runs ...
+#+end_example
 
 - Script de execução:
 
@@ -3837,6 +3855,10 @@ for row in ${ref[@]}; do
 done
 
 #+end_src
+
+* TODO [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução :Gabriel:
+- State "TODO"       from              [2016-08-31 Qua 14:01]
+** Script do Experimento
 
 - Vamos fazer um novo experimento para o benchmark do NAS, a fim de
   verificar se existe diferença entre uma execução que usa como
