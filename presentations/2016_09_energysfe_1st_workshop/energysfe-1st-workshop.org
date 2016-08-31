@@ -1,0 +1,179 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer
+#+STARTUP: overview
+#+STARTUP: indent
+#+TAGS: noexport(n)
+
+#+Title: Three-Level Screening Designs @@latex: \\@@ for Fast Energy Savings
+#+Author: Lucas Mello Schnorr @@latex:\\@@ schnorr@inf.ufrgs.br
+#+Date: First EnergySFE Intl. Workshop @@latex: \\@@ Grenoble, September 1st, 2016
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [12pt,xcolor=dvipsnames,presentation]
+#+OPTIONS:   H:1 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+STARTUP: beamer overview indent
+#+LATEX_HEADER: \graphicspath{{../}}
+#+LATEX_HEADER: \input{../org-babel-style-preembule.tex}
+#+LATEX_HEADER: \institute{
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/gppd.png}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/inf.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+#+LATEX_HEADER:  % \hfill
+#+LATEX_HEADER:  % \includegraphics[width=.16\textwidth]{img/cnpq.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.18\textwidth]{img/capes.pdf}
+#+LATEX_HEADER: }
+#+LaTeX: \input{../org-babel-document-preembule.tex}
+#+LaTeX: \newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+* Abstract                                                         :noexport:
+
+
+_Abstract_: Dynamic Voltage and Frequency Scaling is often used to save
+energy by selecting the best frequency to execute code regions of HPC
+applications. If a memory-bound code region is correctly identified,
+one can potentially save energy with minimal performance losses by
+lowering the frequency. The problem this work addresses comes from two
+sources: the first one is that current processors have many available
+frequency levels; the second is that HPC applications are complex with
+many code regions. Detecting the best frequency to run each code
+region is very time consuming, especially if one wants to consider
+measurement variability through replications. Our strategy to reduce
+the time to detect such frequencies is two folded: to adopt
+three-level screening designs and to automaticaly detect memory-bound
+code regions using hardware counters (L2, L3, IPC). We plan to employ
+such strategy in a number of applications, such as those available in
+the Mantevo and Coral benchmark suites, using a rigourous experimental
+plan. Since this work is still in its infancy, we are looking for
+potential partners that might be interested for collaboration.
+
+* Introduction & Context
+
+DVFS (Dynamic Voltage and Frequency Scaling) hardware support
+- *Per-processor* (more common) or per-core DVFS
+- Very common sense: ``OS governor is already here''
+- Things might be more complex in HPC \to Fine-grain DVFS
+
+\pause
+\vfill
+
+Fine-grain DVFS for HPC applications?
+- Subtle phase changes (microsecs. range) during runtime
+  - CPU-bound, *Memory-bound*
+- Frequency scaling in per-phase fashion
+  - If phase is memory-bound \to minimal (or no) performance losses
+- What is a phase: a _OpenMP parallel loop_
+
+* Per-Phase Frequency Scaling
+
+There are many strategies. Here's two widely different:
+
+\vfill
+
+*Freeh et al. (2005)*: per-phase frequency scaling
+- Test all possible frequencies _one by one_ for each phase
+  - Sequentially and in order (f \times p plus replications)
+# - _One-factor at a time design_ (phase is a factor)
+# is it clear what a factor is, at this point?
+
+\pause
+\bigskip
+
+*Laurenzano et al. (2011, 2013)*: loop-based strategy
+- Series of loops (with different CPU and memory behavior)
+
+\pause
+
+1. *System characterization*
+  - Several loop versions are executed with all available frequencies
+  - Defines which _frequency is the best for each loop configuration_
+    
+2. *Real application loops are profiled*
+  - Signature (cache hits, flops, memory accesses, etc)
+  - Search the closest point in system characterization data
+
+* Problem Statement (with example)
+
+Situation
+1. Many freq. levels available on current processors architectures
+2. Many code region in complex HPC applications
+
+\vfill
+
+*Too much time to discover best frequency for each code region*
+- Results depend on the input size + other factors
+
+\vfill
+\pause
+
+_An example_: applying Freeh's methodology: f \times p \times _replications_
+- Graph500 benchmark: 17 code regions (manually marked)
+  - Input size 25, it takes roughly six minutes
+- Intel Xeon E5-2630: 13 frequency levels (including turbo boost)
+- 221 experiments \times 10 replications \times 6 minutes = *13260 minutes*
+
+\vfill
+\pause
+_A faster methodology is required_.
+
+* Previous Strategy (Millani's Reppar'16 Paper)
+
+DoE-based methodology to accelerate experimental time
+-  Code regions are letters (A, B, ...) -- *Factors* \\
+- Only two processor frequencies: Low (-) and High (+) -- *Levels*
+
+\medskip
+
+#+BEGIN_CENTER
+#+LaTeX: \includegraphics[width=.8\linewidth]{img/three_phases.pdf}
+#+END_CENTER
+
+*PB Screening*: how much each code region affects Time/Energy?
+*Full Factorial*: define all Time-Energy trade-offs, with variability
+
+\pause
+\bigskip
+
+Back to the example: Graph500 17 regions + Intel E5-2630 13 freqs
+- 20 \times10 replics. + 2^4 \times10 replics. = 960\times6 = 6960 minutes
+  - Disregarding FF, we get only 1200 minutes
+
+* Critical View on the Current Approach
+
+Only considers two frequency levels (low and high)
+- Showing energy consumption as a function of proc. frequency
+- Matrix Multiplication (CPU-bound)
+
+#+BEGIN_CENTER
+#+LaTeX: \includegraphics[width=.4\linewidth]{img/frequency-matprod-energy-crop.pdf}
+#+END_CENTER
+\pause
+Is the full factorial step really necessary?
+- We have seen no factor iteraction so far
+
+* Refining the Strategy + Directions
+
+Adopt three-level screening designs
+- Three processor frequencies, being more realistic
+- Easy to run, hard to analyze
+Automatic detection of memory-bound code regions
+- Using hardware counters: L2, L3 misses; IPC
+  - Use likwid's timeline mode (counters as a function of runtime)
+- _Gabriel Moro's Master Thesis_
+
+\vfill
+\pause
+
+Too many benchmarks
+- Graph500, MiniFE, Lulesh
+- NPB, Parsec, Mantevo, Coral, Bots
+Use Millani's efforts on ReDFST
+- https://github.com/lfgmillani/redfst (GPL'd code)
+
+* Thanks for your attention
+
+More details
+- http://www.inf.ufrgs.br/~schnorr/
