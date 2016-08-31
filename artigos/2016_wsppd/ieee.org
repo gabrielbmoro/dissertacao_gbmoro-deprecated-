@@ -677,7 +677,7 @@ parallel regions: the first to define the initial condition of the plate
 and another part would be responsible for calculating the heat
 transfer across different points of the plate for a number of timesteps.
 Each parallel region has its own characteristic. Some may be
-considered memory-bound, with a high rate of cache miss,
+considered memory-bound, with a high rate of cache misses,
 while others may be considered more CPU-bound, with a high instruction
 execution rate, and even others might be considered IO-bound.
 In the previous example of the
@@ -717,15 +717,13 @@ identification of memory-bound code regions.
 
 #+LaTeX: %- Paper structure
 
-This paper has the following organization. Section
-\ref{sec:relatedwork} presents related work regarding automatic phase
-detection for HPC applications. It also motivates our work. Section
-\ref{sec:methodology} details our proposal and its corresponding
-methodology to fullfill our goal.  Section \ref{sec:results} describes
-the platform we have been using to conduct experiments and the
-preliminary results we have obtained so far. Section
-\ref{sec:conclusion} concludes the paper listing the main
-contributions and future work towards automatic detection.
+The paper is organized as follows. Section \ref{sec:relatedwork}
+presents related work regarding automatic phase detection for HPC
+applications. In Section \ref{sec:methodology} is presented our
+proposal and its corresponding methodology. The Section
+\ref{sec:results} describes the platform used in the experiments and
+the preliminary results. Section \ref{sec:conclusion} concludes the
+paper listing the main contributions and future works.
 
 *** Previous structure (in portuguese)                           :noexport:
 
@@ -876,7 +874,7 @@ measured at 10% during the initialization phase.
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth]{img/ft_L2_L3_100ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Discrete 3D Fast Fourier Transform (NPB-FT, B Class) when measuring metrics every 100 milliseconds.}
+\caption{The L2 and L3 cache misses rate of the Discrete 3D Fast Fourier Transform (NPB-FT, B Class) when measuring metrics every 100 milliseconds.}
 \label{figFT}
 \end{figure}
 #+END_LaTeX
@@ -893,7 +891,7 @@ the initialization phase, where a 13% rate is observed.
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth,height=5cm]{img/lu_L2_L3_100ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class) when measuring metrics every 100 milliseconds.}
+\caption{The L2 and L3 cache misses rate of the Lower-Upper Gauss-Seidel Solver (NAS-LU, B Class) when measuring metrics every 100 milliseconds.}
 \label{figLU}
 \end{figure}
 #+END_LaTeX
@@ -912,7 +910,7 @@ processor frequency is selected.
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth,height=5cm]{img/cg_L2_L3_100ms.pdf}
-\caption{The L2 and L3 cache miss rate of the Conjugate Gradient (NPB-CG, B Class) when measuring metrics every 50 milliseconds.}
+\caption{The L2 and L3 cache misses rate of the Conjugate Gradient (NPB-CG, B Class) when measuring metrics every 50 milliseconds.}
 \label{figCG}
 \end{figure}
 #+END_LaTeX
@@ -1070,7 +1068,7 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
   	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
      theme(legend.position=c(0.9,0.8),
                legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
-     scale_color_discrete(name="Cache Level") + facet_wrap(~Application) +
+      scale_color_discrete(name="Cache Level") + facet_wrap(~Application) +
       labs(x = "Runtime (seconds)", y= "Average Cache Misses (%)");
 
 #+end_src
