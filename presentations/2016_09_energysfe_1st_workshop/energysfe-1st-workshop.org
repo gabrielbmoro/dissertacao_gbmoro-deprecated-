@@ -141,6 +141,45 @@ Back to the example: Graph500 17 regions + Intel E5-2630 13 freqs
 - 20 \times10 replics. + 2^4 \times10 replics. = 960\times6 = 6960 minutes
   - Disregarding FF, we get only 1200 minutes
 
+* Graph500: Full Factorial Results (Pareto)
+Ellipses: 99% CI; Pareto points: =+= and =-= labels for the E,I,J,L regions
+
+#+LaTeX: {\scriptsize
+- ~++--~ :: -7.7% energy, +4.4% time against =HIGH=; \hfill +2.4% energy, -7% time against =LOW=
+#+LaTeX: }
+
+\bigskip
+
+#+LaTeX: \centering
+#+LaTeX: \includegraphics[width=.9\linewidth]{img/graph500-pareto-zoom-crop}
+
+2 \times E5-2630 Sandy Bridge (12 cores); 32GB; GCC5.1.1-O3, RAPL
+* MiniFE: Full Factorial Results (Pareto)
+
+#+LaTeX: \begin{columns}\begin{column}{.28\linewidth}
+
+Ellipses 99% CI
+
+\bigskip
+
+=+= and =-= for the D,F,K,T,Y regions
+
+\bigskip
+
+- ~+-+++~ :: 
+
+-9.3% energy
++1.5% time
+against =HIGH=
+
+#+LaTeX: \end{column}\begin{column}{.68\linewidth}
+
+#+LaTeX: \begin{overlayarea}{\linewidth}{9cm}
+#+LaTeX: \centering
+#+LaTeX: \includegraphics[width=\linewidth]{img/minifeopt-pareto-zoom-crop.pdf}
+#+LaTeX: \end{overlayarea}
+
+#+LaTeX: \end{column}\end{columns}
 * Critical View on the Current Approach
 
 Only considers two frequency levels (low and high)
