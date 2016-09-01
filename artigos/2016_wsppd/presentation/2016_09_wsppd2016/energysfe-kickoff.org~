@@ -1,0 +1,75 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer
+#+STARTUP: overview
+#+STARTUP: indent
+#+TAGS: noexport(n)
+
+#+Title: Measuring Hardware Counters for HPC Application Phase Detection
+#+Author: Gabriel B. Moro and Lucas M. Schnorr @@latex:\\@@ {gbmoro,schnorr}@inf.ufrgs.br
+#+Date: XIV Workshop de Processamento Paralelo e Distribuído \linebreak UFRGS, Porto Alegre, 2nd September 2016
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [12pt,xcolor=dvipsnames,presentation,handout]
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+STARTUP: beamer overview indent
+#+LATEX_HEADER: \graphicspath{{../}}
+#+LATEX_HEADER: \input{../org-babel-style-preembule.tex}
+#+LATEX_HEADER: \institute{
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/gppd.png}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/inf.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+#+LATEX_HEADER:  % \hfill
+#+LATEX_HEADER:  % \includegraphics[width=.16\textwidth]{img/cnpq.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.18\textwidth]{img/hpe.png}
+#+LATEX_HEADER: }
+#+LaTeX: \input{../org-babel-document-preembule.tex}
+#+LaTeX: \newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+* E-mail "O que colocar na apresentação"                           :noexport:
+
+I would like to ask you to prepare few slides to (a) present yourself,
+(b) your current research activities and (c) how you intend to
+contribute to the EnergySFE project (research topics, students,
+collaborations, ...).
+
+* Introduction
+** 
+*** Introduction
+=Motivation=:
+
+- Reducing the power consumption of parallel applications;
+- Fine-granularity to identify the _memory-bound regions_ of parallel
+  application several timestamps;
+- _Lower overhead_ of measurement.
+
+=Objective=:
+
+- Measure hardware counters at every given time interval to discover
+  memory-bound regions
+ 
+* Related Works
+=Spiliopoulos et al=:
+- Tool that analyzes the behavior of sequential application (the
+  concept of phases);
+- Based on cache misses of different caches' levels.
+
+=Laurenzano et al=: 
+- Finer granularity for each application loop.
+
+=Freeh et al.=:
+- Define the most suitable frequency for each phase of MPI
+  applications;
+- Analyse of the best frequency for each node.
+ 
+
+
+*** References
+
+#+LATEX: \tiny
+#+LATEX: \bibliographystyle{plain}
+#+LATEX: \bibliography{europar2016}
+

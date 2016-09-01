@@ -1,0 +1,100 @@
+% Created 2016-09-01 Qui 14:33
+\documentclass[12pt,xcolor=dvipsnames,presentation,handout]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\graphicspath{{../}}
+\input{../org-babel-style-preembule.tex}
+\institute{
+\includegraphics[width=.16\textwidth]{img/gppd.png}
+\hfill
+\includegraphics[width=.16\textwidth]{img/inf.pdf}
+\hfill
+\includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+% \hfill
+% \includegraphics[width=.16\textwidth]{img/cnpq.pdf}
+\hfill
+\includegraphics[width=.18\textwidth]{img/hpe.png}
+}
+\usetheme{default}
+\author{Gabriel B. Moro and Lucas M. Schnorr \\ \{gbmoro,schnorr\}@inf.ufrgs.br}
+\date{XIV Workshop de Processamento Paralelo e Distribuído \linebreak UFRGS, Porto Alegre, 2nd September 2016}
+\title{Measuring Hardware Counters for HPC Application Phase Detection}
+\hypersetup{
+ pdfauthor={Gabriel B. Moro and Lucas M. Schnorr \\ \{gbmoro,schnorr\}@inf.ufrgs.br},
+ pdftitle={Measuring Hardware Counters for HPC Application Phase Detection},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 24.3.1 (Org mode 8.3.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\input{../org-babel-document-preembule.tex}
+\newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+\section{Introduction}
+\label{sec:orgheadline3}
+\subsection{}
+\label{sec:orgheadline2}
+\begin{frame}[fragile,label={sec:orgheadline1}]{Introduction}
+ \texttt{Motivation}:
+
+\begin{itemize}
+\item Reducing the power consumption of parallel applications;
+\item Fine-granularity to identify the \uline{memory-bound regions} of parallel
+application several timestamps;
+\item \uline{Lower overhead} of measurement.
+\end{itemize}
+
+\texttt{Objective}:
+
+\begin{itemize}
+\item Measure hardware counters at every given time interval to discover
+memory-bound regions
+\end{itemize}
+\end{frame}
+
+\section{Related Works}
+\label{sec:orgheadline7}
+\subsection{}
+\label{sec:orgheadline6}
+\begin{frame}[fragile,label={sec:orgheadline4}]{Related Works}
+ \texttt{Spiliopoulos et al}:
+\begin{itemize}
+\item Tool that analyzes the behavior of sequential application (the
+concept of phases);
+\item Based on cache misses of different caches' levels.
+\end{itemize}
+
+\texttt{Laurenzano et al}: 
+\begin{itemize}
+\item Finer granularity for each application loop.
+\end{itemize}
+
+\texttt{Freeh et al.}:
+\begin{itemize}
+\item Define the most suitable frequency for each phase of MPI
+applications;
+\item Analyse of the best frequency for each node.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[label={sec:orgheadline5}]{References}
+\tiny
+\bibliographystyle{plain}
+\bibliography{europar2016}
+\end{frame}
+\end{document}
