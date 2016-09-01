@@ -56,27 +56,46 @@ collaborations, ...).
 ** 
 *** Related Works
 
-=Spiliopoulos et al=:
+=Spiliopoulos et al= \cite{spiliopoulos2012power}:
 - Tool that analyzes the behavior of sequential application (the
   concept of phases);
 - Based on cache misses of different caches' levels.
 
-=Laurenzano et al=: 
+=Laurenzano et al= \cite{laurenzano2011reducing}: 
 - Finer granularity for each application loop.
 
-=Freeh et al.=:
+*** Related Works
+
+=Freeh et al.=\cite{freeh2005exploring}:
 - Define the most suitable frequency for each phase of MPI
   applications;
 - Analyse of the best frequency for each node.
+
+=Millani and Schnorr= \cite{millani2016fr}:
+- OpenMP applications
+- Analyse of parallel regions of programs 
+- Manual instrumentation of code to identify 
+
  
 * Methodology
 ** 
 *** Methodology
 
+#+LaTeX: \begin{center}
+#+LaTeX: \includegraphics<1>[width=\linewidth]{img/metodologiaWorkWsppd2016.pdf}
+#+LaTeX: \end{center}
 
+*** Thank you + Propaganda
+
+Thank you for your attention.
+
+\bigskip
+
+* References
+** 
 *** References
 
 #+LATEX: \tiny
 #+LATEX: \bibliographystyle{plain}
-#+LATEX: \bibliography{europar2016}
+#+LATEX: \bibliography{ref}
 
