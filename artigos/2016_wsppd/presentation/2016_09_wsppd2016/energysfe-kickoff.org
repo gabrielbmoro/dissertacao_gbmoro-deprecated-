@@ -7,7 +7,7 @@
 
 #+Title: Measuring Hardware Counters for HPC Application Phase Detection
 #+Author: Gabriel B. Moro and Lucas M. Schnorr @@latex:\\@@ {gbmoro,schnorr}@inf.ufrgs.br
-#+Date: XIV Workshop de Processamento Paralelo e Distribuído \linebreak UFRGS, Porto Alegre, 2nd September 2016
+#+Date: XIV Workshop de Processamento Paralelo e Distribuído \linebreak UFRGS, Porto Alegre, September-2nd-2016
 
 #+LaTeX_CLASS: beamer
 #+LaTeX_CLASS_OPTIONS: [12pt,xcolor=dvipsnames,presentation,handout]
@@ -53,26 +53,26 @@ collaborations, ...).
 - Measure hardware counters at every given time interval to discover
   memory-bound regions
  
-* Related Works
+* Related Work
 ** 
-*** Related Works
+*** Related Work
 
-=Spiliopoulos et al= \cite{spiliopoulos2012power}:
+=Spiliopoulos et al., 2012=:
 - Tool that analyzes the behavior of sequential application (the
-  concept of phases);
-- Based on cache misses of different caches' levels.
+  concept of phases)
+- Based on cache misses of different caches' levels
 
-=Laurenzano et al= \cite{laurenzano2011reducing}: 
-- Finer granularity for each application loop.
+=Laurenzano et al., 2011=: 
+- Finer granularity for each application loop
 
-*** Related Works
+*** Related Work
 
-=Freeh et al.=\cite{freeh2005exploring}:
+=Freeh et al., 2005=:
 - Define the most suitable frequency for each phase of MPI
-  applications;
-- Analyse of the best frequency for each node.
+  applications
+- Analyse of the best frequency for each node
 
-=Millani and Schnorr= \cite{millani2016fr}:
+=Millani and Schnorr 2016=:
 - OpenMP applications
 - Analyse of parallel regions of programs 
 - Manual instrumentation of code to identify 
@@ -84,6 +84,15 @@ collaborations, ...).
 #+LaTeX: \begin{center}
 #+LaTeX: \includegraphics<1>[width=\linewidth]{img/metodologiaWorkWsppd2016.pdf}
 #+LaTeX: \end{center}
+
+*** Plataform 
+
+=Beagle1:=
+
+- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz
+  - 8 physical cores
+  - Hyper-Threading tecnology
+
 
 * Preliminary Results
 ** 
@@ -118,15 +127,15 @@ collaborations, ...).
 =Contributions=:
 
 - Fine-granularity to identify the _memory-bound regions_ of parallel
-  application several timestamps;
-- _Lower overhead_ of measurement.
+  application several timestamps
+- _Lower overhead_ of measurement
   
 =Future work=:
 	- _Automatically_ identify the memory-bound regions based on the hardware counters
   - Reducing the power consumption of parallel applications (use of
     DVFS approach)
 
-* References
+* References                                                       :noexport:
 ** 
 *** References
 
@@ -158,14 +167,14 @@ collaborations, ...).
 \newblock 3rd International Workshop on Reproducibility in Parallel Computing (REPPAR)
 \end{thebibliography}
 
-*** Acknowledgements
+* Thank you
 
-\begin{center}
-The results reported in this study were generated in virtue of the
-agreement between Hewlett Packard Enterprise (HPE) and the Federal
-University of Rio Grande do Sul (UFRGS), financed by resources in
-return for the exemption or reduction of the IPI tax, granted by
-Brazilian Law nº 8248, 1991, and its subsequent updates.
-\end{center} 
+** 
+*** Thank you
 
 *Thank you for your attention!*
+
+\newline
+
+Gabriel Bronzatti Moro
+  - gbmoro@inf.ufrgs.br 
