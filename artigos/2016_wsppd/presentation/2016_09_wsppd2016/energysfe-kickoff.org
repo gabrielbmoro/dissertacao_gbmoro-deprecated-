@@ -42,10 +42,11 @@ collaborations, ...).
 
 =Motivation=:
 
-- Reducing the power consumption of parallel applications;
-- Fine-granularity to identify the _memory-bound regions_ of parallel
-  application several timestamps;
-- _Lower overhead_ of measurement.
+- Memory-bound: programs with misses cache rate considerable (e.g. Breadth-First Search)
+
+- CPU-bound: programs limited by processing (e.g. Matrices Multiplication)
+
+- Programs can have fragments more Memory-bound than others more CPU-bound (e.g. Fourier Transform)
 
 =Objective=:
 
@@ -75,7 +76,6 @@ collaborations, ...).
 - OpenMP applications
 - Analyse of parallel regions of programs 
 - Manual instrumentation of code to identify 
-
  
 * Methodology
 ** 
@@ -85,14 +85,13 @@ collaborations, ...).
 #+LaTeX: \includegraphics<1>[width=\linewidth]{img/metodologiaWorkWsppd2016.pdf}
 #+LaTeX: \end{center}
 
-
 * Preliminary Results
 ** 
 *** Preliminary Results : NPB-FT, B Class
 
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth]{../../img/ft_L2_L3_100ms.pdf}
-\caption{When measuring metrics every 100 milliseconds.}
+\caption{Sampling interval - 100 milliseconds.}
 \label{figFT}
 \end{figure}
 
@@ -100,7 +99,7 @@ collaborations, ...).
 
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth,height=5cm]{../../img/lu_L2_L3_100ms.pdf}
-\caption{When measuring metrics every 100 milliseconds.}
+\caption{Sampling interval - 100 milliseconds.}
 \label{figLU}
 \end{figure}
 
@@ -108,7 +107,7 @@ collaborations, ...).
 
 \begin{figure}[!htb]
 \includegraphics[width=\linewidth,height=5cm]{../../img/cg_L2_L3_100ms.pdf}
-\caption{When measuring metrics every 50 milliseconds.}
+\caption{Sampling interval - 50 milliseconds.}
 \label{figCG}
 \end{figure}
 
@@ -116,10 +115,16 @@ collaborations, ...).
 ** 
 *** Conclusion
 
-- The main contribution of this work is its methodology: steps and tools necessary that should be used to identify memory-bound portions of parallel application.
+=Contributions=:
 
-- Future work:
-	- Automatically identify the memory-bound regions based on the hardware counters
+- Fine-granularity to identify the _memory-bound regions_ of parallel
+  application several timestamps;
+- _Lower overhead_ of measurement.
+  
+=Future work=:
+	- _Automatically_ identify the memory-bound regions based on the hardware counters
+  - Reducing the power consumption of parallel applications (use of
+    DVFS approach)
 
 * References
 ** 
@@ -155,10 +160,12 @@ collaborations, ...).
 
 *** Acknowledgements
 
+\begin{center}
 The results reported in this study were generated in virtue of the
 agreement between Hewlett Packard Enterprise (HPE) and the Federal
 University of Rio Grande do Sul (UFRGS), financed by resources in
 return for the exemption or reduction of the IPI tax, granted by
 Brazilian Law nº 8248, 1991, and its subsequent updates.
+\end{center} 
 
-- Thank you for your attention!
+*Thank you for your attention!*
