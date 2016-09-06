@@ -3814,6 +3814,7 @@ The following objects are masked from ‘package:stats’:
 The following object is masked from ‘package:graphics’:
 
     plot.design
+
 The following object is masked from ‘package:base’:
 
     lengths
@@ -3828,12 +3829,9 @@ The following object is masked from ‘package:base’:
 nameFile="../dados/exp4NAS_semlikwid/exp4NASDesign.csv"
 pathOfApps="/home/aulapinroot/NPB3.0/NPB3.0-OMP/bin"
 
-#AUTHOR GABRIEL BRONZATTI MORO
-#EXPERIMENT: Matrices Multiplication
+outputFile="../dados/exp4NAS_semlikwid/ResultExp4.csv"
 
-nameFile="desingExp1.csv"
-
-ref=$(cat desingExp1.csv)
+ref=$(cat $nameFile)
 
 tmp=""
 
@@ -3843,21 +3841,19 @@ for row in ${ref[@]}; do
    if [ $i -gt 0 ]; then		
 	   name=$(echo "$row" | cut -d ',' -f1)
 	   runId=$(echo "$row" | cut -d ',' -f2)
-         runNumber=$(echo "$row" | cut -d ',' -f3)
+           runNumber=$(echo "$row" | cut -d ',' -f3)
 	   runStd=$(echo "$row" | cut -d ',' -f4)
 	   versions=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
 	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
 
 	   export OMP_NUM_THREADS=$threads
-		
-	   timeWithoutLikwid=$(./$version | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
-	   timeWithLikwid=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE ./$version | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
 
-	   time=$(echo $time | sed 's/HPCELO://g' | bc)
-	   echo "$name,$runId,$runNumber,$sizeTmp,$version,$timeWithoutLikwid,$timeWithLikwid" 
-       >> "ResultExp1.csv"
+	   timeWithoutLikwid=$("$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+	   timeWithLikwid=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE "$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+
+	   echo "$name,$runId,$runNumber,$runStd,$versions,$threads,$timeWithoutLikwid,$timeWithLikwid" >> $outputFile
 	else
-		echo $row >> "ResultExp1.csv"
+		echo $row >> $outputFile
 		let i=$i+1
 	fi
 done
@@ -3869,10 +3865,86 @@ done
 #+begin_src R :results output :session *R* :exports both
 library(dplyr);
 
-df <- read.csv("dados/exp4NASDesign.csv");
-k <- filter(df, df$versions!='is.B') %>%
-    as.data.frame()
+df <- read.csv("dados/exp4NAS_semlikwid/ResultExp4.csv");
+k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
+     group_by(versions, threads) %>%
+     summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
+     as.data.frame();
+
+k
+
 #+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+  versions threads  N mean_without_likwid mean_with_likwid
+1     cg.B       1 20            109.0950          25.8635
+2     cg.B      16 20             24.1955          27.0245
+3     cg.B      32 20             24.2685          26.6355
+4     ft.B       1 20             70.5655           7.8795
+5     ft.B      16 20              9.7140           7.8600
+6     ft.B      32 20              7.6020           7.8775
+7     lu.B       1 20            211.2140          39.6720
+8     lu.B      16 20             35.7505          37.6735
+9     lu.B      32 20             35.7120          38.1885
+#+end_example
+
+- Que estranho esses resultados, por exemplo para uma thread com
+  likwid é mais rápido do que sem, não entendi. Depois com 16 threads
+  e 32 threads para aplicação cg e lu faz sentido. Com 1 thread e 16
+  threads para aplicação ft também ocorre esse comportamento estranho
+  novamente.
+
+- Vou analisar o overhead apenas para as aplicações lu e cg para 16 e
+  32 threads, pois esses dados são os que realmente fazem sentido.
+
+#+begin_src R :results output :session *R* :exports both
+
+library(dplyr);
+
+df <- read.csv("dados/exp4NAS_semlikwid/ResultExp4.csv");
+k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
+     group_by(versions, threads) %>%
+     summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
+     as.data.frame();
+
+k <- k[k$versions!="ft.B",]
+k <- k[k$threads!=1,]
+
+k$overhead <- (1 - (k$mean_without_likwid / k$mean_with_likwid))*100
+overheadMed <- mean(k$overhead)
+overheadMed
+#+end_src
+
+#+RESULTS:
+: [1] 7.736059
+
+- Professor, podemos visualizar em média o likwid causa um overhead de
+  7.73%, não sei se isso é muito ou pouco e se está correto da maneira
+  que calculei. Na minha percepção o cálculo é o seguinte:
+
+#+BEGIN_EXAMPLE
+-> p1 = tempo sem likwid / tempo com likwid
+-> p1 é a porcentagem que o tempo sem likwid representa no valor de tempo 
+com likwid, sempre o valor do tempo em que a aplicação usa likwid será 
+maior do que quando não está usando.
+
+-> 1 - p1, usamos para pegar o quanto falta para chegar ao inteiro.
+
+-> nisso representamos vezes 100 para retornar o overhead da aplicação em 
+porcentagem
+
+#+END_EXAMPLE
 
 * TODO [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução :Gabriel:
 - State "TODO"       from              [2016-08-31 Qua 14:01]
@@ -3906,3 +3978,36 @@ sudo likwid-perfctr -t 225ms -f -c N:0-31 -g L2CACHE -g L3CACHE $sp_command >> l
 sudo likwid-perfctr -t 110ms -f -c N:0-31 -g L2CACHE -g L3CACHE $ua_command >> log_NASExp3/saidaUa_2.log 2>> log_NASExp3/saidaUa_1.log 
 
 #+end_src
+
+** Análise dos Dados
+
+- Script para filtrar os dados de acordo com a execução de dois grupos
+  de medidas.
+
+
+#+begin_src sh :results output :exports both
+
+#+end_src
+
+
+#+begin_src sh :results output
+mkdir dados/exp3_NASandLikwid/
+
+chmod 755 ./scripts/likwid3csv.sh
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaCg_1.log  > dados/exp3_NASandLikwid/cgB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaFt_1.log  > dados/exp3_NASandLikwid/ftB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaLu_1.log  > dados/exp3_NASandLikwid/luB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaSp_1.log  > dados/exp3_NASandLikwid/spB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaUa_1.log  > dados/exp3_NASandLikwid/uaB.csv
+
+cd dados/exp3_NASandLikwid/
+ls
+#+end_src
+
+#+RESULTS:
+: cgB.csv
+: ftB.csv
+: luB.csv
+: spB.csv
+: uaB.csv
+
