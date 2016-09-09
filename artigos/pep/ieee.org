@@ -1,0 +1,195 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+
+#+TITLE: Measuring Hardware Counters  for HPC Application Phase Detection
+#+AUTHOR: Gabriel Bronzatti Moro, Lucas Mello Schnorr
+
+#+STARTUP: overview indent
+#+LANGUAGE: pt-br
+#+OPTIONS: H:3 creator:nil timestamp:nil skip:nil toc:nil num:t ^:nil ~:~
+#+OPTIONS: author:nil title:nil date:nil
+#+TAGS: noexport(n) deprecated(d) ignore(i)  Gabriel(G) Lucas(L)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+#+LATEX_CLASS: IEEEtran
+#+LATEX_CLASS_OPTIONS: [conference,letter,10pt,final]
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage{lipsum}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{xspace}
+#+LATEX_HEADER: \usepackage[brazil]{babel}
+#+LATEX_HEADER: \newcommand{\review}[1]{\textcolor[rgb]{1,0,0}{[Lucas: #1]}}
+
+# You need Org 8.3.5 and Emacs 24 to make this work.
+# If you do, just type make (thanks Luka Stanisic for this).
+
+* IEEETran configuration for org export + ignore tag (Start Here)  :noexport:
+
+#+begin_src emacs-lisp :results output :session :exports both
+(add-to-list 'load-path ".")
+(require 'ox-extra)
+(ox-extras-activate '(ignore-headlines))
+(add-to-list 'org-latex-classes
+             '("IEEEtran"
+               "\\documentclass{IEEEtran}"
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+#+end_src
+
+#+RESULTS:
+
+* *The Paper*                                                       :ignore:
+** Latex configurations                                             :ignore:
+** Frontpage                                                        :ignore:
+#+BEGIN_LaTeX
+\title{Plano de Ensino e Pesquisa}
+
+\author{
+\IEEEauthorblockN{Aluno: Gabriel Bronzatti Moro \\ Orientador: Lucas Mello Schnorr \\}
+\IEEEauthorblockA{Instituto de Informática, Universidade Federal do Rio Grande do Sul \\
+Caixa Postal 15064 –- CEP 91501-970 Porto Alegre -- RS -- Brasil\\
+Email: \textit{\{gabriel.bmoro,schnorr\}@inf.ufrgs.br}\\
+}
+}
+#+END_LaTeX
+
+#+LaTeX: \maketitle
+
+** Resumo                                                         :ignore:
+
+#+LaTeX: \begin{abstract}
+
+#+LaTeX: \end{abstract}
+
+** Introduction
+** Estado da Arte
+
+Laurenzano et al. 2011\cite{laurenzano2011reducing} apresentam uma abordagem automatizada que permite selecionar a frequência mais adequada de processador para determinado laço do programa. A frequência do processador é escolhida utilizando como base uma análise estática (realizada antes da execução) e outra análise realizada durante o tempo de execução da aplicação, utilizando os rastros obtidos. Os autores utilizaram vários \textit{benchmarks}, tendo como base de execução o framework chamado pcubed (\textit{PMaC's Performance and Power benchmark}) que permite explorar diferentes comportamentos de laços de interações a fim de definir uma caracterização para a máquina alvo. A caracterização da máquina define valores como consumo de potência, desempenho, padrões de execução e frequências de processador. Os resultados obtidos no experimento podem ser utilizados posteriormente como base de conhecimento, assim é possível visualizar o comportamento do consumo de energia quando se ajusta os fatores de caracterização da máquina. Dentre os resultados obtidos pelo trabalho, o melhor foi a redução de até 10,6\% no consumo de energia.
+
+
+#+LaTeX: \begin{table}[h]
+#+LaTeX: \centering
+#+LaTeX: \caption{Principais pontos sobre o trabalho Laurenzano et al. 2011 \cite{laurenzano2011reducing}.}
+#+LaTeX: \begin{tabular}{|l|l|}
+#+LaTeX: \hline
+#+LaTeX: \textbf{Aplicação} & Sequenciais e Paralelas \\
+#+LaTeX: \hline
+#+LaTeX: \textbf{Região} & Laço\\
+#+LaTeX: \hline
+#+LaTeX: \textbf{Medidas} & Taxa de misses da L1 e L2\\
+ #+LaTeX: & Operações sobre inteiros  \\
+ #+LaTeX: & Operações de Ponto-flutuante  \\
+ #+LaTeX: \hline
+#+LaTeX: \textbf{Métricas} & Power Delay Product \\
+#+LaTeX: \hline
+#+LaTeX: \textbf{Técnica} & Instrument. de Binário \\
+#+LaTeX: \hline
+#+LaTeX: \end{tabular}
+#+LaTeX: \end{table}
+
+
+** References                                                        :ignore:
+
+# See next section to understand how refs.bib file is created.
+
+#+LATEX: \bibliographystyle{IEEEtran}
+#+LATEX: \bibliography{refs}
+
+* TODO Bib file is here                                            :noexport:
+
+Tangle this file with C-c C-v t
+
+#+begin_src bib :tangle refs.bib
+@Book{knuth:84,
+  author =   {Donald E. Knuth},
+  title =    {The {\TeX} Book},
+  publisher =    {Addison-Wesley},
+  year =   {1984},
+  edition =    {15th}
+}
+
+@InCollection{boulic:91,
+  author =   {R. Boulic and O. Renault},
+  title =    {3D Hierarchies for Animation},
+  booktitle =    {New Trends in Animation and Visualization},
+  publisher =    {John Wiley {\&} Sons ltd.},
+  year =   {1991},
+  editor =   {Nadia Magnenat-Thalmann and Daniel Thalmann}
+}
+
+@InCollection{smith:99,
+  author =   {A. Smith and B. Jones},
+  title =    {On the Complexity of Computing},
+  booktitle =    {Advances in Computer Science},
+  pages =    {555--566},
+  publisher =    {Publishing Press},
+  year =   {1999},
+  editor =   {A. B. Smith-Jones}
+}
+
+@inproceedings{freeh2005exploring,
+  title={Exploring the energy-time tradeoff in mpi programs on a power-scalable cluster},
+  author={Freeh, Vincent W and Pan, Feng and Kappiah, Nandini and Lowenthal, David K and Springer, Robert},
+  booktitle={19th IEEE International Parallel and Distributed Processing Symposium},
+  pages={4a--4a},
+  year={2005},
+  organization={IEEE}
+}
+
+@inproceedings{laurenzano2011reducing,
+  title={Reducing energy usage with memory and computation-aware dynamic frequency scaling},
+  author={Laurenzano, Michael A and Meswani, Mitesh and Carrington, Laura and Snavely, Allan and Tikir, Mustafa M and Poole, Stephen},
+  booktitle={European Conference on Parallel Processing},
+  pages={79--90},
+  year={2011},
+  organization={Springer}
+}
+
+@inproceedings{spiliopoulos2012power,
+  title={Power-Sleuth: A Tool for Investigating Your Program's Power Behavior},
+  author={Spiliopoulos, Vasileios and Sembrant, Andreas and Kaxiras, Stefanos},
+  booktitle={2012 IEEE 20th International Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication Systems},
+  pages={241--250},
+  year={2012},
+  organization={IEEE}
+}
+
+@incollection{schnorr2013visualizing,
+  title={Visualizing More Performance Data Than What Fits on Your Screen},
+  author={Schnorr, Lucas M and Legrand, Arnaud},
+  booktitle={Tools for High Performance Computing 2012},
+  pages={149--162},
+  year={2013},
+  publisher={Springer}
+}
+
+@inproceedings{millani2016fr,
+author = {Millani, Luis Felipe and Schnorr, Lucas Mello},
+title={Computation-Aware Dynamic Frequency Scaling: Parsimonious Evaluation of the Time-Energy Trade-off Using Design of Experiments},
+year={2016},
+booktitle={3rd International Workshop on Reproducibility in Parallel Computing (REPPAR)}
+}
+
+@book{jain1991art,
+  title={Art of Computer Systems Performance Analysis: Techniques For Experimental Design Measurements Simulation and Modeling},
+  author={Jain, R.},
+  isbn={9781118858424},
+  year={1991},
+  publisher={Wiley}
+}
+
+@inproceedings{treibig2010likwid,
+  title={Likwid: A lightweight performance-oriented tool suite for x86 multicore environments},
+  author={Treibig, Jan and Hager, Georg and Wellein, Gerhard},
+  booktitle={2010 39th International Conference on Parallel Processing Workshops},
+  pages={207--216},
+  year={2010},
+  organization={IEEE}
+}
+
+#+end_src
