@@ -1,0 +1,169 @@
+\documentclass[cic,tc,english]{iiufrgs}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{subfigure}
+\usepackage{tabulary}
+\usepackage{tabularx}
+\usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\newcommand{\prettysmall}{\fontsize{6.5}{6.5}\selectfont}
+\newcommand{\prettysmallbis}{\fontsize{7}{7}\selectfont}
+\newcommand{\mtilde}{~}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{booktabs}
+\usepackage[normalem]{ulem}
+\usepackage{xspace}
+\usepackage{amsmath}
+\usepackage{color}
+\newcommand{\review}[1]{\textcolor[rgb]{1,0,0}{[Orientador: #1]}}
+\newcommand{\Orientador}[1]{\textcolor[rgb]{0.2,0.2,0.7}{[Orientador: #1]}}
+\newcommand{\source}{Source: Author}
+\input{configuration.tex}
+\date{}
+\title{}
+\hypersetup{
+ pdfauthor={Aluno},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 24.3.1 (Org mode 8.3.5)}, 
+ pdflang={English}}
+\begin{document}
+
+
+\title{Plano de Ensino e Pesquisa}
+\author{Sobrenome}{Aluno}
+\advisor[Prof.~Dr.]{Sobrenome}{Orientador}
+
+\date{Outubro}{2016}
+\location{Porto Alegre}{RS}
+
+% \renewcommand{\nominataReit}{Prof\textsuperscript{a}.~Wrana Maria Panizzi}
+% \renewcommand{\nominataReitname}{Reitora}
+% \renewcommand{\nominataPRE}{Prof.~Jos{\'e} Carlos Ferraz Hennemann}
+% \renewcommand{\nominataPREname}{Pr{\'o}-Reitor de Ensino}
+% \renewcommand{\nominataPRAPG}{Prof\textsuperscript{a}.~Joc{\'e}lia Grazia}
+% \renewcommand{\nominataPRAPGname}{Pr{\'o}-Reitora Adjunta de P{\'o}s-Gradua{\c{c}}{\~a}o}
+% \renewcommand{\nominataDir}{Prof.~Philippe Olivier Alexandre Navaux}
+% \renewcommand{\nominataDirname}{Diretor do Instituto de Inform{\'a}tica}
+% \renewcommand{\nominataCoord}{Prof.~Carlos Alberto Heuser}
+% \renewcommand{\nominataCoordname}{Coordenador do PPGC}
+% \renewcommand{\nominataBibchefe}{Beatriz Regina Bastos Haro}
+% \renewcommand{\nominataBibchefename}{Bibliotec{\'a}ria-chefe do Instituto de Inform{\'a}tica}
+% \renewcommand{\nominataChefeINA}{Prof.~Jos{\'e} Valdeni de Lima}
+% \renewcommand{\nominataChefeINAname}{Chefe do \deptINA}
+% \renewcommand{\nominataChefeINT}{Prof.~Leila Ribeiro}
+% \renewcommand{\nominataChefeINTname}{Chefe do \deptINT}
+
+
+%
+% TODO: provide these keywords
+%
+\keyword{HPC}
+
+\maketitle
+
+\begin{abstract}
+Abstract ...
+\end{abstract}
+
+\listoffigures
+\listoftables
+
+% lista de abreviaturas e siglas
+% o parametro deve ser a abreviatura mais longa
+\begin{listofabbrv}{SPMD}
+   \item[ANTLR] Another Tool For Language Recognition
+   \item[CSV] Comma Separated Values
+   \item [DBMS] Database Management System    
+   \item[GC] Garbage Collector 
+   \item[HPC] High Performance Computing
+   \item[JDBC] Java Database Connectivity
+   \item[JVM] Java Virtual Machine
+\end{listofabbrv}
+
+
+% idem para a lista de símbolos
+% \begin{listofsymbols}{$\alpha\beta\pi\omega$}
+%     \item[$\sum{\frac{a}{b}}$] Somatório do produtório
+%     \item[$\alpha\beta\pi\omega$] Fator de inconstância do resultado
+% \end{listofsymbols}
+
+\tableofcontents
+
+\chapter{Introdução}
+\label{sec:orgheadline1}
+
+\chapter{Conceitos Básicos}
+\label{sec:orgheadline2}
+\label{chapter.basic_concepts}
+
+%\begin{figure}[!htb]
+%\caption{JavaCC's file generation flow}
+%\centering
+%\includegraphics[width=.85\linewidth]{./img/javaccex.pdf}
+%\label{fig.javaccex} 
+%\\\source
+%\end{figure}
+
+\chapter{Trabalhos Relacionados}
+\label{sec:orgheadline3}
+\label{chapter.relatedwork}
+
+Laurenzano et al. 2011\cite{laurenzano2011reducing} apresentam uma abordagem automatizada que permite selecionar a frequência mais adequada de processador para determinado laço do programa. A frequência do processador é escolhida utilizando como base uma análise estática (realizada antes da execução) e outra análise realizada durante o tempo de execução da aplicação, utilizando os rastros obtidos. Os autores utilizaram vários \textit{benchmarks}, tendo como base de execução o framework chamado pcubed (\textit{PMaC's Performance and Power benchmark}) que permite explorar diferentes comportamentos de laços de interações a fim de definir uma caracterização para a máquina alvo. A caracterização da máquina define valores como consumo de potência, desempenho, padrões de execução e frequências de processador. Os resultados obtidos no experimento podem ser utilizados posteriormente como base de conhecimento, assim é possível visualizar o comportamento do consumo de energia quando se ajusta os fatores de caracterização da máquina. Dentre os resultados obtidos pelo trabalho, o melhor foi a redução de até 10,6$\backslash$% no consumo de energia.
+
+\chapter{Experimentos}
+\label{sec:orgheadline4}
+\label{chapter.experiments} 
+
+
+%\begin{table}[!htb]
+%\caption{Experimental Units description}
+%\label{tab.machines}
+%\centering
+%\begin{tabularx}{\linewidth}{lXXX}\toprule
+%                        &   {\bf Luiza}         & {\bf Orion1}         & {\bf Guarani}    %\\\toprule
+%Processor                &  Intel Core i7        & Xeon E5-2630         & Intel Core i5-2400   %\\
+%CPU(s)                   &  1                    & 2                    & 1       \\
+%Cores per CPU            &  4                    & 6                    & 4             \\
+%Max. Freq.               &  2.7 GHz              & 2.30GHz              & 3.10GHz       \\
+%L1d/L1i Cache            & 32/32KBytes           & 32/32KBytes          & 32/32KBytes  \\     
+%L2 Cache                 & 256KBytes             & 256KBytes            & 256KBytes    \\
+%L3 Cache                 & 6MBytes               & 15MBytes              & 6MBytes         \\
+%Memory                   & 16GBytes              & 32GBytes             & 20GBytes      %\\\midrule
+%OS                       & OSX 10.10.5           & Ubuntu 12.04.5       & Debian 4.3.5-1 \\
+%\bottomrule\end{tabularx}
+%\end{table}
+
+\bibliography{References}
+
+
+\appendix
+\chapter{Apendice 1}
+\label{sec:orgheadline5}
+\label{ap.javacc}
+
+asdsaodk
+set of optional flags. An example, is the flag \texttt{STATIC}, which means
+that there is only one parser for the JVM when set to true.
+\end{document}
