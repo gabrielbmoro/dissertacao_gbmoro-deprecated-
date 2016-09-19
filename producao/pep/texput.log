@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.8.30)  17 SEP 2016 20:50
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.8.30)  19 SEP 2016 17:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1055,7 +1055,12 @@ Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \@lastruleclass=\count158
 \@thisrulewidth=\dimen176
 )
-(./configuration.tex) (./texput.aux)
+(./configuration.tex)
+
+LaTeX Warning: Unused global option(s):
+    [brasilian].
+
+(./texput.aux)
 \openout1 = `texput.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 51.
@@ -1076,8 +1081,7 @@ LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 51.
 LaTeX Font Info:    ... okay on input line 51.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 51.
 LaTeX Font Info:    Try loading font information for TS1+cmr on input line 51.
-
-(/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
+ (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 51.
@@ -1200,157 +1204,199 @@ LaTeX Info: Redefining \nameref on input line 51.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 \c@lstlisting=\count166
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 84.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 84.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 84.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 84.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 84.
 [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 86.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 86.
+ [2
 
 
 ]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 86.
+
 Underfull \hbox (badness 10000) in paragraph at lines 87--88
 
  []
 
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 112.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 112.
 [3
 
-] (./texput.lof
-Package cleveref Info: loaded `english' language definitions on input line 1.
-Package cleveref Info: loaded `english' language definitions on input line 3.
+]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 112.
+ (./texput.toc
+number indent by \l@... (toc, 0):  0.0pt
+text indent by \l@... (toc, 0):  18.0pt
+number indent by parent (toc, 0):  0.0pt
+text indent calculated (toc, 0): 18.0pt
+number indent calculated (toc, 0): 0.0pt
+text noindent (toc, 0): 18.0pt
+number noindent (toc, 0): 0.0pt
+number indent by \l@... (toc, 0):  0.0pt
+text indent by \l@... (toc, 0):  18.0pt
+number indent by parent (toc, 0):  0.0pt
+text indent calculated (toc, 0): 18.0pt
+number indent calculated (toc, 0): 0.0pt
+text noindent (toc, 0): 18.0pt
+number noindent (toc, 0): 0.0pt
+number indent by \l@... (toc, 0):  0.0pt
+text indent by \l@... (toc, 0):  18.0pt
+number indent by parent (toc, 0):  0.0pt
+text indent calculated (toc, 0): 18.0pt
+number indent calculated (toc, 0): 0.0pt
+text noindent (toc, 0): 18.0pt
+number noindent (toc, 0): 0.0pt
+number indent by \l@... (toc, 0):  0.0pt
+text indent by \l@... (toc, 0):  18.0pt
+number indent by parent (toc, 0):  0.0pt
+text indent calculated (toc, 0): 18.0pt
+number indent calculated (toc, 0): 0.0pt
+text noindent (toc, 0): 18.0pt
+number noindent (toc, 0): 0.0pt
+number indent by \l@... (toc, 0):  0.0pt
+text indent by \l@... (toc, 0):  18.0pt
+number indent by parent (toc, 0):  0.0pt
+text indent calculated (toc, 0): 18.0pt
+number indent calculated (toc, 0): 0.0pt
+text noindent (toc, 0): 18.0pt
+number noindent (toc, 0): 0.0pt
 )
-\tf@lof=\write4
-\openout4 = `texput.lof'.
+\tf@toc=\write4
+\openout4 = `texput.toc'.
 
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 114.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 114.
  [4
 
-] (./texput.lot
-Package cleveref Info: loaded `english' language definitions on input line 1.
-Package cleveref Info: loaded `english' language definitions on input line 3.
-)
-\tf@lot=\write5
-\openout5 = `texput.lot'.
-
+]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 114.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 117.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 117.
  [5
 
-] [6
+]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 117.
 
-] (./texput.toc
-Package cleveref Info: loaded `english' language definitions on input line 1.
-Package cleveref Info: loaded `english' language definitions on input line 3.
+Underfull \hbox (badness 10000) has occurred while \output is active
+\T1/ppl/m/n/10.95 6
+ []
 
-number indent by \l@... (toc, 0):  0.0pt
-text indent by \l@... (toc, 0):  18.0pt
-number indent by parent (toc, 0):  0.0pt
-text indent calculated (toc, 0): 18.0pt
-number indent calculated (toc, 0): 0.0pt
-text noindent (toc, 0): 18.0pt
-number noindent (toc, 0): 0.0pt
-number indent by \l@... (toc, 0):  0.0pt
-text indent by \l@... (toc, 0):  18.0pt
-number indent by parent (toc, 0):  0.0pt
-text indent calculated (toc, 0): 18.0pt
-number indent calculated (toc, 0): 0.0pt
-text noindent (toc, 0): 18.0pt
-number noindent (toc, 0): 0.0pt
-number indent by \l@... (toc, 0):  0.0pt
-text indent by \l@... (toc, 0):  18.0pt
-number indent by parent (toc, 0):  0.0pt
-text indent calculated (toc, 0): 18.0pt
-number indent calculated (toc, 0): 0.0pt
-text noindent (toc, 0): 18.0pt
-number noindent (toc, 0): 0.0pt
-number indent by \l@... (toc, 0):  0.0pt
-text indent by \l@... (toc, 0):  18.0pt
-number indent by parent (toc, 0):  0.0pt
-text indent calculated (toc, 0): 18.0pt
-number indent calculated (toc, 0): 0.0pt
-text noindent (toc, 0): 18.0pt
-number noindent (toc, 0): 0.0pt
-number indent by \l@... (toc, 0):  0.0pt
-text indent by \l@... (toc, 0):  18.0pt
-number indent by parent (toc, 0):  0.0pt
-text indent calculated (toc, 0): 18.0pt
-number indent calculated (toc, 0): 0.0pt
-text noindent (toc, 0): 18.0pt
-number noindent (toc, 0): 0.0pt
-)
-\tf@toc=\write6
-\openout6 = `texput.toc'.
-
- [7
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 129.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 129.
+[6
 
 ]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 129.
+
+
+LaTeX Warning: Citation `laurenzano2011reducing' on page 7 undefined on input l
+ine 133.
+
+
+LaTeX Warning: Citation `laurenzano2011reducing' on page 7 undefined on input l
+ine 152.
+
+
+LaTeX Warning: Citation `freeh2005using' on page 7 undefined on input line 153.
+
+
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 165.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 165.
+[7
+
+]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 165.
+
+No file texput.bbl.
+
 Underfull \hbox (badness 10000) has occurred while \output is active
 \T1/ppl/m/n/10.95 8
  []
 
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 192.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 192.
 [8
 
-] [9
-
 ]
-
-LaTeX Warning: Citation `laurenzano2011reducing' on page 10 undefined on input 
-line 133.
-
-
-Underfull \hbox (badness 10000) has occurred while \output is active
-\T1/ppl/m/n/10.95 10
- []
-
-[10
-
-]
-No file texput.bbl.
-[11
-
-]
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 167.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 192.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 197.
  (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 
 AED: lastpage setting LastPage
-
-Underfull \hbox (badness 10000) has occurred while \output is active
-\T1/ppl/m/n/10.95 12
- []
-
-[12
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 199.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 199.
+[9
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 169.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 169.
- (./texput.aux
-Package cleveref Info: loaded `english' language definitions on input line 22.
-Package cleveref Info: loaded `english' language definitions on input line 30.
-)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 169.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 169.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 199.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 199.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 199.
+ (./texput.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 199.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 199.
 Package rerunfilecheck Info: File `texput.out' has not changed.
-(rerunfilecheck)             Checksum: DBBBF449213A7D9D4BF0DFDD9F2FE54F;1387.
+(rerunfilecheck)             Checksum: 9A831980F80C5683ECD340D75C88B9A9;888.
 
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 169.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 199.
  ) 
 Here is how much of TeX's memory you used:
- 17256 strings out of 495004
- 252675 string characters out of 6180662
- 392395 words of memory out of 5000000
- 20139 multiletter control sequences out of 15000+600000
+ 17204 strings out of 495004
+ 251700 string characters out of 6180662
+ 376783 words of memory out of 5000000
+ 20101 multiletter control sequences out of 15000+600000
  18370 words of font info for 47 fonts, out of 8000000 for 9000
  16 hyphenation exceptions out of 8191
- 49i,6n,45p,1224b,576s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 49i,6n,45p,262b,405s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/pa
 latino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/uplri
 8a.pfb>
-Output written on texput.pdf (12 pages, 72416 bytes).
+Output written on texput.pdf (9 pages, 71251 bytes).
 PDF statistics:
- 137 PDF objects out of 1000 (max. 8388607)
- 116 compressed objects within 2 object streams
- 28 named destinations out of 1000 (max. 500000)
- 81 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 108 PDF objects out of 1000 (max. 8388607)
+ 91 compressed objects within 1 object stream
+ 19 named destinations out of 1000 (max. 500000)
+ 57 words of extra memory for PDF output out of 10000 (max. 10000000)
 

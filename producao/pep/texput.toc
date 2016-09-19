@@ -1,8 +1,6 @@
-\select@language {english}
 \select@language {brazilian}
-\select@language {english}
-\contentsline {chapter}{1~Introdu\IeC {\c c}\IeC {\~a}o}{8}{CHAPTER.1}
-\contentsline {chapter}{2~Conceitos B\IeC {\'a}sicos}{9}{CHAPTER.2}
-\contentsline {chapter}{3~Trabalhos Relacionados}{10}{CHAPTER.3}
-\contentsline {chapter}{4~Experimentos}{11}{CHAPTER.4}
-\contentsline {chapter}{\MakeUppercase {Appendix} A~--- Apendice 1}{12}{CHAPTER.A}
+\contentsline {chapter}{1~Introdu\IeC {\c c}\IeC {\~a}o}{5}{CHAPTER.1}
+\contentsline {chapter}{2~Conceitos B\IeC {\'a}sicos}{6}{CHAPTER.2}
+\contentsline {chapter}{3~Trabalhos Relacionados}{7}{CHAPTER.3}
+\contentsline {chapter}{4~Experimentos}{8}{CHAPTER.4}
+\contentsline {chapter}{\MakeUppercase {Ap{\^e}ndice} A~--- Apendice 1}{9}{CHAPTER.A}

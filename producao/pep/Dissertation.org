@@ -1,5 +1,5 @@
-#+TITLE: 
-#+AUTHOR: Aluno
+#+TITLE:
+#+AUTHOR: Gabriel Bronzatti Moro
 
 #+STARTUP: overview indent
 #+LANGUAGE: en
@@ -10,7 +10,7 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 
 #+LATEX_CLASS: iiufrgs
-#+LATEX_CLASS_OPTIONS: [cic,tc,english]
+#+LATEX_CLASS_OPTIONS: [cic,tc,brasilian]
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+LATEX_HEADER: \usepackage{subfigure}
@@ -118,8 +118,8 @@ Hope this helps.
 * Front page preparation                                           :ignore:
 #+BEGIN_LaTeX
 \title{Plano de Ensino e Pesquisa}
-\author{Sobrenome}{Aluno}
-\advisor[Prof.~Dr.]{Sobrenome}{Orientador}
+\author{Bronzatti Moro}{Gabriel}
+\advisor[Prof.~Dr.]{Mello Schnorr}{Lucas}
 
 \date{Outubro}{2016}
 \location{Porto Alegre}{RS}
@@ -145,7 +145,7 @@ Hope this helps.
 %
 % TODO: provide these keywords
 %
-\keyword{HPC}
+%\keyword{HPC}
 #+END_LaTeX
 
 * Front page                                                       :ignore:
@@ -166,20 +166,20 @@ Abstract ...
 * Lists                                                            :ignore:
 
 #+BEGIN_LaTeX
-\listoffigures
-\listoftables
+%\listoffigures
+%\listoftables
 
 % lista de abreviaturas e siglas
 % o parametro deve ser a abreviatura mais longa
-\begin{listofabbrv}{SPMD}
-   \item[ANTLR] Another Tool For Language Recognition
-   \item[CSV] Comma Separated Values
-   \item [DBMS] Database Management System    
-   \item[GC] Garbage Collector 
-   \item[HPC] High Performance Computing
-   \item[JDBC] Java Database Connectivity
-   \item[JVM] Java Virtual Machine
-\end{listofabbrv}
+%\begin{listofabbrv}{SPMD}
+%   \item[ANTLR] Another Tool For Language Recognition
+%   \item[CSV] Comma Separated Values
+%   \item [DBMS] Database Management System    
+%   \item[GC] Garbage Collector 
+%   \item[HPC] High Performance Computing
+%   \item[JDBC] Java Database Connectivity
+%   \item[JVM] Java Virtual Machine
+%\end{listofabbrv}
 
 
 % idem para a lista de símbolos
@@ -263,7 +263,37 @@ Do as follows:
 * Trabalhos Relacionados
 \label{chapter.relatedwork}
 
-Laurenzano et al. 2011\cite{laurenzano2011reducing} apresentam uma abordagem automatizada que permite selecionar a frequência mais adequada de processador para determinado laço do programa. A frequência do processador é escolhida utilizando como base uma análise estática (realizada antes da execução) e outra análise realizada durante o tempo de execução da aplicação, utilizando os rastros obtidos. Os autores utilizaram vários \textit{benchmarks}, tendo como base de execução o framework chamado pcubed (\textit{PMaC's Performance and Power benchmark}) que permite explorar diferentes comportamentos de laços de interações a fim de definir uma caracterização para a máquina alvo. A caracterização da máquina define valores como consumo de potência, desempenho, padrões de execução e frequências de processador. Os resultados obtidos no experimento podem ser utilizados posteriormente como base de conhecimento, assim é possível visualizar o comportamento do consumo de energia quando se ajusta os fatores de caracterização da máquina. Dentre os resultados obtidos pelo trabalho, o melhor foi a redução de até 10,6\% no consumo de energia.
+\citeonline{laurenzano2011reducing} apresentam uma
+abordagem automatizada que permite selecionar a frequência mais
+adequada de processador para determinado laço do programa. A
+frequência do processador é escolhida utilizando como base uma análise
+estática (realizada antes da execução) e outra análise realizada
+durante o tempo de execução da aplicação, utilizando os rastros
+obtidos. Os autores utilizaram vários \textit{benchmarks}, tendo como
+base de execução o framework chamado pcubed (\textit{PMaC's
+Performance and Power benchmark}) que permite explorar diferentes
+comportamentos de laços de interações a fim de definir uma
+caracterização para a máquina alvo. A caracterização da máquina define
+valores como consumo de potência, desempenho, padrões de execução e
+frequências de processador. Os resultados obtidos no experimento podem
+ser utilizados posteriormente como base de conhecimento, assim é
+possível visualizar o comportamento do consumo de energia quando se
+ajusta os fatores de caracterização da máquina. Dentre os resultados
+obtidos pelo trabalho, o melhor foi a redução de até 10,6\% no consumo
+de energia. 
+
+Diferente de \citeonline{laurenzano2011reducing},
+\citeonline{freeh2005using} apresentam uma abordagem voltada à memória
+distribuída para aplicações MPI. Essa abordagem encontra a melhor
+frequência para cada nó, essa frequência é definida por uma heurística
+chamada ``gear'', a qual define o ganho entre consumo de energia e
+desempenho. Como a aplicação é dividida em fases, para cada fase e em
+cada nó é definido o ``gear'' desejado, a fim de escolher a melhor
+configuração de frequência para a execução da aplicação sobre os
+diferentes nós. Os resultados apresentam que mais da metade das
+aplicações executadas apresentam um ganho, quando utiliza-se
+diferentes ``gears'', o melhor resultado obtido foi a redução de 9\% de
+energia e 1\% no tempo de execução para determinada aplicação.
   
 * Experimentos
 \label{chapter.experiments} 
