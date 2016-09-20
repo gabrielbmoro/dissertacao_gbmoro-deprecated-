@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.8.30)  19 SEP 2016 17:39
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.8.30)  20 SEP 2016 01:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1315,75 +1315,107 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 129.
 
 
-LaTeX Warning: Citation `laurenzano2011reducing' on page 7 undefined on input l
-ine 133.
+LaTeX Warning: Citation `spiliopoulos2012power' on page 7 undefined on input li
+ne 133.
 
 
 LaTeX Warning: Citation `laurenzano2011reducing' on page 7 undefined on input l
 ine 152.
 
 
-LaTeX Warning: Citation `freeh2005using' on page 7 undefined on input line 153.
+Overfull \hbox (10.68628pt too wide) in paragraph at lines 152--170
+[]\T1/ppl/b/n/12 ??\T1/ppl/m/n/12 ) de-fi-nem uma abor-da-gem au-to-ma-ti-zada 
+que per-mite se-le-ci-o-nar a frequên-
+ []
 
 
+Overfull \hbox (6.32066pt too wide) in paragraph at lines 152--170
+\T1/ppl/m/n/12 cia mais ade-quada de pro-ces-sa-dor para de-ter-mi-nado laço do
+ pro-grama. A frequên-
+ []
+
+
+LaTeX Warning: Citation `laurenzano2011reducing' on page 7 undefined on input l
+ine 171.
+
+
+LaTeX Warning: Citation `freeh2005exploring' on page 7 undefined on input line 
+172.
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 165.
+(babel)             in language  on input line 187.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 165.
-[7
+(babel)             in language  on input line 187.
+ [7
 
 ]
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 165.
 
-No file texput.bbl.
+LaTeX Warning: Citation `millani2016fr' on page 8 undefined on input line 188.
+
 
 Underfull \hbox (badness 10000) has occurred while \output is active
 \T1/ppl/m/n/10.95 8
  []
 
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 192.
+(babel)             in language  on input line 203.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 192.
-[8
+(babel)             in language  on input line 203.
+[8]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 203.
+
+No file texput.bbl.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 230.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 230.
+[9
 
 ]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 192.
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 197.
+(babel)             in language  on input line 230.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 235.
  (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 
 AED: lastpage setting LastPage
+
+Underfull \hbox (badness 10000) has occurred while \output is active
+\T1/ppl/m/n/10.95 10
+ []
+
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 199.
+(babel)             in language  on input line 237.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 199.
-[9
+(babel)             in language  on input line 237.
+[10
 
 ]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 199.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 199.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 199.
+(babel)             in language  on input line 237.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 237.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 237.
  (./texput.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 199.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 199.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 237.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 237.
 Package rerunfilecheck Info: File `texput.out' has not changed.
 (rerunfilecheck)             Checksum: 9A831980F80C5683ECD340D75C88B9A9;888.
 
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 199.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 237.
  ) 
 Here is how much of TeX's memory you used:
- 17204 strings out of 495004
- 251700 string characters out of 6180662
- 376783 words of memory out of 5000000
- 20101 multiletter control sequences out of 15000+600000
+ 17209 strings out of 495004
+ 251815 string characters out of 6180662
+ 378783 words of memory out of 5000000
+ 20105 multiletter control sequences out of 15000+600000
  18370 words of font info for 47 fonts, out of 8000000 for 9000
  16 hyphenation exceptions out of 8191
  49i,6n,45p,262b,405s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1393,10 +1425,10 @@ f-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/pa
 latino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/uplri
 8a.pfb>
-Output written on texput.pdf (9 pages, 71251 bytes).
+Output written on texput.pdf (10 pages, 76167 bytes).
 PDF statistics:
- 108 PDF objects out of 1000 (max. 8388607)
- 91 compressed objects within 1 object stream
- 19 named destinations out of 1000 (max. 500000)
+ 112 PDF objects out of 1000 (max. 8388607)
+ 94 compressed objects within 1 object stream
+ 20 named destinations out of 1000 (max. 500000)
  57 words of extra memory for PDF output out of 10000 (max. 10000000)
 

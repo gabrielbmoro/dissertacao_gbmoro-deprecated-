@@ -2,6 +2,6 @@
 \contentsline {chapter}{1~Introdu\IeC {\c c}\IeC {\~a}o}{5}{CHAPTER.1}
 \contentsline {chapter}{2~Conceitos B\IeC {\'a}sicos}{6}{CHAPTER.2}
 \contentsline {chapter}{3~Trabalhos Relacionados}{7}{CHAPTER.3}
-\contentsline {chapter}{4~Experimentos}{8}{CHAPTER.4}
-\contentsline {chapter}{\xspace {}Refer{\^e}ncias}{9}{schapter.3}
-\contentsline {chapter}{\MakeUppercase {Ap{\^e}ndice} A~--- Apendice 1}{10}{CHAPTER.A}
+\contentsline {chapter}{4~Experimentos}{9}{CHAPTER.4}
+\contentsline {chapter}{\xspace {}Refer{\^e}ncias}{10}{schapter.3}
+\contentsline {chapter}{\MakeUppercase {Ap{\^e}ndice} A~--- Apendice 1}{11}{CHAPTER.A}
