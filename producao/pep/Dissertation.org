@@ -263,38 +263,86 @@ Do as follows:
 * Trabalhos Relacionados
 \label{chapter.relatedwork}
 
-\citeonline{laurenzano2011reducing} apresentam uma
+\citeonline{spiliopoulos2012power} apresentam uma ferramenta chamada
+Power-Sleuth que é capaz de fornecer uma descrição detalhada do
+comportamento de uma aplicação quando executada em determinada frequência. Esse trabalho
+utiliza três técnicas fundamentais para compreender o comportamento de
+um programa, detecção de fases, modelo DVFS (
+#+BEGIN_LaTeX
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+) e modelos de correlação. A abordagem desenvolvida pelos autores
+identificam as fases da aplicação utilizando uma biblioteca chamada
+ScarPhase, a qual utiliza como base um histórico de execução da
+aplicação, agrupando em fases, funções do programa que possuem um comportamento
+similar (acessos a memória, taxa de misses, entre outros). Esse artigo
+investiga apenas aplicações sequenciais, nessa perspectiva a
+identificação de áreas de regiões memory-bound podem ser obtidas em
+uma granularidade mais grosseira no intervalo entre amostras. Já para
+aplicações paralelas, como são executadas sobre diferentes fluxos de
+processamento, cada fluxo pode possuir um comportamento distinto de
+acordo como o balanceamento da carga da aplicação, até mesmo para
+mesmas regiões de código.
+
+\citeonline{laurenzano2011reducing} definem uma
 abordagem automatizada que permite selecionar a frequência mais
 adequada de processador para determinado laço do programa. A
 frequência do processador é escolhida utilizando como base uma análise
 estática (realizada antes da execução) e outra análise realizada
 durante o tempo de execução da aplicação, utilizando os rastros
-obtidos. Os autores utilizaram vários \textit{benchmarks}, tendo como
-base de execução o framework chamado pcubed (\textit{PMaC's
-Performance and Power benchmark}) que permite explorar diferentes
-comportamentos de laços de interações a fim de definir uma
-caracterização para a máquina alvo. A caracterização da máquina define
-valores como consumo de potência, desempenho, padrões de execução e
-frequências de processador. Os resultados obtidos no experimento podem
-ser utilizados posteriormente como base de conhecimento, assim é
-possível visualizar o comportamento do consumo de energia quando se
-ajusta os fatores de caracterização da máquina. Dentre os resultados
-obtidos pelo trabalho, o melhor foi a redução de até 10,6\% no consumo
-de energia. 
+obtidos. Os autores utilizaram vários benchmarks, tendo como
+base de execução o framework chamado pcubed (
+#+BEGIN_LaTeX
+\textit{PMaC's Performance and Power benchmark}
+#+END_LaTeX
+) que permite explorar diferentes comportamentos de laços de
+interações a fim de definir uma caracterização para a máquina alvo. A
+caracterização da máquina define valores como consumo de potência,
+desempenho, padrões de execução e frequências de processador. Os
+resultados obtidos no experimento podem ser utilizados posteriormente
+como base de conhecimento, assim é possível visualizar o comportamento
+do consumo de energia quando se ajusta os fatores de caracterização da
+máquina. Dentre os resultados obtidos pelo trabalho, o melhor foi a
+redução de até 10,6\% no consumo de energia. 
 
 Diferente de \citeonline{laurenzano2011reducing},
-\citeonline{freeh2005using} apresentam uma abordagem voltada à memória
+\citeonline{freeh2005exploring} apresentam uma abordagem voltada à memória
 distribuída para aplicações MPI. Essa abordagem encontra a melhor
-frequência para cada nó, essa frequência é definida por uma heurística
-chamada ``gear'', a qual define o ganho entre consumo de energia e
-desempenho. Como a aplicação é dividida em fases, para cada fase e em
-cada nó é definido o ``gear'' desejado, a fim de escolher a melhor
-configuração de frequência para a execução da aplicação sobre os
-diferentes nós. Os resultados apresentam que mais da metade das
-aplicações executadas apresentam um ganho, quando utiliza-se
-diferentes ``gears'', o melhor resultado obtido foi a redução de 9\% de
-energia e 1\% no tempo de execução para determinada aplicação.
-  
+frequência para cada nó, a frequência é definida por uma heurística
+chamada ``gear'', a qual define um ganho entre consumo de energia e
+desempenho. Com o trace obtido a partir de uma pré-execução, a
+abordagem define blocos (
+#+BEGIN_LaTeX
+ \textit{Basic blocks}
+#+END_LaTeX
+) que realizam operações comuns, depois dessa classificação é obtido
+as fases da aplicação que correspondem a junção desses blocos. Para
+cada bloco é definido o ganho desejado. O ganho é a melhor
+configuração encontrada (frequência de processador) entre consumo de energia e desempenho para
+determinada fase da aplicação. Os resultados apresentam um ganho
+considerável para mais da metade das aplicações executadas, o melhor
+resultado obtido foi a redução do consumo de energia em 9% e do tempo
+de execução em 1%.
+
+Para aplicações paralelas escritas com OpenMP, \citeonline{millani2016fr}
+apresentam uma abordagem que analisa as regiões paralelas de um
+programa, utilizando uma análise rigorosa usando a técnica 
+#+BEGIN_LaTeX
+\textit{Design of Experiments}
+#+END_LaTeX
+ e 
+#+BEGIN_LaTeX
+\textit{Screening Design}.
+#+END_LaTeX
+Os autores realizaram experimentos com sete benchmarks, através das
+execuções eles concluíram que é possível obter um ganho considerável
+de energia e desempenho com a utilização da abordagem, dependendo das
+características comportamentais da aplicação. A técnica consiste na
+instrumentação manual de código para assinalar as regiões paralelas no
+código fonte. Diferente disso, o foco desse trabalho é direcionado na
+identificação automática dessas regiões paralelas, baseando-se em
+contadores de hardware específicos.
+
 * Experimentos
 \label{chapter.experiments} 
 
