@@ -10,7 +10,7 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 
 #+LATEX_CLASS: iiufrgs
-#+LATEX_CLASS_OPTIONS: [cic,tc,brasilian]
+#+LATEX_CLASS_OPTIONS: [ppgc,tc,brasilian]
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+LATEX_HEADER: \usepackage{subfigure}
@@ -210,7 +210,6 @@ Execute the following code (with C-c C-c) prior to export this file to PDF.
 (ox-extras-activate '(ignore-headlines))
 (add-to-list 'org-latex-classes
              '("iiufrgs"
-
                "\\documentclass{iiufrgs}"
                ("\\chapter{%s}" . "\\chapter*{%s}")
                ("\\section{%s}" . "\\section*{%s}")
@@ -263,6 +262,13 @@ Do as follows:
 * Trabalhos Relacionados
 \label{chapter.relatedwork}
 
+Não existe uma solução definitiva para detectar se uma região de
+código é mais memory-bound ou CPU-bound. Alguns trabalhos focam mais
+na detecção de fases para aplicações sequenciais
+\cite{spiliopoulos2012power}, outros se concentram mais na perspectiva
+de aplicações distribuídas \cite{freeh2005exploring} e paralelas
+\cite{laurenzano2011reducing, millani2016fr}. 
+
 \citeonline{spiliopoulos2012power} apresentam uma ferramenta chamada
 Power-Sleuth que é capaz de fornecer uma descrição detalhada do
 comportamento de uma aplicação quando executada em determinada frequência. Esse trabalho
@@ -273,15 +279,15 @@ um programa, detecção de fases, modelo DVFS (
 #+END_LaTeX
 ) e modelos de correlação. A abordagem desenvolvida pelos autores
 identificam as fases da aplicação utilizando uma biblioteca chamada
-ScarPhase, a qual utiliza como base um histórico de execução da
-aplicação, agrupando em fases, funções do programa que possuem um comportamento
+ScarPhase que utiliza o histórico de execução da
+aplicação, agrupando em fases, as funções do programa que possuem um comportamento
 similar (acessos a memória, taxa de misses, entre outros). Esse artigo
 investiga apenas aplicações sequenciais, nessa perspectiva a
 identificação de áreas de regiões memory-bound podem ser obtidas em
 uma granularidade mais grosseira no intervalo entre amostras. Já para
 aplicações paralelas, como são executadas sobre diferentes fluxos de
 processamento, cada fluxo pode possuir um comportamento distinto de
-acordo como o balanceamento da carga da aplicação, até mesmo para
+acordo com o balanceamento da carga da aplicação, até mesmo para
 mesmas regiões de código.
 
 \citeonline{laurenzano2011reducing} definem uma
@@ -296,20 +302,20 @@ base de execução o framework chamado pcubed (
 \textit{PMaC's Performance and Power benchmark}
 #+END_LaTeX
 ) que permite explorar diferentes comportamentos de laços de
-interações a fim de definir uma caracterização para a máquina alvo. A
+interações, a fim de definir uma caracterização para a máquina alvo. A
 caracterização da máquina define valores como consumo de potência,
 desempenho, padrões de execução e frequências de processador. Os
 resultados obtidos no experimento podem ser utilizados posteriormente
 como base de conhecimento, assim é possível visualizar o comportamento
 do consumo de energia quando se ajusta os fatores de caracterização da
 máquina. Dentre os resultados obtidos pelo trabalho, o melhor foi a
-redução de até 10,6\% no consumo de energia. 
+redução de até 10,6% no consumo de energia. 
 
 Diferente de \citeonline{laurenzano2011reducing},
 \citeonline{freeh2005exploring} apresentam uma abordagem voltada à memória
 distribuída para aplicações MPI. Essa abordagem encontra a melhor
 frequência para cada nó, a frequência é definida por uma heurística
-chamada ``gear'', a qual define um ganho entre consumo de energia e
+chamada ``gear'' que define um ganho entre consumo de energia e
 desempenho. Com o trace obtido a partir de uma pré-execução, a
 abordagem define blocos (
 #+BEGIN_LaTeX
@@ -326,7 +332,7 @@ de execução em 1%.
 
 Para aplicações paralelas escritas com OpenMP, \citeonline{millani2016fr}
 apresentam uma abordagem que analisa as regiões paralelas de um
-programa, utilizando uma análise rigorosa usando a técnica 
+programa, utilizando uma análise detalhada com a técnica 
 #+BEGIN_LaTeX
 \textit{Design of Experiments}
 #+END_LaTeX
@@ -342,6 +348,78 @@ instrumentação manual de código para assinalar as regiões paralelas no
 código fonte. Diferente disso, o foco desse trabalho é direcionado na
 identificação automática dessas regiões paralelas, baseando-se em
 contadores de hardware específicos.
+
+** Detecção de Regiões Memory-bound	
+
+Cada um dos trabalhos analisados utiliza uma abordagem diferenciada
+para analisar o comportamento de uma aplicação, classificando trechos
+de execução mais memory-bound, partes em
+que a aplicação espera por IO (entrada ou saída de dados), entre
+outros comportamentos. Como o alvo desse trabalho é a detecção de regiões
+memory-bound de aplicações paralelas, para que seja possível reduzir o
+consumo de energia de toda aplicação pelo uso da técnica DVFS. Nessa
+seção será abordado as medidas utilizadas pelas técnicas, ao
+definir o comportamento memory-bound de um programa. Na Tabela
+\ref{table:comparativoDeTrabalhos} é possível visualizar um
+comparativo entre as abordagens. 
+
+#+BEGIN_LaTeX
+\begin{table}[h]
+\centering
+\caption{Comparativo de trabalhos}\label{table:comparativoDeTrabalhos}
+\vspace{0.5cm}
+\begin{tabular}{rrr} 
+\citeonline{laurenzano2011reducing} & \citeonline{spiliopoulos2012power} & \citeonline{freeh2005exploring} \\
+\hline
+Tamanho de Array & Miss na LLC & Miss na L2 \\
+Stride & Cycles &  Operações por Miss \\
+Taxa de Hit & Stall Cycles & -\\
+Operações de Memória & Latência de Memória & - \\
+Operações de FP & Tempo de Reorder Buffer & - \\
+Instruções por Laço & - & - \\
+\end{tabular}
+\end{table}
+
+%\begin{table}[h]
+%\centering
+%\caption{Comparativo de trabalhos}\label{table:comparativoDeTrabalhos}
+%\vspace{0.5cm}
+%\begin{tabular}{r|lr} 
+%Trabalho & Medidas & Overhead \\
+%\hline
+%\citeonline{spiliopoulos2012power} & Miss na LLC \\ Cycles & 2% \\
+% & Cycles &  \\
+% & Stall Cycles & \\
+% & Latência de Memória & \\
+% & Tempo de Reorder Buffer & \\
+%\citeonline{freeh2005exploring} & Operações por Miss & - \\
+% & Miss na L2 &  \\
+%\citeonline{laurenzano2011reducing} & Tamanho de Array & 4x mais lento \\
+% & stride & \\
+% & Taxa de hit & \\
+% & Número de Operações de Memória & \\
+% & Número de Operações de FP & \\
+% & Instruções por Laço & \\
+%\citeonline{millani2016fr} & - & - \\
+%\end{tabular}
+%\end{table}
+#+END_LaTeX
+
+Dentre os trabalhos, pode-se visualizar que
+\citeonline{laurenzano2011reducing} utilizam mais medidas que as outras
+técnicas, a fim de compreender o comportamento da aplicação em uma
+granularidade mais fina, analisando além das fases da aplicação onde
+ocorre mais processamento, também os padrões de acesso à memória. Já
+\citeonline{spiliopoulos2012power} apresentam uma abordagem diferente,
+analisando também o tempo em que o 
+#+BEGIN_LaTeX
+\textit{Reorder Buffer}
+#+END_LaTeX
+ leva para encher. A abordagem que utiliza menos medidas é a de
+ \citeonline{freeh2005exploring}, a qual analisa apenas o índice de cache
+ misses para o segundo nível de cache, já que em sua abordagem é
+ levado em consideração uma aplicação distribuída, o grão é o próprio
+ nó de processamento.
 
 * Experimentos
 \label{chapter.experiments} 
@@ -371,9 +449,3 @@ contadores de hardware específicos.
 
 
 \appendix
-* Apendice 1
-\label{ap.javacc}
-
-asdsaodk
-set of optional flags. An example, is the flag =STATIC=, which means
-that there is only one parser for the JVM when set to true.
