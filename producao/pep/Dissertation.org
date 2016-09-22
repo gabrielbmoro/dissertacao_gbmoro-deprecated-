@@ -245,9 +245,130 @@ Do as follows:
    #+end_src
 
 * Introdução
-
 * Conceitos Básicos
 \label{chapter.basic_concepts}
+
+Este capítulo apresentará alguns conceitos que são fundamentais para a
+compreensão da proposta do trabalho. Como o trabalho leva em
+consideração o comportamento de uma aplicação paralela, será abordado
+nesse capítulo um pouco sobre os tipos de aplicações paralelas e
+principais características de balanceamento de carga, o que pode
+impactar diretamente no comportamento de uma aplicação.
+
+** Tipos de Aplicações Paralelas
+*** Fork-join
+
+O modelo Fork-join consiste em um processo que dispara várias threads
+(fork), após essa divisão, geralmente ocorre um processamento
+específico em cada thread (abordagem muito usada em Pthreads) ou um
+processamento similar, sobre diferentes dados (abordagem mais usada em
+OpenMP) \cite{pacheco2011introduction}. Na Figura \ref{fig.fork-join}
+é possível visualizar um exemplo de fork-join, um processo que
+inicializa duas threads.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Exemplo de Aplicação Fork-Join \cite{pacheco2011introduction}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/applicationFork-join.pdf}
+\label{fig.fork-join} 
+\end{figure}
+#+END_LaTeX
+
+Fork-join é um tipo de aplicação paralela muito desenvolvida quando se
+utiliza o padrão OpenMP, especialmente quando paraleliza-se laços
+"for". Ao definir os "pragmas", indica-se ao compilador aonde iniciará
+a divisão do fluxo principal de execução em vários fluxos de
+processamento (threads). A seguir no código \ref{lst.mm} é apresentado
+um exemplo de Fork-Join utilizando a biblioteca OpenMP em um problema
+de multiplicação de matrizes.
+
+#+LaTeX: \lstset{language=C,caption={Multiplicação de matrizes usando Fork-join.},label=lst.mm}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+/*Multiplicacao das matrizes matA e matB*/
+int i,j,k;
+double tmp=0.0;
+
+#pragma omp parallel for private(i,j,k)
+for(i=0;i < size; i++) {
+  for(j=0;j < size; j++) {
+	  tmp=0;
+	  for(k=0; k < size; k++) {
+	    tmp = tmp + A[i * size + k] * B[k * size + j];
+    }
+	    R[i * size + j] = tmp;
+	}
+}
+\end{lstlisting}
+
+#+END_LaTeX
+
+A abordagem tradicional de multiplicação de matrizes utiliza três
+laços aninhados, o primeiro que percorre as linhas da matriz, o mais
+interno permite o deslocamento nas colunas e o terceiro laço permite
+passar por cada elemento da linha e da coluna desejada. Na
+implementação do exemplo \ref{lst.mm}, a diretiva "pragma omp parallel
+for" sinaliza o momento em que ocorrerá o fork da aplicação, aonde
+cada thread receberá do processo principal "x" iterações do primeiro
+laço, ou seja, a tarefa de percorrer "x" linhas da matriz. Cada thread
+executará o mesmo código, mas o índice "i" será diferente para cada
+thread para que elas realizem o mesmo trabalho em localizações
+diferentes da matriz.
+
+*** Stencil
+
+Aplicações do tipo Stencil realizam uma espécie de computação
+matricial, aplicando cálculos sobre determinada célula da matriz,
+levando em consideração suas células vizinhas \cite{Roth1997}. Muitas
+dependências podem ocorrer nesse tipo de abordagem, o que torna esse
+tipo de aplicação mais complexo do ponto de vista de implementação. A
+Figura \ref{fig.stencil} apresenta o funcionamento básico desse tipo
+de aplicação.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Exemplo de Aplicação Stencil.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/applicationStencil.pdf}
+\label{fig.stencil} 
+\end{figure}
+#+END_LaTeX
+
+O exemplo da Figura \ref{fig.stencil} apresenta uma matriz, uma parte
+dela é selecionada pelo algoritmo, nessa parte é realizado um cálculo
+que leva em consideração os valores dos vizinhos da célula alvo. O
+mesmo procedimento é realizado para todos os elementos da
+matriz. Nesse exemplo é possível visualizar uma dependência muito
+comum, quando a célula fizer parte de uma borda, ocorrerá que faltará
+alguns vizinhos para a mesma. Dependendo do cálculo que está sendo
+realizado e do algoritmo, a solução para o problema das bordas pode
+ser a duplicação das mesmas ou o preenchimento com um valor
+constante.
+
+Uma aplicação muito conhecida que implementa a abordagem Stencil é o
+#+BEGIN_LaTeX
+\textit{Heat Transfer}
+#+END_LaTeX
+, na qual utiliza-se uma matriz base para representar uma placa
+metálica e outra matriz menor que pode ser chamada de matriz de
+convolução. Essa matriz de convolução atua sobre cada elemento da
+matriz base, a fim de calcular a sua temperatura. Esse procedimento é
+realizado inúmeras vezes para cada célula, de acordo com o número de
+iterações definido.
+
+*** Mapeamento
+*** Recorrência
+*** Escaneamento
+
+** Balanceamento de Carga
+*** Balanceamento Estático
+*** Balanceamento Dinâmico
+
+** Comportamentos de Aplicações
+*** Memory-bound
+*** CPU-bound
+*** IO-bound
 
 #+BEGIN_LaTeX
 %\begin{figure}[!htb]
