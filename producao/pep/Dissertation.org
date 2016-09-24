@@ -250,19 +250,22 @@ Do as follows:
 
 Este capítulo apresentará alguns conceitos que são fundamentais para a
 compreensão da proposta do trabalho. Como o trabalho leva em
-consideração o comportamento de uma aplicação paralela, será abordado
-nesse capítulo um pouco sobre os tipos de aplicações paralelas e
-principais características de balanceamento de carga, o que pode
-impactar diretamente no comportamento de uma aplicação.
+consideração o comportamento de aplicações paralelas, será abordado
+nesse capítulo um pouco sobre os tipos de aplicações e suas
+principais características, o que pode impactar diretamente no
+comportamento de uma aplicação. 
 
 ** Tipos de Aplicações Paralelas
+
+Existem vários modelos de aplicações paralelas para memória compartilhada, dentre esses modelos, os tipos de aplicações utilizadas nos experimentos desse trabalho podem ser classificadas em abordagens de tipo: Fork-join, Stencil, Mapeamento e Redução.
+
 *** Fork-join
 
 O modelo Fork-join consiste em um processo que dispara várias threads
 (fork), após essa divisão, geralmente ocorre um processamento
 específico em cada thread (abordagem muito usada em Pthreads) ou um
 processamento similar, sobre diferentes dados (abordagem mais usada em
-OpenMP) \cite{pacheco2011introduction}. Na Figura \ref{fig.fork-join}
+OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a abordagem de divisão e conquista, como por exemplo o algoritmo Merge-sort, fazem uso do modelo Fork-Join. Na Figura \ref{fig.fork-join}
 é possível visualizar um exemplo de fork-join, um processo que
 inicializa duas threads.
 
@@ -274,47 +277,6 @@ inicializa duas threads.
 \label{fig.fork-join} 
 \end{figure}
 #+END_LaTeX
-
-Fork-join é um tipo de aplicação paralela muito desenvolvida quando se
-utiliza o padrão OpenMP, especialmente quando paraleliza-se laços
-"for". Ao definir os "pragmas", indica-se ao compilador aonde iniciará
-a divisão do fluxo principal de execução em vários fluxos de
-processamento (threads). A seguir no código \ref{lst.mm} é apresentado
-um exemplo de Fork-Join utilizando a biblioteca OpenMP em um problema
-de multiplicação de matrizes.
-
-#+LaTeX: \lstset{language=C,caption={Multiplicação de matrizes usando Fork-join.},label=lst.mm}
-#+BEGIN_LaTeX
-\begin{lstlisting}
-/*Multiplicacao das matrizes matA e matB*/
-int i,j,k;
-double tmp=0.0;
-
-#pragma omp parallel for private(i,j,k)
-for(i=0;i < size; i++) {
-  for(j=0;j < size; j++) {
-	  tmp=0;
-	  for(k=0; k < size; k++) {
-	    tmp = tmp + A[i * size + k] * B[k * size + j];
-    }
-	    R[i * size + j] = tmp;
-	}
-}
-\end{lstlisting}
-
-#+END_LaTeX
-
-A abordagem tradicional de multiplicação de matrizes utiliza três
-laços aninhados, o primeiro que percorre as linhas da matriz, o mais
-interno permite o deslocamento nas colunas e o terceiro laço permite
-passar por cada elemento da linha e da coluna desejada. Na
-implementação do exemplo \ref{lst.mm}, a diretiva "pragma omp parallel
-for" sinaliza o momento em que ocorrerá o fork da aplicação, aonde
-cada thread receberá do processo principal "x" iterações do primeiro
-laço, ou seja, a tarefa de percorrer "x" linhas da matriz. Cada thread
-executará o mesmo código, mas o índice "i" será diferente para cada
-thread para que elas realizem o mesmo trabalho em localizações
-diferentes da matriz.
 
 *** Stencil
 
@@ -340,7 +302,7 @@ dela é selecionada pelo algoritmo, nessa parte é realizado um cálculo
 que leva em consideração os valores dos vizinhos da célula alvo. O
 mesmo procedimento é realizado para todos os elementos da
 matriz. Nesse exemplo é possível visualizar uma dependência muito
-comum, quando a célula fizer parte de uma borda, ocorrerá que faltará
+comum, quando a célula fizer parte de uma borda, faltará
 alguns vizinhos para a mesma. Dependendo do cálculo que está sendo
 realizado e do algoritmo, a solução para o problema das bordas pode
 ser a duplicação das mesmas ou o preenchimento com um valor
@@ -358,8 +320,82 @@ realizado inúmeras vezes para cada célula, de acordo com o número de
 iterações definido.
 
 *** Mapeamento
-*** Recorrência
-*** Escaneamento
+
+Mapeamento é um tipo de aplicação paralela muito desenvolvida quando se
+utiliza o padrão OpenMP, especialmente quando paraleliza-se laços
+"for". Ao definir os "pragmas", indica-se ao compilador aonde iniciará
+a divisão do fluxo principal de execução em vários fluxos de
+processamento (threads). A seguir no código \ref{lst.mm} é apresentado
+um exemplo da técnica de Mapeamento, utilizando a biblioteca OpenMP em um problema
+de multiplicação de matrizes.
+
+#+LaTeX: \lstset{language=C,caption={Multiplicação de matrizes usando Mapeamento \cite{Krause2016}.},label=lst.mm}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+/*Multiplicacao das matrizes matA e matB*/
+int i,j,k;
+double tmp=0.0;
+
+#pragma omp parallel for private(i,j,k)
+for(i=0;i < size; i++) {
+  for(j=0;j < size; j++) {
+	  tmp=0;
+	  for(k=0; k < size; k++) {
+	    tmp = tmp + A[i * size + k] * B[k * size + j];
+    }
+	    R[i * size + j] = tmp;
+	}
+}
+\end{lstlisting}
+
+#+END_LaTeX
+
+A abordagem tradicional de multiplicação de matrizes utiliza três
+laços aninhados, o primeiro que percorre as linhas da matriz, o mais
+interno permite o deslocamento nas colunas e o terceiro laço permite
+passar por cada elemento da linha e da coluna desejada. Na
+implementação do exemplo \ref{lst.mm}, a diretiva "pragma omp parallel
+for" sinaliza o momento em que ocorrerá o disparo das threads, aonde
+cada thread receberá do processo principal "x" iterações do primeiro
+laço, ou seja, a tarefa de percorrer "x" linhas da matriz. Cada thread
+executará o mesmo código, mas o índice "i" será diferente para cada
+thread para que elas realizem o mesmo trabalho em localizações
+diferentes da matriz.
+
+*** Redução
+
+Geralmente esse tipo de implementação envolve a combinação de pequenas soluções obtidas a partir do processamento de partes de uma coleção de elementos de entrada. A saída desse tipo de implementação é um resultado único, o qual foi calculado por processamentos consecutivos. Na Figura \ref{fig.reduction} é possível visualizar um exemplo para ilustrar essa abordagem.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Exemplo de Redução.}
+\centering
+\includegraphics[width=.40\linewidth]{./img/applicationReduction.pdf}
+\label{fig.reduction} 
+\end{figure}
+#+END_LaTeX
+
+Um exemplo de algoritmo de redução é o algoritmo para calcular o número de Fibonacci, utilizando tarefas em OpenMP, essa implementação pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa da recursão são somadas em uma apenas. O recurso da diretiva "omp task" permite que realizar uma concorrência daquela tarefa dentre as threads, as quais realizam o trabalho e após isso concorrem pela próxima tarefa. A diretiva de sincronização é simbolizada com o "pragma omp taskwait", fazendo com que as threads que terminaram as duas tarefas responsáveis por "x" e "y", esperem uma pela outra para realizar o cálculo "x + y".
+
+#+LaTeX: \lstset{language=C,caption={Fibonacci implementado usando tarefas OpenMP \cite{addison2009openmp}.},label=lst.fib}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+int fib(int n) {
+    int x, y;
+    if (n < 2)
+        return n;
+    else {
+        #pragma omp task shared(x)
+            x = fib(n - 1);
+        #pragma omp task shared(y)
+            y = fib(n - 2);
+        #pragma omp taskwait
+            return x + y;
+    }
+}
+\end{lstlisting}
+
+#+END_LaTeX
 
 ** Balanceamento de Carga
 *** Balanceamento Estático
