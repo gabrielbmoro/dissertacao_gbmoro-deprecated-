@@ -257,7 +257,10 @@ comportamento de uma aplicação.
 
 ** Tipos de Aplicações Paralelas
 
-Existem vários modelos de aplicações paralelas para memória compartilhada, dentre esses modelos, os tipos de aplicações utilizadas nos experimentos desse trabalho podem ser classificadas em abordagens de tipo: Fork-join, Stencil, Mapeamento e Redução.
+Existem vários modelos de aplicações paralelas para memória
+compartilhada, dentre esses modelos, os tipos de aplicações utilizadas
+nos experimentos desse trabalho podem ser classificadas em abordagens
+de tipo: Fork-join, Stencil, Mapeamento e Redução.
 
 *** Fork-join
 
@@ -265,9 +268,11 @@ O modelo Fork-join consiste em um processo que dispara várias threads
 (fork), após essa divisão, geralmente ocorre um processamento
 específico em cada thread (abordagem muito usada em Pthreads) ou um
 processamento similar, sobre diferentes dados (abordagem mais usada em
-OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a abordagem de divisão e conquista, como por exemplo o algoritmo Merge-sort, fazem uso do modelo Fork-Join. Na Figura \ref{fig.fork-join}
-é possível visualizar um exemplo de fork-join, um processo que
-inicializa duas threads.
+OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a
+abordagem de divisão e conquista, como por exemplo o algoritmo
+Merge-sort, fazem uso do modelo Fork-Join. Na Figura
+\ref{fig.fork-join} é possível visualizar um exemplo de fork-join, um
+processo que inicializa duas threads.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
@@ -364,7 +369,12 @@ diferentes da matriz.
 
 *** Redução
 
-Geralmente esse tipo de implementação envolve a combinação de pequenas soluções obtidas a partir do processamento de partes de uma coleção de elementos de entrada. A saída desse tipo de implementação é um resultado único, o qual foi calculado por processamentos consecutivos. Na Figura \ref{fig.reduction} é possível visualizar um exemplo para ilustrar essa abordagem.
+Geralmente esse tipo de implementação envolve a combinação de pequenas
+soluções obtidas a partir do processamento de partes de uma coleção de
+elementos de entrada. A saída desse tipo de implementação é um
+resultado único, o qual foi calculado por processamentos
+consecutivos. Na Figura \ref{fig.reduction} é possível visualizar um
+exemplo para ilustrar essa abordagem.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
@@ -375,7 +385,17 @@ Geralmente esse tipo de implementação envolve a combinação de pequenas solu�
 \end{figure}
 #+END_LaTeX
 
-Um exemplo de algoritmo de redução é o algoritmo para calcular o número de Fibonacci, utilizando tarefas em OpenMP, essa implementação pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa da recursão são somadas em uma apenas. O recurso da diretiva "omp task" permite que realizar uma concorrência daquela tarefa dentre as threads, as quais realizam o trabalho e após isso concorrem pela próxima tarefa. A diretiva de sincronização é simbolizada com o "pragma omp taskwait", fazendo com que as threads que terminaram as duas tarefas responsáveis por "x" e "y", esperem uma pela outra para realizar o cálculo "x + y".
+Um exemplo de algoritmo de redução é o algoritmo para calcular o
+número de Fibonacci, utilizando tarefas em OpenMP, essa implementação
+pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta
+uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa
+da recursão são somadas em uma apenas. O recurso da diretiva "omp
+task" permite que realizar uma concorrência daquela tarefa dentre as
+threads, as quais realizam o trabalho e após isso concorrem pela
+próxima tarefa. A diretiva de sincronização é simbolizada com o
+"pragma omp taskwait", fazendo com que as threads que terminaram as
+duas tarefas responsáveis por "x" e "y", esperem uma pela outra para
+realizar o cálculo "x + y". 
 
 #+LaTeX: \lstset{language=C,caption={Fibonacci implementado usando tarefas OpenMP \cite{addison2009openmp}.},label=lst.fib}
 #+BEGIN_LaTeX
@@ -398,8 +418,71 @@ int fib(int n) {
 #+END_LaTeX
 
 ** Balanceamento de Carga
+
+\citeonline{Li2005} definem balanceamento de carga como uma ação que
+permite dividir a carga de trabalho da aplicação para vários
+processadores, máquinas ou threads, a fim de obter o aumento de
+desempenho em uma aplicação paralela. A carga de trabalho nesse
+contexto pode ser a divisão de dados ou tarefas, o que está
+relacionado diretamente com o tipo de aplicação a ser paralelizada,
+por exemplo, em uma aplicação Stencil, o balanceamento de carga pode
+ser a divisão da matriz base utilizada pela aplicação, assim cada
+processo/thread atuará sobre determinadas regiões da mesma matriz
+base. Outra abordagem de balanceamento de carga para uma aplicação
+Stencil, poderia ser a divisão das iterações realizadas sobre
+determinado elemento da matriz. 
+
 *** Balanceamento Estático
+
+O balanceamento de carga estático leva em consideração um conhecimento
+prévio da plataforma de execução (características de máquina) e da
+aplicação. A divisão da carga de trabalho ocorre antes da computação,
+fazendo com que esse tipo de técnica possua um baixo overhead, quando
+comparada com o balanceamento dinâmico \cite{Li2005}. 
+
+Para memória compartilhada, utilizando OpenMP é possível informar o
+tipo de balanceamento que será realizado na aplicação. No código
+\ref{lst.static} é possível visualizar um exemplo de algoritmo de
+multiplicação de matrizes que utiliza um escalonamento estático. Como
+a carga é conhecida, nesse problema é possível obter um bom desempenho
+com esse tipo de escalonador, visto que cada thread receberá um número
+de iterações a serem realizadas sobre determinadas partes da matriz,
+as quais são configuradas pelas variáveis privadas em que cada thread
+realizará o seu trabalho. 
+
+#+LaTeX: \lstset{language=C,caption={Uso de escalonador estático com OpenMP.} ,label=lst.static}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+#pragma omp parallel for private(i,j,k,tmp) schedule(static)
+    for(i=0;i < size; i++) {
+		for(j=0;j < size; j++) {
+			tmp=0;
+			for(k=0; k < size; k++)
+				tmp = tmp + A[i][k] * B[k][j];
+			R[i][j] = tmp;
+		}
+	}
+\end{lstlisting}
+
+
+#+END_LaTeX
+
 *** Balanceamento Dinâmico
+
+Diferente do balanceamento de carga estático, aonde a carga é
+homogênea e conhecida, no balanceamento de carga dinâmico a carga é
+heterogênea e geralmente não conhecida. Isso exige um comportamento
+adaptativo do escalonador, fazendo com que ele decida com base nas
+mudanças da aplicação e da plataforma de execução, qual é a melhor
+opção de balanceamento para melhorar o desempenho da aplicação
+\cite{Li2005}. 
+
+O conjunto de Mandelbrot é um exemplo de algoritmo onde ocorre um
+balanceamento de carga dinâmico. Esse algoritmo consiste no cálculo de
+quais pontos do plano fazem parte do conjunto de Mandelbrot, em cada
+ponto do plano (imagem) são realizados vários cálculos, com várias
+iterações, fazendo com que a carga seja desbalanceada entre as threads
+\cite{chandra2001parallel}. 
 
 ** Comportamentos de Aplicações
 *** Memory-bound
@@ -419,6 +502,51 @@ int fib(int n) {
 * Trabalhos Relacionados
 \label{chapter.relatedwork}
 
+A coleta dos trabalhos relacionados foi realizada utilizando a técnica
+chamada mapeamento sistemático da literatura \cite{Kitchenham2007}. Essa 
+técnica permite realizar um estudo prévio sobre a literatura com uma 
+boa cobertura, tendo por base um protocolo de pesquisa para seleção 
+dos artigos. O protocolo definido para investigar o estado da arte pode ser visualizado na Tabela \ref{table:protocoloDePesquisa}.
+
+#+BEGIN_LaTeX
+\begin{table}[!htb]
+\centering
+\caption{Protocolo de Pesquisa}\label{table:protocoloDePesquisa}
+\vspace{0.5cm}
+\begin{tabular}{|l|} 
+\hline
+\textbf{Critérios de Seleção} \\
+\hline
+- publicados acima de 2005 \\
+- artigos de bases confiáveis, revistas, periódicos e conferências \\
+- trabalho deve apresentar uma metodologia consistente, com uma \\ 
+descrição detalhada dos experimentos \\
+\hline
+\textbf{Critério de Inclusão} \\
+\hline
+- trabalhos destinados a redução do consumo de energia de aplicações \\
+paralelas, distribuídas e sequenciais \\
+\hline
+\textbf{Critérios de Exclusão} \\
+\hline
+- artigos com o número menor ou igual a 6 páginas \\
+- artigos não escritos em inglês \\
+\hline
+\textbf{Palavras-chave} \\
+\hline
+``memory-bound'' + ``behavior'' + \\ 
+``applications'' + ``power consumption'' + \\ 
+``hpc'' \\
+\hline
+\textbf{Questão de Pesquisa} \\
+\hline
+- Quais são as abordagens/técnicas que permitem diminuir a redução de \\
+energia de aplicações, levando em consideração o comportamento de aplicações? \\
+\hline
+\end{tabular}
+\end{table}
+#+END_LaTeX
+
 Não existe uma solução definitiva para detectar se uma região de
 código é mais memory-bound ou CPU-bound. Alguns trabalhos focam mais
 na detecção de fases para aplicações sequenciais
@@ -428,30 +556,30 @@ de aplicações distribuídas \cite{freeh2005exploring} e paralelas
 
 \citeonline{spiliopoulos2012power} apresentam uma ferramenta chamada
 Power-Sleuth que é capaz de fornecer uma descrição detalhada do
-comportamento de uma aplicação quando executada em determinada frequência. Esse trabalho
-utiliza três técnicas fundamentais para compreender o comportamento de
-um programa, detecção de fases, modelo DVFS (
+comportamento de uma aplicação quando executada em determinada
+frequência. Esse trabalho utiliza três técnicas fundamentais para
+compreender o comportamento de um programa, detecção de fases, modelo DVFS (
 #+BEGIN_LaTeX
 \textit{Dynamic Voltage and Frequency Scaling}
 #+END_LaTeX
 ) e modelos de correlação. A abordagem desenvolvida pelos autores
 identificam as fases da aplicação utilizando uma biblioteca chamada
 ScarPhase que utiliza o histórico de execução da
-aplicação, agrupando em fases, as funções do programa que possuem um comportamento
-similar (acessos a memória, taxa de misses, entre outros). Esse artigo
-investiga apenas aplicações sequenciais, nessa perspectiva a
-identificação de áreas de regiões memory-bound podem ser obtidas em
-uma granularidade mais grosseira no intervalo entre amostras. Já para
-aplicações paralelas, como são executadas sobre diferentes fluxos de
-processamento, cada fluxo pode possuir um comportamento distinto de
-acordo com o balanceamento da carga da aplicação, até mesmo para
-mesmas regiões de código.
+aplicação, agrupando em fases, as funções do programa que possuem um
+comportamento similar (acessos a memória, taxa de misses, entre
+outros). Esse artigo investiga apenas aplicações sequenciais, nessa
+perspectiva a identificação de áreas de regiões memory-bound podem ser
+obtidas em uma granularidade mais grosseira no intervalo entre
+amostras. Já para aplicações paralelas, como são executadas sobre
+diferentes fluxos de processamento, cada fluxo pode possuir um
+comportamento distinto de acordo com o balanceamento da carga da
+aplicação, até mesmo para mesmas regiões de código.
 
 \citeonline{laurenzano2011reducing} definem uma
 abordagem automatizada que permite selecionar a frequência mais
 adequada de processador para determinado laço do programa. A
 frequência do processador é escolhida utilizando como base uma análise
-estática (realizada antes da execução) e outra análise realizada
+estática (realizada antes da execução) e outra análise realizada 
 durante o tempo de execução da aplicação, utilizando os rastros
 obtidos. Os autores utilizaram vários benchmarks, tendo como
 base de execução o framework chamado pcubed (
@@ -481,15 +609,15 @@ abordagem define blocos (
 ) que realizam operações comuns, depois dessa classificação é obtido
 as fases da aplicação que correspondem a junção desses blocos. Para
 cada bloco é definido o ganho desejado. O ganho é a melhor
-configuração encontrada (frequência de processador) entre consumo de energia e desempenho para
-determinada fase da aplicação. Os resultados apresentam um ganho
-considerável para mais da metade das aplicações executadas, o melhor
-resultado obtido foi a redução do consumo de energia em 9% e do tempo
-de execução em 1%.
+configuração encontrada (frequência de processador) entre consumo de
+energia e desempenho para determinada fase da aplicação. Os resultados
+apresentam um ganho considerável para mais da metade das aplicações
+executadas, o melhor resultado obtido foi a redução do consumo de
+energia em 9% e do tempo de execução em 1%.
 
-Para aplicações paralelas escritas com OpenMP, \citeonline{millani2016fr}
-apresentam uma abordagem que analisa as regiões paralelas de um
-programa, utilizando uma análise detalhada com a técnica 
+Para aplicações paralelas escritas com OpenMP,
+\citeonline{millani2016fr} apresentam uma abordagem que analisa as
+regiões paralelas de um programa, utilizando uma análise detalhada com a técnica 
 #+BEGIN_LaTeX
 \textit{Design of Experiments}
 #+END_LaTeX
