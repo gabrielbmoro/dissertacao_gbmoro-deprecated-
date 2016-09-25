@@ -485,9 +485,29 @@ iterações, fazendo com que a carga seja desbalanceada entre as threads
 \cite{chandra2001parallel}. 
 
 ** Comportamentos de Aplicações
+
+O comportamento de uma aplicação está relacionado diretamente com a
+abordagem da aplicação, por exemplo, um algoritmo de multiplicação de
+vetores é diferente de um algoritmo de busca em grafos. Ambos
+algoritmos possuem entrada, processamento e saída, mas o núcleo é
+diferente, porque realizam processamentos distintos. O algoritmo de
+busca em grafos, por exemplo, possui um comportamento mais
+memory-bound, do que o algoritmo de multiplicação de vetores, pois
+quando é realizado uma busca em grafos, por determinado nó, ocorre
+vários "misses" de cache, fazendo com que o algoritmo acesse a memória
+principal várias vezes. Diferente do que ocorre no algoritmo de
+multiplicação de vetores, aonde os dados estão mais bem localizados na
+memória cache, pela estrutura de dados utilizada ser um vetor e a
+leitura dos elementos ser realizada de maneira sequencial, os dados
+permitem que a busca na memória principal ocorra menos vezes, pelo
+princípio da localidade. Nessa seção será apresentado os dois
+comportamentos mais importantes de uma aplicação: memory-bound e
+CPU-bound.
+
 *** Memory-bound
+
+
 *** CPU-bound
-*** IO-bound
 
 #+BEGIN_LaTeX
 %\begin{figure}[!htb]
