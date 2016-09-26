@@ -500,14 +500,27 @@ multiplicação de vetores, aonde os dados estão mais bem localizados na
 memória cache, pela estrutura de dados utilizada ser um vetor e a
 leitura dos elementos ser realizada de maneira sequencial, os dados
 permitem que a busca na memória principal ocorra menos vezes, pelo
-princípio da localidade. Nessa seção será apresentado os dois
-comportamentos mais importantes de uma aplicação: memory-bound e
-CPU-bound.
+princípio da localidade. 
 
-*** Memory-bound
+\citeonline{jesshope2006advances} definem que as aplicações memory-bound 
+são aquelas que o desempenho aumenta a medida que for reduzido a taxa de 
+cache misses para o segundo nível de cache (cache L2). Diferente disso, nas 
+aplicações non-memory-bound não ocorre o aumento de desempenho a medida 
+que a taxa de cache misses diminui. Uma das maneiras de medir esse 
+comportamento é a partir de contadores de hardware, os quais informam a 
+quantidade de acessos aos níveis de cache, memória principal, a taxa de hit 
+nas memórias, a quantidade de instruções realizadas e assim por diante.
 
-
-*** CPU-bound
+Além da taxa de misses para o segundo nível de cache para definir o 
+comportamento de uma aplicação, também é possível utilizar a 
+métrica IPC (
+#+BEGIN_LaTeX
+\textit{Instructions per Clock Cycle}
+#+END_LaTeX
+). Essa métrica permite verificar 
+quantas instruções o programa realiza por ciclo de processador, dessa maneira 
+podemos analisar se reduzindo o número de instruções de uma aplicação, aumentamos 
+o seu desempenho, se isso acontecer podemos classificar a aplicação como non-memory-bound ou CPU-bound \cite{jesshope2006advances}.
 
 #+BEGIN_LaTeX
 %\begin{figure}[!htb]
