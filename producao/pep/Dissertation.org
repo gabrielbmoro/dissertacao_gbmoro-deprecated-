@@ -245,6 +245,57 @@ Do as follows:
    #+end_src
 
 * Introdução
+
+Cada programa/aplicação possui aspectos peculiares, os quais definem
+seu tipo, modelo e demais características de processamento. Além
+dessas características influenciarem o comportamento de uma aplicação,
+a plataforma de execução aonde a aplicação é executada influencia
+diretamente no seu comportamento. Aplicações memory-bound, por
+exemplo, definem uma classe de aplicações que possuem uma alta taxa de
+cache misses, fazendo com que ela seja limitada pelo acesso a
+memória em algumas partes da sua execução. Outras aplicações,
+realizam mais processamento e acessam a memória menos vezes, o que é o
+caso por exemplo das aplicações mais CPU-bound, as quais possuem um
+IPC (
+#+BEGIN_LaTeX
+\textit{Instruction Per Cycle}
+#+END_LaTeX
+) maior que demais tipos de aplicações,
+dependendo da arquitetura alvo.
+
+Uma aplicação paralela é composta por várias regiões paralelas, as
+quais são executadas por threads distintas. Por exemplo, em uma
+aplicação que simula a troca de calor através de uma placa de metal é
+possível definir duas regiões paralelas: a primeira define uma
+condição inicial da placa metálica, outra realiza os cálculos de
+transferência de calor através dos diferentes pontos da placa, a fim
+de calcular o cálculo da troca de calor. Nesse exemplo, podemos
+visualizar que a segunda região é mais memory-bound do que a outra,
+visto que é efetuado o mesmo cálculo sobre diferentes dados em
+diferentes iterações, fazendo com que o registro da informação seja
+realizado e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
+em uma aplicação é possível ter diferentes comportamentos em uma
+granularidade mais fina, compreendendo o comportamento das diferentes
+regiões da aplicação. O objetivo do trabalho é estudar
+as regiões memory-bound de aplicações paralelas em uma granularidade
+mais refinada das abordagens investigadas, de maneira que possa ser
+realizado um ajuste de frequência de processador utilizando a técnica
+DVFS (
+#+BEGIN_LaTeX
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+) para obter um consumo de energia nas fases mais memory-bound da
+aplicação.
+
+O presente trabalho está organizado da seguinte maneira: no capítulo 2
+será apresentado os conceitos básicos utilizados em nossa abordagem;
+já no capítulo 3 é investigado o estado da arte com vários trabalhos que
+contribuem diretamente para essa pesquisa; o capítulo 4 apresenta os
+experimentos realizados e alguns resultados preliminares do trabalho;
+e no capítulo 5 é apresentado as conclusões do trabalho, como também
+os próximos passos da pesquisa e cronograma de atividades que serão
+realizadas no decorrer do mestrado.
+
 * Conceitos Básicos
 \label{chapter.basic_concepts}
 
@@ -879,11 +930,9 @@ fim de obter a redução no consumo de energia.
 \end{figure}
 #+END_LaTeX
 
+* Considerações Finais
+
 #+LATEX: \bibliography{References}
-
-
-\appendix
-
 
 * 2016-08-20 FT (gráficos)                                         :noexport:
 
