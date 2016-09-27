@@ -609,7 +609,9 @@ diferentes fluxos de processamento, cada fluxo pode possuir um
 comportamento distinto de acordo com o balanceamento da carga da
 aplicação, até mesmo para mesmas regiões de código.
 
-\citeonline{Poellabauer2005} demonstram uma técnica chamada 
+Além da abordagem de \citeonline{spiliopoulos2012power}, a qual é mais
+voltada para aplicações sequenciais, \citeonline{Poellabauer2005}
+demonstram uma técnica chamada 
 #+BEGIN_LaTeX
 \textit{Feed-back loop}
 #+END_LaTeX
@@ -617,8 +619,13 @@ aplicação, até mesmo para mesmas regiões de código.
 #+BEGIN_LaTeX
 data cache misses / instructions executed
 #+END_LaTeX
-). A partir dessa equação é possível analisar a porcentagem de misses 
-nas instruções executadas pela aplicação como um todo.
+) e também DVFS. A partir da equação MAR é possível analisar a
+porcentagem de misses nas instruções executadas pela aplicação como um
+todo, fazendo com que a partir desses resultados seja possível
+realizar previsões sobre o comportamento de aplicações em determinada
+arquitetura. Os resultados dessa pesquisa apresentam uma economia de
+energia de até 27% para as seis aplicações executadas.
+
 
 \citeonline{laurenzano2011reducing} definem uma
 abordagem automatizada que permite selecionar a frequência mais
