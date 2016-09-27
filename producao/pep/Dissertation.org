@@ -539,7 +539,8 @@ A coleta dos trabalhos relacionados foi realizada utilizando a técnica
 chamada mapeamento sistemático da literatura \cite{Kitchenham2007}. Essa 
 técnica permite realizar um estudo prévio sobre a literatura com uma 
 boa cobertura, tendo por base um protocolo de pesquisa para seleção 
-dos artigos. O protocolo definido para investigar o estado da arte pode ser visualizado na Tabela \ref{table:protocoloDePesquisa}.
+dos artigos. O protocolo definido para investigar o estado da arte pode ser 
+visualizado na Tabela \ref{table:protocoloDePesquisa}.
 
 #+BEGIN_LaTeX
 \begin{table}[!htb]
@@ -585,7 +586,7 @@ código é mais memory-bound ou CPU-bound. Alguns trabalhos focam mais
 na detecção de fases para aplicações sequenciais
 \cite{spiliopoulos2012power}, outros se concentram mais na perspectiva
 de aplicações distribuídas \cite{freeh2005exploring} e paralelas
-\cite{laurenzano2011reducing, millani2016fr}. 
+\cite{laurenzano2011reducing, millani2016fr}.
 
 \citeonline{spiliopoulos2012power} apresentam uma ferramenta chamada
 Power-Sleuth que é capaz de fornecer uma descrição detalhada do
@@ -607,6 +608,17 @@ amostras. Já para aplicações paralelas, como são executadas sobre
 diferentes fluxos de processamento, cada fluxo pode possuir um
 comportamento distinto de acordo com o balanceamento da carga da
 aplicação, até mesmo para mesmas regiões de código.
+
+\citeonline{Poellabauer2005} demonstram uma técnica chamada 
+#+BEGIN_LaTeX
+\textit{Feed-back loop}
+#+END_LaTeX
+, essa técnica utiliza uma métrica chamada MAR (
+#+BEGIN_LaTeX
+data cache misses / instructions executed
+#+END_LaTeX
+). A partir dessa equação é possível analisar a porcentagem de misses 
+nas instruções executadas pela aplicação como um todo.
 
 \citeonline{laurenzano2011reducing} definem uma
 abordagem automatizada que permite selecionar a frequência mais
@@ -646,7 +658,13 @@ configuração encontrada (frequência de processador) entre consumo de
 energia e desempenho para determinada fase da aplicação. Os resultados
 apresentam um ganho considerável para mais da metade das aplicações
 executadas, o melhor resultado obtido foi a redução do consumo de
-energia em 9% e do tempo de execução em 1%.
+energia em 9% e do tempo de execução em 1%. Em contraste a abordagem de 
+\citeonline{freeh2005exploring}, \citeonline{Ge2005} apresenta uma abordagem 
+que também utiliza a técnica DVFS para aplicações paralelas em Clusters, mas 
+nessa abordagem ao invés de utilizar as regiões mais memory-bound da aplicação 
+para aplicar a redução da frequência, os autores realizam a redução de frequência 
+de processador quando o desempenho da CPU não é necessário, por exemplo quando 
+ocorre comunicações entre os processos MPI.
 
 Para aplicações paralelas escritas com OpenMP,
 \citeonline{millani2016fr} apresentam uma abordagem que analisa as
