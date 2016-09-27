@@ -764,31 +764,205 @@ analisando também o tempo em que o
  levado em consideração uma aplicação distribuída, o grão é o próprio
  nó de processamento.
 
-* Experimentos
+* Experimentos Preliminares
 \label{chapter.experiments} 
+
+Os experimentos preliminares foram realizados com o objetivo de
+investigar em uma granularidade fina, pontos de execução da aplicação
+aonde ocorre um comportamento mais memory-bound, levando em
+consideração o índice de cache misses na L2 e na cache L3. A
+metodologia utilizada para realizar esse tipo de análise pode ser
+visualizada na Figura \ref{fig.methodology}.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Visão geral da metodologia utilizada para coletar os hardware counters \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/experimentosMetodologia.pdf}
+\label{fig.methodology} 
+\end{figure}
+#+END_LaTeX
+
+A metodologia utilizada nesse trabalho define algumas etapas, dentre
+elas a compilação do código fonte, execução com instrumentação,
+agrupamento dos arquivos ".evt" e agrupamento dos rastros em um
+arquivo final. O arquivo binário é gerado a partir de uma compilação
+comum, após isso o programa é executado utilizando a ferramenta
+likwid-perfctr, utilizando o modo 
+#+BEGIN_LaTeX
+\textit{timeline} 
+#+END_LaTeX
+que permite coletar
+contadores de hardware ao longo do tempo de execução da aplicação. Na
+diretiva de execução da aplicação com a ferramenta likwid, deve ser
+definido os hardware counters desejados e também o intervalo em que
+será realizado a amostragem. A partir da execução da aplicação é
+gerado um arquivo de rastro para cada núcleo de processamento, os
+quais são agrupados por um script para gerar o arquivo 
+#+BEGIN_LaTeX
+\textit{trace} 
+#+END_LaTeX
+para
+realizarmos a análise do comportamento da aplicação. 
+
+** Experimento com o Nas Parallel Benchmark (NPB)
+
+O experimento foi realizado em uma máquina com 2 processadores
+Intel(R) Xeon(R) E5-2650 CPU 2.00 GHz, cada um com 8 cores físicos e
+tecnologia Hyper-Threading. A metodologia foi aplicada para três
+aplicações do NPB, dentre elas: 3D Discrete Fast Fourier Transform
+(FT), Lower-Upper Gauss-Seidel Solver (LU) e a Conjugante Gradient
+(CG), utilizando a configuração padrão de threads do OpenMP para a
+plataforma com 32 threads em execução.
+
+*** Discrete 3D Fast Fourier Transform (NPB-FT, B Class)
+
+A Figura \ref{fig.ftExecution} apresenta a taxa de cache misses da L2 e da L3 para a
+aplicação FT, com amostragem realizada a cada 100 milisegundos de
+execução. É possível visualizar claramente as fases mais memory-bound
+da aplicação, as quais são representadas pelos picos em intervalos
+regulares, quando analisamos esse comportamento para a cache L2. Já
+para a cache L3 é observável que depois da fase de inicialização (onde
+existe um pico de 37%), a taxa decresce em direção a zero. A maior
+taxa de misses para a L2 foi 30%, entre 7.5 e 10 segundos de
+execução. Já a menor taxa para a L2 foi de 10% de misses durante a
+fase de inicialização da aplicação.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Taxa de Misses para Caches L2 e L3, aplicação Fast Fourier Transform (NPB-FT, Classe B) \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/ft_L2_L3_100ms.pdf}
+\label{fig.ftExecution} 
+\end{figure}
+#+END_LaTeX
+
+*** Lower-Upper Gauss-Seidel Solver (NPB-LU, B Class)
+
+A Figura \ref{fig.luExecution} apresenta a taxa de cache misses da L2
+e da L3 para a aplicação LU. O comportamento da aplicação é bem
+diferente da FT (conforme a Figura {fig.ftExecution}). A partir do
+gráfico é possível visualizar que a taxa de misses ocorridos na L2
+fica em aproximadamente 20%, enquanto que na cache L3, a taxa se
+aproxima de zero durante toda a execução, com exceção da inicialização
+da aplicação. 
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Taxa de Misses para Caches L2 e L3, aplicação Lower-Upper Gauss-Seidel Solver (NPB-LU, Classe B) \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/lu_L2_L3_100ms.pdf}
+\label{fig.luExecution} 
+\end{figure}
+#+END_LaTeX
+
+*** Conjugate Gradient (NPB-CG, B Class)
+
+Na Figura \ref{fig.cgExecution} é possível visualizar o comportamento
+da aplicação CG, levando em consideração a taxa de misses nas caches
+L2 e L3. A partir da fase de inicialização, o comportamento de mabas
+métricas se torna estável, aproximando-se de 38% de misses para a L2 e
+zero para L3. Comparando com as aplicações anteriores (FT e LU) é
+possível visualizar que a taxa de misses na L2 é maior do que as
+outras, sugerindo um comportamento mais memory-bound. Dessa maneira,
+essa aplicação potencialmente seria candidata para aplicação da
+técnica DVFS, reduzindo a frequência nos pontos mais memory-bound, a
+fim de obter a redução no consumo de energia.
 
 
 #+BEGIN_LaTeX
-%\begin{table}[!htb]
-%\caption{Experimental Units description}
-%\label{tab.machines}
-%\centering
-%\begin{tabularx}{\linewidth}{lXXX}\toprule
-%                        &   {\bf Luiza}         & {\bf Orion1}         & {\bf Guarani}    %\\\toprule
-%Processor                &  Intel Core i7        & Xeon E5-2630         & Intel Core i5-2400   %\\
-%CPU(s)                   &  1                    & 2                    & 1       \\
-%Cores per CPU            &  4                    & 6                    & 4             \\
-%Max. Freq.               &  2.7 GHz              & 2.30GHz              & 3.10GHz       \\
-%L1d/L1i Cache            & 32/32KBytes           & 32/32KBytes          & 32/32KBytes  \\     
-%L2 Cache                 & 256KBytes             & 256KBytes            & 256KBytes    \\
-%L3 Cache                 & 6MBytes               & 15MBytes              & 6MBytes         \\
-%Memory                   & 16GBytes              & 32GBytes             & 20GBytes      %\\\midrule
-%OS                       & OSX 10.10.5           & Ubuntu 12.04.5       & Debian 4.3.5-1 \\
-%\bottomrule\end{tabularx}
-%\end{table}
+\begin{figure}[!htb]
+\caption{Taxa de Misses para Caches L2 e L3, aplicação Conjugate Gradient (NPB-CG, Classe B) \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/cg_L2_L3_100ms.pdf}
+\label{fig.cgExecution} 
+\end{figure}
 #+END_LaTeX
 
 #+LATEX: \bibliography{References}
 
 
 \appendix
+
+
+* 2016-08-20 FT (gráficos)                                         :noexport:
+
+#+begin_src R :results output graphics :file img/ft_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session *2*
+library(dplyr);
+df2 <- read.csv("../../dados/exp3_NASandLikwid/ftl2.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp3_NASandLikwid/ftl3.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "FT";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+      scale_color_discrete(name="Nível de Cache") + facet_wrap(~Application) +
+      labs(x = "Tempo de Execução (segundos)", y= "Taxa de Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/ft_L2_L3_100ms.pdf]]
+
+* 2016-08-20 LU (gráficos)                                         :noexport:
+
+#+begin_src R :results output graphics :file img/lu_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "LU";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Nível de Cache") + facet_wrap(~Application) +
+      labs(x = "Tempo de Execução (segundos)", y= "Taxa de Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/lu_L2_L3_100ms.pdf]]
+
+* 2016-08-20 CG (gráficos)                                         :noexport:
+
+#+begin_src R :results output graphics :file img/cg_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "CG";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.4),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Nível de Cache") + facet_wrap(~Application) +
+      labs(x = "Tempo de Execução (segundos)", y= "Taxa de Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/cg_L2_L3_100ms.pdf]]
+
