@@ -3773,7 +3773,7 @@ so, an increase in L3 miss rate generates L2 misses just after.
 
 Note: Change *x* in the previous code block to see other timeslices.
 
-* [13:53:07; 31.08.2016] Avaliando o Overhead da técnica com e sem likwid :Gabriel:
+* [10:22:46; 28.09.2016] Avaliando o Overhead da técnica com e sem likwid :Gabriel:
 
 - Projeto do Experimento:
 
@@ -3918,7 +3918,7 @@ k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
      summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
      as.data.frame();
 
-k <- k[k$versions!="ft.B",]
+#k <- k[k$versions!="ft.B",]
 k <- k[k$threads!=1,]
 
 k$overhead <- k$mean_without_likwid / k$mean_with_likwid
@@ -3927,11 +3927,58 @@ overheadMed
 #+end_src
 
 #+RESULTS:
-: [1] 0.9226394
+#+begin_example
 
-- O uso da ferramenta likwid-perfctr é de 0,92% sobre o tempo de
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+[1] 0.9819104
+#+end_example
+
+- O uso da ferramenta likwid-perfctr é de 0,98% sobre o tempo de
   execução. O que demonstra um ponto positivo, baixo overhead da
   técnica.
+
+
+#+begin_src R :results output graphics :file imagens/exp_comESemLikwid.pdf :exports both :session
+
+library(dplyr);
+
+df <- read.csv("dados/exp4NAS_semlikwid/ResultExp4.csv");
+k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
+     group_by(versions, threads) %>%
+     summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
+     as.data.frame();
+
+#tirando a coluna de uma thread, para ficar melhor de visualizar o gráfico
+k <- k[k$threads!=1,]
+
+
+library(ggplot2);
+ggplot(k, aes(x=as.factor(threads))) +
+   theme_bw() +
+   geom_point(aes(y=mean_without_likwid, group=versions), color="blue") + 
+   geom_point(aes(y=mean_with_likwid, group=versions), color="red") + 
+   ylab("Tempo de Execução (s)") + 
+   xlab("Número de Threads") + 
+   facet_wrap(~versions,ncol=1);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/exp_comESemLikwid.pdf]]
+
+
+- No gráfico podemos ver um comportamento estranho para a aplicação
+  FT, quando ela é executada com 16 threads, ocorre que o tempo de
+  execução com likwid é maior do que sem a ferramenta. Isso não
+  procede, porque a instrumentação gera um overhead de tempo, por mais
+  pequeno que seja.
 
 * TODO [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução :Gabriel:
 - State "TODO"       from              [2016-08-31 Qua 14:01]
