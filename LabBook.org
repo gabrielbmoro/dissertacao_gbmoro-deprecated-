@@ -4051,7 +4051,7 @@ The following object is masked from ‘package:base’:
 
 - Script de execução:
 
-#+begin_src sh :results output :exports both :tangle scripts/exp4Script.bash
+#+begin_src sh :results output :exports both :tangle scripts/exp5Script_overhead.bash
 #!bin/bash
 
 nameFile="../dados/exp5NAS_overhead/exp5NAS_overhead.csv"
