@@ -1,6 +1,6 @@
 #!bin/bash
 
-nameFile="../dados/exp5NAS_overhead/exp5NAS_overhead.csv"
+nameFile="../dados/exp5NAS_overhead/exp5NASDesign_overhead.csv"
 pathOfApps="/home/aulapinroot/NPB3.0/NPB3.0-OMP/bin"
 
 outputFile="../dados/exp5NAS_overhead/ResultExp5_overhead.csv"
