@@ -3774,6 +3774,7 @@ so, an increase in L3 miss rate generates L2 misses just after.
 Note: Change *x* in the previous code block to see other timeslices.
 
 * [10:22:46; 28.09.2016] Avaliando o Overhead da técnica com e sem likwid :Gabriel:
+** Avaliando o Overhead do uso da ferramenta Likwid - Com vs Sem
 
 - Projeto do Experimento:
 
@@ -3841,7 +3842,7 @@ for row in ${ref[@]}; do
    if [ $i -gt 0 ]; then		
 	   name=$(echo "$row" | cut -d ',' -f1)
 	   runId=$(echo "$row" | cut -d ',' -f2)
-           runNumber=$(echo "$row" | cut -d ',' -f3)
+         runNumber=$(echo "$row" | cut -d ',' -f3)
 	   runStd=$(echo "$row" | cut -d ',' -f4)
 	   versions=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
 	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
@@ -3979,6 +3980,74 @@ ggplot(k, aes(x=as.factor(threads))) +
   execução com likwid é maior do que sem a ferramenta. Isso não
   procede, porque a instrumentação gera um overhead de tempo, por mais
   pequeno que seja.
+
+** Avaliando o Overhead de diferentes frequências 
+
+- Vou definir o projeto do experimento a fim de verificar o problema
+  que ocorreu no experimento anterior para a aplicação FT e também
+  para visualizarmos como o overhead se comporta quando analisamos
+  diferentes frequências, as quais classificamos como:
+
+#+BEGIN_EXAMPLE
+Frequências de amostragem em milisegundos:
+
+-> 50: baixa
+-> 100: média
+-> 150: média alta
+-> 200: alta
+
+
+-> Quanto maior a frequência menos amostras de traço serão obtidas
+-> Para mesma frequência e diferentes aplicações, diferentes 
+quantidades de amostras serão obtidas.
+
+#+END_EXAMPLE
+
+#+begin_src R :results output :session *RpjectD* :exports both 
+require(DoE.base);
+  exp5NASDesign_overhead <- fac.design (
+           nfactors=4,
+           replications=30,
+           repeat.only=FALSE,
+           blocks=1,
+           randomize=TRUE,
+           seed=10373,
+           nlevels=c(3,5,4,2),
+           factor.names=list(
+		      	versions=c("ft.B","cg.B","lu.B"),
+			threads=c(1,8,16,24,32),
+			sampling=c(50,100,150,200),
+			use=c("com","sem")));                
+
+  export.design(exp5NASDesign_overhead,
+                path=".",
+                filename=NULL,
+                type="csv",
+                replace=TRUE,
+                response.names=c("tempo"));
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Loading required package: DoE.base
+Loading required package: grid
+Loading required package: conf.design
+
+Attaching package: ‘DoE.base’
+
+The following objects are masked from ‘package:stats’:
+
+    aov, lm
+
+The following object is masked from ‘package:graphics’:
+
+    plot.design
+
+The following object is masked from ‘package:base’:
+
+    lengths
+ creating full factorial with 120 runs ...
+#+end_example
 
 * TODO [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução :Gabriel:
 - State "TODO"       from              [2016-08-31 Qua 14:01]
