@@ -3921,30 +3921,17 @@ k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
 k <- k[k$versions!="ft.B",]
 k <- k[k$threads!=1,]
 
-k$overhead <- (1 - (k$mean_without_likwid / k$mean_with_likwid))*100
+k$overhead <- k$mean_without_likwid / k$mean_with_likwid
 overheadMed <- mean(k$overhead)
 overheadMed
 #+end_src
 
 #+RESULTS:
-: [1] 7.736059
+: [1] 0.9226394
 
-- Professor, podemos visualizar em média o likwid causa um overhead de
-  7.73%, não sei se isso é muito ou pouco e se está correto da maneira
-  que calculei. Na minha percepção o cálculo é o seguinte:
-
-#+BEGIN_EXAMPLE
--> p1 = tempo sem likwid / tempo com likwid
--> p1 é a porcentagem que o tempo sem likwid representa no valor de tempo 
-com likwid, sempre o valor do tempo em que a aplicação usa likwid será 
-maior do que quando não está usando.
-
--> 1 - p1, usamos para pegar o quanto falta para chegar ao inteiro.
-
--> nisso representamos vezes 100 para retornar o overhead da aplicação em 
-porcentagem
-
-#+END_EXAMPLE
+- O uso da ferramenta likwid-perfctr é de 0,92% sobre o tempo de
+  execução. O que demonstra um ponto positivo, baixo overhead da
+  técnica.
 
 * TODO [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução :Gabriel:
 - State "TODO"       from              [2016-08-31 Qua 14:01]
