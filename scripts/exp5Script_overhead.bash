@@ -24,7 +24,7 @@ for row in ${ref[@]}; do
 
 	   export OMP_NUM_THREADS=$threads
 
-	   if [ $user == "com" ]; then 
+	   if [ $user='com' ]; then 
 		timeSeconds=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE "$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
 	   else
 		timeSeconds=$("$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
