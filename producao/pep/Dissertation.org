@@ -33,6 +33,7 @@
 #+LATEX_HEADER: \usepackage{xspace}
 #+LATEX_HEADER: \usepackage{amsmath}
 #+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{lscape}
 #+LATEX_HEADER: \newcommand{\review}[1]{\textcolor[rgb]{1,0,0}{[Orientador: #1]}}
 #+LATEX_HEADER: \newcommand{\Orientador}[1]{\textcolor[rgb]{0.2,0.2,0.7}{[Orientador: #1]}}
 #+LATEX_HEADER: \newcommand{\source}{Source: Author}
@@ -930,7 +931,111 @@ fim de obter a redução no consumo de energia.
 \end{figure}
 #+END_LaTeX
 
+** Overhead da Técnica
+
+Para analisar o overhead do uso da biblioteca likwid para
+monitorar o comportamento da aplicação foi realizado um experimento
+com as aplicações FT, CG e LU (NPB, Classe B), executadas com 1, 8,
+16, 24 e 32 threads. Os intervalos utilizados para amostragem foram
+50, 100, 150 e 200 milesegundos. Também, foram realizadas execuções com o uso
+da ferramenta likwid e outras execuções sem likwid. Dentre essas
+configurações, o experimento utilizou 30 replicações para cada
+configurações (fatores e valores), de maneira aleatória, a fim de evitar qualquer vício no
+ambiente de execução. Além disso, o experimento foi realizado em uma
+máquina com 2 processadores Intel(R) Xeon(R) E5-2650 CPU 2.00 GHz,
+cada um com 8 cores físicos e tecnologia Hyper-Threading. Na Figura
+\ref{fig.overhead} é possível visualizar o resultado do experimento.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Overhead da técnica para as aplicações FT, CG e LU (NPB, Classe B).}
+\centering
+\includegraphics[width=.85\linewidth]{./img/exp5Overhead.pdf}
+\label{fig.overhead} 
+\end{figure}
+#+END_LaTeX
+
+O gráfico de overhead para as três aplicações apresenta na maioria dos
+casos, um maior overhead com amostragem a cada 50 milisegundos. Em
+alguns casos, isso não ocorreu, um exemplo foi na aplicação ft.B,
+quando executada com 32 threads, aonde o overhead mais baixo foi com
+50 milisegundos. Um dos motivos associados a isso pode ser que os
+trechos aonde foi coletado as amostras a cada 50 milisegundos, o
+overhead da comunicação ou da sincronização das threads não estava
+ocorrendo tão intensamente como nos trechos de coleta com 150
+milisegundos (maior overhead para ft.B com 32 threads).
+
+O maior overhead de uso da ferramenta likwid obtido foi de 1.04% em
+dois casos, o primeiro na aplicação ft.B executada com apenas 1
+thread, já o segundo caso ocorreu na aplicação lu.B com 16
+threads. Ambos os casos quando a amostragem realizada foi de 50
+milesegundos, conforme esperado, quanto menor é a frequência das
+amostragens maior é o overhead da ferramenta sobre o tempo de execução
+da aplicação. Outro aspecto interessante foi que o menor overhead
+obtido foi de aproximadamente 0.92%, muito próximo do maior, esse
+comportamento ocorreu com a aplicação ft.B, quando executada sobre 1
+thread, onde a amostragem foi realizada a cada 100 milisegundos. Em
+média, o overhead para todo o experimento ficou em cerca de 0.99% , a
+baixo de 1%, o que implica que a ferramenta apresenta um baixo
+overhead.
+
 * Considerações Finais
+
+O objetivo desse trabalho é realizar um estudo aprofundado sobre as
+regiões memory-bound de aplicações paralelas em uma granularidade mais
+refinada das abordagens investigadas, de maneira que possa ser
+realizado um ajuste de frequência de processador utilizando a técnica
+DVFS ( 
+#+BEGIN_LaTeX 
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+) para obter um consumo de energia nas fases mais memory-bound da
+aplicação.
+
+Os resultados preliminares apresentam que a metodologia e a ferramenta
+utilizada é capaz de identificar trechos de execução aonde a aplicação
+é mais memory-bound, diferente dos trabalhos investigados, aonde o
+overhead de instrumentação muitas vezes se aproxima de 2% (conforme é
+o caso de \citeonline{spiliopoulos2012power}), o uso da biblioteca
+likwid gerou em nossos experimentos um overhead de 0.99% em
+média, o que mostra uma das vantagens de uso.
+
+Como trabalhos futuros, pretende-se investigar como utilizar a técnica
+DVFS para obter a redução do consumo de energia nos trechos
+memory-bound da aplicação, os quais já são conhecidos pelo uso da
+técnica desenvolvida anteriormente em \citeonline{Morowsppd}.
+
+** Cronograma de Atividades
+
+As atividades a serem realizadas ao decorrer do trabalho podem ser
+organizadas em um cronograma, conforme a Tabela \ref{table:cronograma}. 
+
+#+BEGIN_LaTeX
+\begin{landscape}
+\begin{table}[h]
+\centering
+\caption{Cronograma de Atividades}\label{table:cronograma}
+\vspace{0.5cm}
+\begin{tabular}{llllllll}
+Atividades & 2016 & & & 2017 & & & \\
+ & Out & Nov & Dez & Jan & Fev & Mar & Abr \\
+\hline
+Ajustar frequência de amostragem adequada para aplicações paralelas & X & X & X & - & - & - & - \\
+Realizar experimento para verificar o ajuste de frequências de amostragem & - & X & X & - & - & - & - \\
+Analisar resultados do experimento de ajuste de frequências & - & - & X & X & - & - & - \\
+Estudar sobre a técnica DVFS (Dynamic Voltage Frequency Scaling) & X & X & X & X & - & - & - \\
+Criação de um Programa Sintético de perfil completamente Memory-bound & - & - & X & X & - & - & - \\
+Aplicar DVFS sobre o Programa Sintético & - & - & - & - & X & - & - \\
+Utilizar a técnica DVFS nas fases mais memory-bound & - & - & - & - & X & X & - \\
+Realizar experimento final para verificar a técnica como um todo & - & - & - & - & - & X & - \\
+Analisar resultados  & - & - & - & - & - & X & - \\
+Realizar uma revisão sistemática da literatura aprofundada & - & - & - & X & X & - & - \\
+Escrever dissertação & - & - & - & X & X & X & X \\
+\end{tabular}
+\end{table}
+ \end{landscape}
+#+END_LaTeX
+
 
 #+LATEX: \bibliography{References}
 
@@ -1014,4 +1119,38 @@ ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
 
 #+RESULTS:
 [[file:img/cg_L2_L3_100ms.pdf]]
+
+* [12:41:29; 30.09.2016] Gráfico do Overhead                       :noexport:
+
+- Professor eu utilizei gráfico de barras, porque na minha opinião
+  fica mais fácil de visualizar esse tipo de métrica.
+
+#+begin_src R :results output graphics :file "img/exp5Overhead.pdf" :exports both :session *mmexp2* 
+library(dplyr);
+library(ggplot2);
+
+df <- read.csv("../../dados/exp5NAS_overhead/ResultExp5_overhead.csv");
+k <- df %>% select(versions, threads, sampling, use, tempo) %>%
+     group_by(versions, threads,  use, sampling) %>%
+     summarize(mean=mean(tempo), se=3*sd(tempo)/sqrt(n())) %>%
+     as.data.frame();
+
+sem <- k[k$use!='com',]
+com <- k[k$use!='sem',]
+
+k$overhead <- sem$mean / com$mean;
+#k <- k[k$sampling!=150 & k$sampling!=100,]
+
+ggplot(k, aes(x=as.factor(threads), y=overhead, 
+fill=as.factor(sampling))) + 
+#  labs(fill = sampling) + 
+#  geom_line(aes(group=sampling)) + 
+geom_bar(stat="identity", position=position_dodge(), width=0.5) + #coord_flip() +
+  theme_bw() + ylab("overhead (%)") + xlab("threads") + 
+facet_wrap(~versions, ncol=1);
+
+#+end_src
+
+#+RESULTS:
+[[file:img/exp5Overhead.pdf]]
 
