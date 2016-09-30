@@ -3,12 +3,9 @@
 nameFile="../dados/exp4NAS_semlikwid/exp4NASDesign.csv"
 pathOfApps="/home/aulapinroot/NPB3.0/NPB3.0-OMP/bin"
 
-#AUTHOR GABRIEL BRONZATTI MORO
-#EXPERIMENT: Matrices Multiplication
+outputFile="../dados/exp4NAS_semlikwid/ResultExp4.csv"
 
-nameFile="desingExp1.csv"
-
-ref=$(cat desingExp1.csv)
+ref=$(cat $nameFile)
 
 tmp=""
 
@@ -24,15 +21,13 @@ for row in ${ref[@]}; do
 	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
 
 	   export OMP_NUM_THREADS=$threads
-		
-	   timeWithoutLikwid=$(./$version | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
-	   timeWithLikwid=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE ./$version | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
 
-	   time=$(echo $time | sed 's/HPCELO://g' | bc)
-	   echo "$name,$runId,$runNumber,$sizeTmp,$version,$timeWithoutLikwid,$timeWithLikwid" 
-       >> "ResultExp1.csv"
+	   timeWithoutLikwid=$("$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+	   timeWithLikwid=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE "$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+
+	   echo "$name,$runId,$runNumber,$runStd,$versions,$threads,$timeWithoutLikwid,$timeWithLikwid" >> $outputFile
 	else
-		echo $row >> "ResultExp1.csv"
+		echo $row >> $outputFile
 		let i=$i+1
 	fi
 done
