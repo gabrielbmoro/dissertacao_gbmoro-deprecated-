@@ -4218,3 +4218,19 @@ ls
 : spB.csv
 : uaB.csv
 
+* [15:14:37; 05.10.2016] Estudando Dynamic Voltage Frequency Scaling :Gabriel:
+- DVFS é um framework que permite alterar a frequência do
+  processador, a fim de obter ganhos de desempenho e/ou energia. O
+  DVFS geralmente é utilizado com o CPU_Freq que é um framework de
+  monitoração, esse framework está no kernel linux e possui papel
+  fundamental ao analisar os requisitos do processador, quando é
+  necessário realizar a troca de frequência por exemplo. A arquitetura
+  do CPU_Freq define dois modos, o primeiro chama-se "Governor", o
+  outro "Driver".
+
+	a) Governor
+		Realiza a decisão, por exemplo, de qual frequência
+           utilizar.
+
+	b) Driver
+		Realiza a ação, baseada na decisão do Governo.

@@ -845,7 +845,7 @@ likwid-perfctr, utilizando o modo
 \textit{timeline} 
 #+END_LaTeX
 que permite coletar
-contadores de hardware ao longo do tempo de execução da aplicação. Na
+contadores de hardware ao longo do tempo de execução da aplicação \cite{psti}. Na
 diretiva de execução da aplicação com a ferramenta likwid, deve ser
 definido os hardware counters desejados e também o intervalo em que
 será realizado a amostragem. A partir da execução da aplicação é
@@ -933,7 +933,7 @@ fim de obter a redução no consumo de energia.
 
 ** Overhead da Técnica
 
-Para analisar o overhead do uso da biblioteca likwid para
+Para analisar o overhead do uso da biblioteca likwid \cite{psti} para
 monitorar o comportamento da aplicação foi realizado um experimento
 com as aplicações FT, CG e LU (NPB, Classe B), executadas com 1, 8,
 16, 24 e 32 threads. Os intervalos utilizados para amostragem foram
