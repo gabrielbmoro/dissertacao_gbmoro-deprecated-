@@ -4233,4 +4233,44 @@ ls
            utilizar.
 
 	b) Driver
-		Realiza a ação, baseada na decisão do Governo.
+		Realiza a ação, baseada na decisão do Governor.
+
+
+** Comandos Interessantes - Executados em =morocomputer=
+
+- Listando os governors disponíveis:
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+#+end_src
+
+#+RESULTS:
+: conservative ondemand userspace powersave performance 
+
+
+- Qual é o governor ativo?
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+: ondemand
+
+- Qual é a frequência atual do processador?
+
+#+begin_src sh :results output :exports both
+sudo cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
+#+end_src
+
+#+RESULTS:
+: 1600000
+
+- Quais são as frequências disponíveis no meu processador?
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+#+end_src
+
+#+RESULTS:
+: 2933000 2667000 2400000 2133000 1867000 1600000 
