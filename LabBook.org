@@ -4230,7 +4230,23 @@ ls
 
 	a) Governor
 		Realiza a decisão, por exemplo, de qual frequência
-           utilizar.
+           utilizar. Os governors que estão disponíveis no kernel
+           linux são:
+		- _performance_: configura a frequência estáticamente
+                  para obter o melhor desempenho, ou seja, a
+                  frequência utilizada aqui é a maior disponível no
+                  processador;
+		- _powersave_: Configura a frequência estáticamente para
+                  a mais baixa disponível, a fim de economizar
+                  energia, diminuindo a temperatura do processador;
+		- _userspace_: configura a frequência a partir de um
+                  programa de usuário;
+		- _ondemand_: o ajuste de frequência é realizado de
+                  acordo com o uso do processador;
+		- _conservative_: ajuste baseado na utilização do
+                  processador, utilização mais conservada de
+                  frequências, as quais são alteradas em determinadas
+                  situações apenas, não em todas.
 
 	b) Driver
 		Realiza a ação, baseada na decisão do Governor.
@@ -4246,7 +4262,6 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
 
 #+RESULTS:
 : conservative ondemand userspace powersave performance 
-
 
 - Qual é o governor ativo?
 
@@ -4266,6 +4281,10 @@ sudo cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
 #+RESULTS:
 : 1600000
 
+Vale salientar que, a unidade de frequência utilizada aqui é em
+=MHz=. Se convertermos para =GHz=, ao invés de 1600000 MHz seria _1600
+GHz_. 
+
 - Quais são as frequências disponíveis no meu processador?
 
 #+begin_src sh :results output :exports both
@@ -4274,3 +4293,37 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
 
 #+RESULTS:
 : 2933000 2667000 2400000 2133000 1867000 1600000 
+** Organização e Estrutura de Arquivos - Executados em =morocomputer=
+
+#+begin_src sh :results output :exports both
+cd /sys/devices/system/cpu/
+ls | grep -i cpu
+#+end_src
+
+#+RESULTS:
+: cpu0
+: cpu1
+: cpufreq
+: cpuidle
+
+- Aqui podemos visualizar duas pastas, uma chamada cpu0 e outra
+  chamada cpu1, como eu tenho duas cpus apenas, essas duas pastas
+  definem suas configurações básicas. Vamos analisar o governor
+  utilizado para a cpu0, depois para a cpu1.
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+: ondemand
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+: ondemand
+
+- O mesmo governor é utilizado, =ondemand=, a fim de obter um ajuste de
+  frequência de acordo com o uso do processador.
