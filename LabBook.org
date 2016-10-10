@@ -4327,3 +4327,59 @@ cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
 
 - O mesmo governor é utilizado, =ondemand=, a fim de obter um ajuste de
   frequência de acordo com o uso do processador.
+* [12:40:04; 10.10.2016] Script para instrumentar o código          :Gabriel:
+
+- Eu criei um script em python (está a seguir), esse script tem por
+  objetivo instrumentar o código, nesse exemplo fiz uma assinatura em
+  cada região paralela do código.
+
+#+begin_src python :results output :exports both
+#!/usr/bin/env python3
+# -*- coding; utf-8 -*-
+
+#AUTHOR GABRIEL BRONZATTI MORO
+
+import sys
+
+def generateIdsByParallelRegions(fileName):
+	fileName = "code.c"
+	readBuffer = open(fileName,"r")
+	counter = 1
+	directive = "#pragma omp parallel for"
+	newText=''
+
+	for row in readBuffer:
+
+		if directive in row:
+			backup = row
+			newLine = "\twarn(\"parallel region: "+ str(counter) + "\"); \n" + backup
+			newText = newText + newLine
+		else:
+			newText = newText + row
+		
+		counter = counter + 1
+
+	readBuffer.close
+
+	readBuffer = open(fileName, "w")
+	readBuffer.write(newText);
+	readBuffer.close
+
+generateIdsByParallelRegions(sys.argv[0:])
+#+end_src
+
+
+- Porque isso é importante?
+  Após a primeira execução, que podemos chamar de
+  pré-execução, as regiões memory-bound são encontradas, como vou
+  saber na próxima execução quais partes do programa são mais
+  memory-bound do que outras?
+	A minha ideia é utilizar uma espécie de instrumentação, a fim
+  de avisar ao runtime o momento em que a região memory-bound vai
+  ocorrer, assim ele poderá mexer na frequência da plataforma, tudo
+  tendo por base os warns que o programa vai disparar, por exemplo:
+  "vai iniciar uma região memory-bound", ai o processador já baixa sua
+  frequência para otimizar em tal comportamento. Não sei se é uma
+  saída boa, visto que temos o atraso do tempo do "warn", mas até
+  agora, acho que se conseguirmos primeiramente dessa forma, já é um
+  avanço interessante.
