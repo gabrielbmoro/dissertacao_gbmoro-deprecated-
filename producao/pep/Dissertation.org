@@ -300,11 +300,12 @@ diferentes iterações, fazendo com que o registro da informação seja
 realizado e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
 em uma aplicação é possível ter diferentes comportamentos em uma
 granularidade mais fina, compreendendo o comportamento das diferentes
-regiões da aplicação. O objetivo do trabalho é estudar
-as regiões memory-bound de aplicações paralelas em uma granularidade
-mais refinada das abordagens investigadas, de maneira que possa ser
-realizado um ajuste de frequência de processador utilizando a técnica
-DVFS (
+regiões da aplicação. O objetivo do trabalho é detectar as regiões
+memory-bound de aplicações paralelas de maneira automática, em uma
+granularidade mais refinada das abordagens investigadas, de maneira
+que possa ser realizado um ajuste de frequência de processador
+utilizando a técnica 
+DVFS ( 
 #+BEGIN_LaTeX
 \textit{Dynamic Voltage and Frequency Scaling}
 #+END_LaTeX
@@ -347,7 +348,8 @@ OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a
 abordagem de divisão e conquista, como por exemplo o algoritmo
 Merge-sort, fazem uso do modelo Fork-Join. Na Figura
 \ref{fig.fork-join} é possível visualizar um exemplo de fork-join, um
-processo que inicializa duas threads.
+processo que inicializa duas threads, nessa computação podemos
+visualizar a utilização de três fluxos de execução em paralelo.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
@@ -360,44 +362,22 @@ processo que inicializa duas threads.
 
 *** Stencil
 
-Aplicações do tipo Stencil realizam uma espécie de computação
-matricial, aplicando cálculos sobre determinada célula da matriz,
-levando em consideração suas células vizinhas \cite{Roth1997}. Muitas
+Aplicações do tipo Stencil realizam o processo de convolução para
+obter um novo resultado para determinado elemento da matriz, levando
+em consideração suas células vizinhas \cite{Roth1997}. Muitas
 dependências podem ocorrer nesse tipo de abordagem, o que torna esse
-tipo de aplicação mais complexo do ponto de vista de implementação. A
-Figura \ref{fig.stencil} apresenta o funcionamento básico desse tipo
-de aplicação.
+tipo de aplicação mais complexo do ponto de vista de implementação.  
 
-#+BEGIN_LaTeX
-\begin{figure}[!htb]
-\caption{Exemplo de Aplicação Stencil.}
-\centering
-\includegraphics[width=.85\linewidth]{./img/applicationStencil.pdf}
-\label{fig.stencil} 
-\end{figure}
-#+END_LaTeX
-
-O exemplo da Figura \ref{fig.stencil} apresenta uma matriz, uma parte
-dela é selecionada pelo algoritmo, nessa parte é realizado um cálculo
-que leva em consideração os valores dos vizinhos da célula alvo. O
-mesmo procedimento é realizado para todos os elementos da
-matriz. Nesse exemplo é possível visualizar uma dependência muito
-comum, quando a célula fizer parte de uma borda, faltará
-alguns vizinhos para a mesma. Dependendo do cálculo que está sendo
-realizado e do algoritmo, a solução para o problema das bordas pode
-ser a duplicação das mesmas ou o preenchimento com um valor
-constante.
-
-Uma aplicação muito conhecida que implementa a abordagem Stencil é o
-#+BEGIN_LaTeX
-\textit{Heat Transfer}
-#+END_LaTeX
-, na qual utiliza-se uma matriz base para representar uma placa
-metálica e outra matriz menor que pode ser chamada de matriz de
-convolução. Essa matriz de convolução atua sobre cada elemento da
-matriz base, a fim de calcular a sua temperatura. Esse procedimento é
-realizado inúmeras vezes para cada célula, de acordo com o número de
-iterações definido.
+Um exemplo de algoritmo que utiliza esse tipo de abordagem é o Filtro
+Gaussiano, no qual é utilizado duas matrizes, a primeira matriz é
+chamada de matriz de convolução e a partir dela é realizado o cálculo
+sobre cada elemento da matriz base, que por sua vez é a matriz
+original que representa a imagem tratada pela aplicação. Nesse exemplo
+é possível visualizar uma dependência muito comum, quando a célula
+fizer parte de uma borda da matriz, faltará alguns vizinhos para
+realizar o cálculo. Dependendo do cálculo que está sendo realizado e
+do algoritmo, a solução para o problema das bordas pode ser a
+duplicação das mesmas ou o preenchimento com um valor constante. 
 
 *** Mapeamento
 
