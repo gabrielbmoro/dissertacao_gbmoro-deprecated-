@@ -324,12 +324,14 @@ realizadas no decorrer do mestrado.
 * Conceitos Básicos
 \label{chapter.basic_concepts}
 
-Este capítulo apresentará alguns conceitos que são fundamentais para a
-compreensão da proposta do trabalho. Como o trabalho leva em
-consideração o comportamento de aplicações paralelas, será abordado
-nesse capítulo um pouco sobre os tipos de aplicações e suas
-principais características, o que pode impactar diretamente no
-comportamento de uma aplicação. 
+Como o trabalho leva em consideração o comportamento de aplicações
+paralelas, a eficiência energética e outros aspectos fundamentais da
+técnica 
+#+BEGIN_LaTeX
+\textit{Design Of Experiments}
+#+END_LaTeX
+, esse capítulo apresentará alguns conceitos que são fundamentais para
+a compreensão da proposta do trabalho. 
 
 ** Tipos de Aplicações Paralelas
 
@@ -587,6 +589,35 @@ o seu desempenho, se isso acontecer podemos classificar a aplicação como non-m
 %\end{figure}
 #+END_LaTeX
 
+** Consumo de Energia de Aplicações
+
+Segundo \citeonline{Orgerie2014}, o consumo de energia de recursos
+computacionais pode ser medido através de sensores de energia (gasto
+real) ou a partir de modelos (estimativa teórica). Algumas ferramentas
+podem ser utilizadas para acessar esses sensores, um exemplo de
+ferramenta que permite obter uma relação do consumo de energia total
+gasto pela aplicação é a Intel PCM, fornecendo o consumo de energia
+gasto pela CPU (considerando as memórias caches) e memória principal
+\cite{SilveiraAndMoro}. Outra maneira é estimar a energia utilizando
+modelos, o CACTI é um exemplo de ferramenta que permite especificar o
+modelo de memória utilizado pela plataforma de execução, a partir
+disso é possível obter uma estimativa de gasto de energia por
+instrução \cite{SilveiraAndMoro}.  
+
+
+Além de conhecer o quanto de energia a aplicação consome, vários
+trabalhos possuem propostas de redução no consumo energético, uma
+técnica amplamente utilizada para economizar energia a partir da
+redução da frequência do processador é a técnica DVFS (
+#+BEGIN_LaTeX
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+). Essa técnica permite reduzir a frequência do processador em
+determinados trechos de execução do programa.
+
+*** Dynamic Voltage and Frequency Scaling
+
+** Design of Experiments
 * Trabalhos Relacionados
 \label{chapter.relatedwork}
 
