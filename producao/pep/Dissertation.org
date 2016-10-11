@@ -626,15 +626,16 @@ visualizado na Tabela \ref{table:protocoloDePesquisa}.
 \hline
 \textbf{Critérios de Seleção} \\
 \hline
-- publicados acima de 2005 \\
-- artigos de bases confiáveis, revistas, periódicos e conferências \\
-- trabalho deve apresentar uma metodologia consistente, com uma \\ 
-descrição detalhada dos experimentos \\
+- publicados a partir de 2005 \\
+- artigos de bases confiáveis, revistas, periódicos e \\ 
+conferências \\
+- trabalho deve apresentar uma metodologia consistente,\\
+com uma descrição detalhada dos experimentos \\
 \hline
 \textbf{Critério de Inclusão} \\
 \hline
-- trabalhos destinados a redução do consumo de energia de aplicações \\
-paralelas, distribuídas e sequenciais \\
+- trabalhos destinados a redução do consumo de energia \\
+de aplicações paralelas, distribuídas e sequenciais \\
 \hline
 \textbf{Critérios de Exclusão} \\
 \hline
@@ -649,8 +650,9 @@ paralelas, distribuídas e sequenciais \\
 \hline
 \textbf{Questão de Pesquisa} \\
 \hline
-- Quais são as abordagens/técnicas que permitem diminuir a redução de \\
-energia de aplicações, levando em consideração o comportamento de aplicações? \\
+- Quais são as abordagens/técnicas que permitem diminuir\\
+a redução de energia de aplicações, levando em consideração\\
+ o comportamento de aplicações? \\
 \hline
 \end{tabular}
 \end{table}
@@ -786,8 +788,8 @@ comparativo entre as abordagens.
 \centering
 \caption{Comparativo de trabalhos}\label{table:comparativoDeTrabalhos}
 \vspace{0.5cm}
-\begin{tabular}{rrr} 
-\citeonline{laurenzano2011reducing} & \citeonline{spiliopoulos2012power} & \citeonline{freeh2005exploring} \\
+\begin{tabular}{lll} 
+Laurenzano et al. (2011) & Spiliopoulos et al. (2012) & Freeh et al. (2005) \\
 \hline
 Tamanho de Array & Miss na LLC & Miss na L2 \\
 Stride & Cycles &  Operações por Miss \\
