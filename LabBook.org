@@ -4383,3 +4383,18 @@ generateIdsByParallelRegions(sys.argv[0:])
   saída boa, visto que temos o atraso do tempo do "warn", mas até
   agora, acho que se conseguirmos primeiramente dessa forma, já é um
   avanço interessante.
+* [09:00:04; 11.10.2016] Experimento Teste de Aplicação com Likwid e Script para instrumentação :Gabriel:
+
+- Como já temos um script base para instrumentar o código em python, o
+  objetivo desse experimento é executar uma aplicação com likwid e
+  marcar no código as regiões memory-bound identificadas. A aplicação
+  que vou utilizar como exemplo vai ser o mandelbrot.
+
+
+#+begin_src sh :results output :exports both
+cd src/exp1ComMandelbro
+#sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE 
+#+end_src
+
+#+RESULTS:
+
