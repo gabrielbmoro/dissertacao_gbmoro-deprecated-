@@ -247,6 +247,29 @@ Do as follows:
 
 * Introdução
 
+Na área de computação de alto desempenho (
+#+BEGIN_LaTeX
+\textit{High Performance Computing}
+#+END_LaTeX
+), o objetivo principal é obter o máximo de desempenho nas aplicações,
+utilizando de maneira eficiente os recursos de processamento, os quais
+podem estar em diferentes localidades (nós distribuídos) ou conectados
+por barramento (memória compartilhada) em uma 
+#+BEGIN_LaTeX
+\textit{Workstation}
+#+END_LaTeX
+. Além da eficiência de desempenho das aplicações, a eficiência
+energética é uma questão cada vez mais importante no
+cenário econômico atual, recursos computacionais de
+alta capacidade de processamento consomem muita energia para operar,
+dependendo do tipo de computação e da aplicação, esse consumo pode ser
+muito maior. Nisso, muitas pesquisas são realizadas para reduzir o
+consumo de energia, tanto a nível de processador, trabalhando com
+diferentes configurações de frequência para o processamento de
+aplicações (uso de DVFS), como também a nível de software, por exemplo
+com técnicas de balanceamento de carga, a fim de melhor distribuir a
+computação entre os recursos de processamento.  
+
 Cada programa/aplicação possui aspectos peculiares, os quais definem
 seu tipo, modelo e demais características de processamento. Além
 dessas características influenciarem o comportamento de uma aplicação,
