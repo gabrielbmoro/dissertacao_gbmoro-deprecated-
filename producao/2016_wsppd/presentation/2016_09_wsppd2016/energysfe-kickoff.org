@@ -1,0 +1,180 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer
+#+STARTUP: overview
+#+STARTUP: indent
+#+TAGS: noexport(n)
+
+#+Title: Measuring Hardware Counters for HPC Application Phase Detection
+#+Author: Gabriel B. Moro and Lucas M. Schnorr @@latex:\\@@ {gbmoro,schnorr}@inf.ufrgs.br
+#+Date: XIV Workshop de Processamento Paralelo e Distribuído \linebreak UFRGS, Porto Alegre, September-2nd-2016
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [12pt,xcolor=dvipsnames,presentation,handout]
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+STARTUP: beamer overview indent
+#+LATEX_HEADER: \graphicspath{{../}}
+#+LATEX_HEADER: \input{../org-babel-style-preembule.tex}
+#+LATEX_HEADER: \institute{
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/gppd.png}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/inf.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+#+LATEX_HEADER:  % \hfill
+#+LATEX_HEADER:  % \includegraphics[width=.16\textwidth]{img/cnpq.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.18\textwidth]{img/hpe.png}
+#+LATEX_HEADER: }
+#+LaTeX: \input{../org-babel-document-preembule.tex}
+#+LaTeX: \newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+* E-mail "O que colocar na apresentação"                           :noexport:
+
+I would like to ask you to prepare few slides to (a) present yourself,
+(b) your current research activities and (c) how you intend to
+contribute to the EnergySFE project (research topics, students,
+collaborations, ...).
+
+* Introduction
+** 
+*** Introduction
+
+=Motivation=:
+
+- Memory-bound: programs with misses cache rate considerable (e.g. Breadth-First Search)
+
+- CPU-bound: programs limited by processing (e.g. Matrices Multiplication)
+
+- Programs can have fragments more Memory-bound than others more CPU-bound (e.g. Fourier Transform)
+
+=Objective=:
+
+- Measure hardware counters at every given time interval to discover
+  memory-bound regions
+ 
+* Related Work
+** 
+*** Related Work
+
+=Spiliopoulos et al., 2012=:
+- Tool that analyzes the behavior of sequential application (the
+  concept of phases)
+- Based on cache misses of different caches' levels
+
+=Laurenzano et al., 2011=: 
+- Finer granularity for each application loop
+
+*** Related Work
+
+=Freeh et al., 2005=:
+- Define the most suitable frequency for each phase of MPI
+  applications
+- Analyse of the best frequency for each node
+
+=Millani and Schnorr 2016=:
+- OpenMP applications
+- Analyse of parallel regions of programs 
+- Manual instrumentation of code to identify 
+ 
+* Methodology
+** 
+*** Methodology
+
+#+LaTeX: \begin{center}
+#+LaTeX: \includegraphics<1>[width=\linewidth]{img/metodologiaWorkWsppd2016.pdf}
+#+LaTeX: \end{center}
+
+*** Plataform 
+
+=Beagle1:=
+
+- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz
+  - 8 physical cores
+  - Hyper-Threading tecnology
+
+
+* Preliminary Results
+** 
+*** Preliminary Results : NPB-FT, B Class
+
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth]{../../img/ft_L2_L3_100ms.pdf}
+\caption{Sampling interval - 100 milliseconds.}
+\label{figFT}
+\end{figure}
+
+*** Preliminary Results : NPB-LU, B Class
+
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth,height=5cm]{../../img/lu_L2_L3_100ms.pdf}
+\caption{Sampling interval - 100 milliseconds.}
+\label{figLU}
+\end{figure}
+
+*** Preliminary Results : NPB-CG, B Class
+
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth,height=5cm]{../../img/cg_L2_L3_100ms.pdf}
+\caption{Sampling interval - 50 milliseconds.}
+\label{figCG}
+\end{figure}
+
+* Conclusion
+** 
+*** Conclusion
+
+=Contributions=:
+
+- Fine-granularity to identify the _memory-bound regions_ of parallel
+  application several timestamps
+- _Lower overhead_ of measurement
+  
+=Future work=:
+	- _Automatically_ identify the memory-bound regions based on the hardware counters
+  - Reducing the power consumption of parallel applications (use of
+    DVFS approach)
+
+* References                                                       :noexport:
+** 
+*** References
+
+\begin{thebibliography}{99} % Beamer does not support BibTeX so references must be inserted manually as below
+\bibitem[1]{spiliopoulos2012power} Spiliopoulos, Vasileios and Sembrant, Andreas and Kaxiras, Stefanos (2012)
+\newblock Power-Sleuth: A Tool for Investigating Your Program's Power Behavior
+\newblock IEEE
+\end{thebibliography}
+
+\begin{thebibliography}{99} 
+\bibitem[2]{laurenzano2011reducing} Laurenzano, Michael A and Meswani, Mitesh and Carrington, Laura and Snavely, Allan and Tikir, Mustafa M and Poole, Stephen (2011)
+\newblock Reducing energy usage with memory and computation-aware dynamic frequency scaling
+\newblock Springer
+\end{thebibliography}
+
+** 
+*** References
+
+
+\begin{thebibliography}{99} 
+\bibitem[3]{freeh2005exploring} Freeh, Vincent W and Pan, Feng and Kappiah, Nandini and Lowenthal, David K and Springer, Robert (2005)
+\newblock Exploring the energy-time tradeoff in mpi programs on a power-scalable cluster
+\newblock IEEE
+\end{thebibliography}
+
+\begin{thebibliography}{99} 
+\bibitem[4]{millani2016fr} Millani, Luis Felipe and Schnorr, Lucas Mello (2016)
+\newblock Computation-Aware Dynamic Frequency Scaling: Parsimonious Evaluation of the Time-Energy Trade-off Using Design of Experiments
+\newblock 3rd International Workshop on Reproducibility in Parallel Computing (REPPAR)
+\end{thebibliography}
+
+* Thank you
+
+** 
+*** Thank you
+
+*Thank you for your attention!*
+
+\newline
+
+Gabriel Bronzatti Moro
+  - gbmoro@inf.ufrgs.br 

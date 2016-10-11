@@ -3773,39 +3773,38 @@ so, an increase in L3 miss rate generates L2 misses just after.
 
 Note: Change *x* in the previous code block to see other timeslices.
 
-* [13:53:07; 31.08.2016] Avaliando o Overhead da técnica com e sem likwid :Gabriel:
+* [10:22:46; 28.09.2016] Avaliando o Overhead da técnica com e sem likwid :Gabriel:
+** Avaliando o Overhead do uso da ferramenta Likwid - Com vs Sem
 
-- Vou fazer um experimento para analisar o =overhead= da utilização do
-  likwid.
+- Projeto do Experimento:
 
-#+begin_src R :results output :session *Rs* :exports both :tangle dados/exp4NAS_semlikwid/exp4NASDesign.csv
+#+begin_src R :results output :session *RpjectD* :exports both 
 require(DoE.base);
-exp4NASDesign <- fac.design (
-	nfactors=2,
-	replications=20,
-	repeat.only=FALSE,
-	blocks=1,
-	randomize=TRUE,
-	seed=10373,
-	nlevels=c(3,2),
-	factor.names=list(
-		versions=c("cg.B","ft.B","lu.B"),
-		threads=c(1,32)));
+  exp4NASDesign <- fac.design (
+           nfactors=2,
+           replications=20,
+           repeat.only=FALSE,
+           blocks=1,
+           randomize=TRUE,
+           seed=10373,
+           nlevels=c(3,3),
+           factor.names=list(
+		      versions=c("ft.B","cg.B","lu.B"),
+                threads=c(1,16,32)));                
 
-export.design(exp4NASDesign, 
-	path=".",
-	filename=NULL,
-	type="csv",
-	replace=TRUE,
-	response.names=c("time"));
-
+  export.design(exp4NASDesign,
+                path=".",
+                filename=NULL,
+                type="csv",
+                replace=TRUE,
+                response.names=c("timeWithoutLikwid", "timeWithLikwid"));
 #+end_src
 
 #+RESULTS:
 #+begin_example
-Carregando pacotes exigidos: DoE.base
-Carregando pacotes exigidos: grid
-Carregando pacotes exigidos: conf.design
+Loading required package: DoE.base
+Loading required package: grid
+Loading required package: conf.design
 
 Attaching package: ‘DoE.base’
 
@@ -3816,45 +3815,343 @@ The following objects are masked from ‘package:stats’:
 The following object is masked from ‘package:graphics’:
 
     plot.design
+
 The following object is masked from ‘package:base’:
 
     lengths
- creating full factorial with 6 runs ...
+ creating full factorial with 9 runs ...
 #+end_example
 
 - Script de execução:
 
 #+begin_src sh :results output :exports both :tangle scripts/exp4Script.bash
 #!bin/bash
-cd scripts
 
 nameFile="../dados/exp4NAS_semlikwid/exp4NASDesign.csv"
+pathOfApps="/home/aulapinroot/NPB3.0/NPB3.0-OMP/bin"
+
+outputFile="../dados/exp4NAS_semlikwid/ResultExp4.csv"
 
 ref=$(cat $nameFile)
+
+tmp=""
 
 i=0
 
 for row in ${ref[@]}; do
-	if [ $i -gt 0 ]; then
-		name=$(echo "$row" | cut -d ',' -f1)
-		runId=$(echo "$row" | cut -d ',' -f2)
-		runNumber=$(echo "$row" | cut -d ',' -f3)
-		runStd=$(echo "$row" | cut -d ',' -f4)
-		version=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
-		threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
-		time=0
-		
-		export OMP_NUM_THREADS=$threads
+   if [ $i -gt 0 ]; then		
+	   name=$(echo "$row" | cut -d ',' -f1)
+	   runId=$(echo "$row" | cut -d ',' -f2)
+         runNumber=$(echo "$row" | cut -d ',' -f3)
+	   runStd=$(echo "$row" | cut -d ',' -f4)
+	   versions=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
+	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
 
-		time=$(./$version | grep -i time | sed 's/Time[[:space:]]in[[:space:]]seconds//g' | sed 's/=//g' | sed 's/[[:space:]]//g')
-		echo "$name,$runId,$runNumber,$runStd,$version,$threads,$time" >> "Results.csv"
+	   export OMP_NUM_THREADS=$threads
+
+	   timeWithoutLikwid=$("$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+	   timeWithLikwid=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE "$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+
+	   echo "$name,$runId,$runNumber,$runStd,$versions,$threads,$timeWithoutLikwid,$timeWithLikwid" >> $outputFile
 	else
-		echo $row | sed 's/,,/,/g' >> "Results.csv"
+		echo $row >> $outputFile
 		let i=$i+1
 	fi
 done
 
 #+end_src
+
+- Análise dos dados
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+
+df <- read.csv("dados/exp4NAS_semlikwid/ResultExp4.csv");
+k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
+     group_by(versions, threads) %>%
+     summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
+     as.data.frame();
+
+k
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+  versions threads  N mean_without_likwid mean_with_likwid
+1     cg.B       1 20            109.0950          25.8635
+2     cg.B      16 20             24.1955          27.0245
+3     cg.B      32 20             24.2685          26.6355
+4     ft.B       1 20             70.5655           7.8795
+5     ft.B      16 20              9.7140           7.8600
+6     ft.B      32 20              7.6020           7.8775
+7     lu.B       1 20            211.2140          39.6720
+8     lu.B      16 20             35.7505          37.6735
+9     lu.B      32 20             35.7120          38.1885
+#+end_example
+
+- Que estranho esses resultados, por exemplo para uma thread com
+  likwid é mais rápido do que sem, não entendi. Depois com 16 threads
+  e 32 threads para aplicação cg e lu faz sentido. Com 1 thread e 16
+  threads para aplicação ft também ocorre esse comportamento estranho
+  novamente.
+
+- Vou analisar o overhead apenas para as aplicações lu e cg para 16 e
+  32 threads, pois esses dados são os que realmente fazem sentido.
+
+#+begin_src R :results output :session *R* :exports both
+
+library(dplyr);
+
+df <- read.csv("dados/exp4NAS_semlikwid/ResultExp4.csv");
+k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
+     group_by(versions, threads) %>%
+     summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
+     as.data.frame();
+
+#k <- k[k$versions!="ft.B",]
+k <- k[k$threads!=1,]
+
+k$overhead <- k$mean_without_likwid / k$mean_with_likwid
+overheadMed <- mean(k$overhead)
+overheadMed
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+[1] 0.9819104
+#+end_example
+
+- O uso da ferramenta likwid-perfctr é de 0,98% sobre o tempo de
+  execução. O que demonstra um ponto positivo, baixo overhead da
+  técnica.
+
+
+#+begin_src R :results output graphics :file imagens/exp_comESemLikwid.pdf :exports both :session
+
+library(dplyr);
+
+df <- read.csv("dados/exp4NAS_semlikwid/ResultExp4.csv");
+k <- df %>% select(versions, threads, timeWithoutLikwid, timeWithLikwid) %>%
+     group_by(versions, threads) %>%
+     summarize(N=n(), mean_without_likwid=mean(timeWithoutLikwid), mean_with_likwid=mean(timeWithLikwid)) %>%
+     as.data.frame();
+
+#tirando a coluna de uma thread, para ficar melhor de visualizar o gráfico
+k <- k[k$threads!=1,]
+
+
+library(ggplot2);
+ggplot(k, aes(x=as.factor(threads))) +
+   theme_bw() +
+   geom_point(aes(y=mean_without_likwid, group=versions), color="blue") + 
+   geom_point(aes(y=mean_with_likwid, group=versions), color="red") + 
+   ylab("Tempo de Execução (s)") + 
+   xlab("Número de Threads") + 
+   facet_wrap(~versions,ncol=1);
+#+end_src
+
+#+RESULTS:
+[[file:imagens/exp_comESemLikwid.pdf]]
+
+
+- No gráfico podemos ver um comportamento estranho para a aplicação
+  FT, quando ela é executada com 16 threads, ocorre que o tempo de
+  execução com likwid é maior do que sem a ferramenta. Isso não
+  procede, porque a instrumentação gera um overhead de tempo, por mais
+  pequeno que seja.
+
+** Avaliando o Overhead de diferentes frequências 
+
+- Vou definir o projeto do experimento a fim de verificar o problema
+  que ocorreu no experimento anterior para a aplicação FT e também
+  para visualizarmos como o overhead se comporta quando analisamos
+  diferentes frequências, as quais classificamos como:
+
+#+BEGIN_EXAMPLE
+Frequências de amostragem em milisegundos:
+
+-> 50: baixa
+-> 100: média
+-> 150: média alta
+-> 200: alta
+
+
+-> Quanto maior a frequência menos amostras de traço serão obtidas
+-> Para mesma frequência e diferentes aplicações, diferentes 
+quantidades de amostras serão obtidas.
+
+#+END_EXAMPLE
+
+#+begin_src R :results output :session *RpjectD* :exports both 
+require(DoE.base);
+  exp5NASDesign_overhead <- fac.design (
+           nfactors=4,
+           replications=30,
+           repeat.only=FALSE,
+           blocks=1,
+           randomize=TRUE,
+           seed=10373,
+           nlevels=c(3,5,4,2),
+           factor.names=list(
+		      	versions=c("ft.B","cg.B","lu.B"),
+			threads=c(1,8,16,24,32),
+			sampling=c(50,100,150,200),
+			use=c("com","sem")));                
+
+  export.design(exp5NASDesign_overhead,
+                path=".",
+                filename=NULL,
+                type="csv",
+                replace=TRUE,
+                response.names=c("tempo"));
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Loading required package: DoE.base
+Loading required package: grid
+Loading required package: conf.design
+
+Attaching package: ‘DoE.base’
+
+The following objects are masked from ‘package:stats’:
+
+    aov, lm
+
+The following object is masked from ‘package:graphics’:
+
+    plot.design
+
+The following object is masked from ‘package:base’:
+
+    lengths
+ creating full factorial with 120 runs ...
+#+end_example
+
+- Script de execução:
+
+#+begin_src sh :results output :exports both :tangle scripts/exp5Script_overhead.bash
+#!bin/bash
+
+nameFile="../dados/exp5NAS_overhead/exp5NASDesign_overhead.csv"
+pathOfApps="/home/aulapinroot/NPB3.0/NPB3.0-OMP/bin"
+
+outputFile="../dados/exp5NAS_overhead/ResultExp5_overhead.csv"
+
+ref=$(cat $nameFile)
+
+tmp=""
+
+i=0
+
+for row in ${ref[@]}; do
+   if [ $i -gt 0 ]; then		
+	   name=$(echo "$row" | cut -d ',' -f1)
+	   runId=$(echo "$row" | cut -d ',' -f2)
+       runNumber=$(echo "$row" | cut -d ',' -f3)
+	   runStd=$(echo "$row" | cut -d ',' -f4)
+	   versions=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
+	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
+	   sampling=$(echo "$row" | cut -d ',' -f7 | sed 's/"//g')
+	   use=$(echo "$row" | cut -d ',' -f8 | sed 's/"//g')
+
+	   export OMP_NUM_THREADS=$threads
+
+	   if [ $user='com' ]; then 
+		timeSeconds=$(sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE "$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+	   else
+		timeSeconds=$("$pathOfApps/$versions" | grep -i "Time in seconds" | sed 's/[[:space:]]//g' | sed 's/[a-zA-Z=]//g')
+	   fi	   	
+
+	   echo "$name,$runId,$runNumber,$runStd,$versions,$threads,$sampling,$use,$timeSeconds" >> $outputFile
+	else
+		echo $row >> $outputFile
+		let i=$i+1
+	fi
+done
+
+#+end_src
+
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr)
+df <- read.csv("dados/exp5NAS_overhead/ResultExp5_overhead.csv");
+k <- df %>% select(versions, threads, sampling, use, tempo) %>%
+     group_by(versions, threads, use, sampling) %>%
+     summarize(mean=mean(tempo), se=3*sd(tempo)/sqrt(n())) %>%
+     as.data.frame();
+
+sem <- k[k$use!='com',]
+com <- k[k$use!='sem',]
+
+k$overhead <- sem$mean / com$mean;
+
+
+#max <- max(k$overhead);
+#max <- as.numeric(max);
+#k <- k[k$overhead==max,];
+
+#min <- min(k$overhead);
+#min <- as.numeric(min);
+#k <- k[k$overhead==min,];
+
+mean <- mean(k$overhead);
+mean
+#+end_src
+
+#+RESULTS:
+: [1] 0.9947122
+
+
+#+begin_src R :results output graphics :file "imagens/exp5Overhead.pdf" :exports both :session *mmexp2* 
+library(dplyr);
+library(ggplot2);
+
+df <- read.csv("dados/exp5NAS_overhead/ResultExp5_overhead.csv");
+k <- df %>% select(versions, threads, sampling, use, tempo) %>%
+     group_by(versions, threads,  use, sampling) %>%
+     summarize(mean=mean(tempo), se=3*sd(tempo)/sqrt(n())) %>%
+     as.data.frame();
+
+sem <- k[k$use!='com',]
+com <- k[k$use!='sem',]
+
+k$overhead <- sem$mean / com$mean;
+#k <- k[k$sampling!=150 & k$sampling!=100,]
+
+ggplot(k, aes(x=as.factor(threads), y=overhead, 
+fill=as.factor(sampling))) + 
+#  labs(fill = sampling) + 
+#  geom_line(aes(group=sampling)) + 
+geom_bar(stat="identity", position=position_dodge(), width=0.5) + #coord_flip() +
+  theme_bw() + ylab("overhead") + xlab("threads") + 
+facet_wrap(~versions, ncol=1);
+
+#+end_src
+
+#+RESULTS:
+[[file:imagens/exp5Overhead.pdf]]
 
 * TODO [11:25:11; 29.08.2016] Novo Experimento L2Cache e L3Cache na mesma Execução :Gabriel:
 - State "TODO"       from              [2016-08-31 Qua 14:01]
@@ -3865,7 +4162,7 @@ done
   parâmetro =-g L2CACHE e L3CACHE= e duas execuções para cada grupo. A
   hipótese é que alguns valores possam ser obtidos por registradores e
   não contadores de hardware.
-
+  
 #+begin_src sh :results output :exports both :tangle scripts/scriptOfExecutionNAS_expL2AndL3.bash
 #!bin/bash
 rm -rf log_NASExp3
@@ -3888,3 +4185,216 @@ sudo likwid-perfctr -t 225ms -f -c N:0-31 -g L2CACHE -g L3CACHE $sp_command >> l
 sudo likwid-perfctr -t 110ms -f -c N:0-31 -g L2CACHE -g L3CACHE $ua_command >> log_NASExp3/saidaUa_2.log 2>> log_NASExp3/saidaUa_1.log 
 
 #+end_src
+
+** Análise dos Dados
+
+- Script para filtrar os dados de acordo com a execução de dois grupos
+  de medidas.
+
+
+#+begin_src sh :results output :exports both
+
+#+end_src
+
+
+#+begin_src sh :results output
+mkdir dados/exp3_NASandLikwid/
+
+chmod 755 ./scripts/likwid3csv.sh
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaCg_1.log  > dados/exp3_NASandLikwid/cgB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaFt_1.log  > dados/exp3_NASandLikwid/ftB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaLu_1.log  > dados/exp3_NASandLikwid/luB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaSp_1.log  > dados/exp3_NASandLikwid/spB.csv
+./scripts/likwid3csv ./scripts/log_NASExp3/saidaUa_1.log  > dados/exp3_NASandLikwid/uaB.csv
+
+cd dados/exp3_NASandLikwid/
+ls
+#+end_src
+
+#+RESULTS:
+: cgB.csv
+: ftB.csv
+: luB.csv
+: spB.csv
+: uaB.csv
+
+* [15:14:37; 05.10.2016] Estudando Dynamic Voltage Frequency Scaling :Gabriel:
+- DVFS é um framework que permite alterar a frequência do
+  processador, a fim de obter ganhos de desempenho e/ou energia. O
+  DVFS geralmente é utilizado com o CPU_Freq que é um framework de
+  monitoração, esse framework está no kernel linux e possui papel
+  fundamental ao analisar os requisitos do processador, quando é
+  necessário realizar a troca de frequência por exemplo. A arquitetura
+  do CPU_Freq define dois modos, o primeiro chama-se "Governor", o
+  outro "Driver".
+
+	a) Governor
+		Realiza a decisão, por exemplo, de qual frequência
+           utilizar. Os governors que estão disponíveis no kernel
+           linux são:
+		- _performance_: configura a frequência estáticamente
+                  para obter o melhor desempenho, ou seja, a
+                  frequência utilizada aqui é a maior disponível no
+                  processador;
+		- _powersave_: Configura a frequência estáticamente para
+                  a mais baixa disponível, a fim de economizar
+                  energia, diminuindo a temperatura do processador;
+		- _userspace_: configura a frequência a partir de um
+                  programa de usuário;
+		- _ondemand_: o ajuste de frequência é realizado de
+                  acordo com o uso do processador;
+		- _conservative_: ajuste baseado na utilização do
+                  processador, utilização mais conservada de
+                  frequências, as quais são alteradas em determinadas
+                  situações apenas, não em todas.
+
+	b) Driver
+		Realiza a ação, baseada na decisão do Governor.
+
+
+** Comandos Interessantes - Executados em =morocomputer=
+
+- Listando os governors disponíveis:
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+#+end_src
+
+#+RESULTS:
+: conservative ondemand userspace powersave performance 
+
+- Qual é o governor ativo?
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+: ondemand
+
+- Qual é a frequência atual do processador?
+
+#+begin_src sh :results output :exports both
+sudo cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
+#+end_src
+
+#+RESULTS:
+: 1600000
+
+Vale salientar que, a unidade de frequência utilizada aqui é em
+=MHz=. Se convertermos para =GHz=, ao invés de 1600000 MHz seria _1600
+GHz_. 
+
+- Quais são as frequências disponíveis no meu processador?
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+#+end_src
+
+#+RESULTS:
+: 2933000 2667000 2400000 2133000 1867000 1600000 
+** Organização e Estrutura de Arquivos - Executados em =morocomputer=
+
+#+begin_src sh :results output :exports both
+cd /sys/devices/system/cpu/
+ls | grep -i cpu
+#+end_src
+
+#+RESULTS:
+: cpu0
+: cpu1
+: cpufreq
+: cpuidle
+
+- Aqui podemos visualizar duas pastas, uma chamada cpu0 e outra
+  chamada cpu1, como eu tenho duas cpus apenas, essas duas pastas
+  definem suas configurações básicas. Vamos analisar o governor
+  utilizado para a cpu0, depois para a cpu1.
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+: ondemand
+
+#+begin_src sh :results output :exports both
+cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+#+end_src
+
+#+RESULTS:
+: ondemand
+
+- O mesmo governor é utilizado, =ondemand=, a fim de obter um ajuste de
+  frequência de acordo com o uso do processador.
+* [12:40:04; 10.10.2016] Script para instrumentar o código          :Gabriel:
+
+- Eu criei um script em python (está a seguir), esse script tem por
+  objetivo instrumentar o código, nesse exemplo fiz uma assinatura em
+  cada região paralela do código.
+
+#+begin_src python :results output :exports both
+#!/usr/bin/env python3
+# -*- coding; utf-8 -*-
+
+#AUTHOR GABRIEL BRONZATTI MORO
+
+import sys
+
+def generateIdsByParallelRegions(fileName):
+	fileName = "code.c"
+	readBuffer = open(fileName,"r")
+	counter = 1
+	directive = "#pragma omp parallel for"
+	newText=''
+
+	for row in readBuffer:
+
+		if directive in row:
+			backup = row
+			newLine = "\twarn(\"parallel region: "+ str(counter) + "\"); \n" + backup
+			newText = newText + newLine
+		else:
+			newText = newText + row
+		
+		counter = counter + 1
+
+	readBuffer.close
+
+	readBuffer = open(fileName, "w")
+	readBuffer.write(newText);
+	readBuffer.close
+
+generateIdsByParallelRegions(sys.argv[0:])
+#+end_src
+
+
+- Porque isso é importante?
+  Após a primeira execução, que podemos chamar de
+  pré-execução, as regiões memory-bound são encontradas, como vou
+  saber na próxima execução quais partes do programa são mais
+  memory-bound do que outras?
+	A minha ideia é utilizar uma espécie de instrumentação, a fim
+  de avisar ao runtime o momento em que a região memory-bound vai
+  ocorrer, assim ele poderá mexer na frequência da plataforma, tudo
+  tendo por base os warns que o programa vai disparar, por exemplo:
+  "vai iniciar uma região memory-bound", ai o processador já baixa sua
+  frequência para otimizar em tal comportamento. Não sei se é uma
+  saída boa, visto que temos o atraso do tempo do "warn", mas até
+  agora, acho que se conseguirmos primeiramente dessa forma, já é um
+  avanço interessante.
+* [09:00:04; 11.10.2016] Experimento Teste de Aplicação com Likwid e Script para instrumentação :Gabriel:
+
+- Como já temos um script base para instrumentar o código em python, o
+  objetivo desse experimento é executar uma aplicação com likwid e
+  marcar no código as regiões memory-bound identificadas. A aplicação
+  que vou utilizar como exemplo vai ser o mandelbrot.
+
+
+#+begin_src sh :results output :exports both
+cd src/exp1ComMandelbro
+#sudo likwid-perfctr -t 100ms -f -c N:0-31 -g L2CACHE 
+#+end_src
+
+#+RESULTS:
+

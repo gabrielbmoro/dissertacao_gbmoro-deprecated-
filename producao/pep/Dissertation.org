@@ -1,0 +1,1156 @@
+#+TITLE:
+#+AUTHOR: Gabriel Bronzatti Moro
+
+#+STARTUP: overview indent
+#+LANGUAGE: en
+#+OPTIONS: H:3 creator:nil timestamp:nil skip:nil toc:nil num:t ^:nil ~:~
+#+OPTIONS: author:nil title:nil date:nil
+#+TAGS: noexport(n) deprecated(d) ignore(i)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+#+LATEX_CLASS: iiufrgs
+#+LATEX_CLASS_OPTIONS: [ppgc,tc,brasilian]
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage{subfigure}
+#+LATEX_HEADER: \usepackage{tabulary}
+#+LATEX_HEADER: \usepackage{tabularx}
+#+LATEX_HEADER: \usepackage{mathtools}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+#+LATEX_HEADER: \usepackage{listings}
+#+LATEX_HEADER: \newcommand{\prettysmall}{\fontsize{6.5}{6.5}\selectfont}
+#+LATEX_HEADER: \newcommand{\prettysmallbis}{\fontsize{7}{7}\selectfont}
+#+LATEX_HEADER: \newcommand{\mtilde}{~}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage{palatino}
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \usepackage{cleveref}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+LATEX_HEADER: \usepackage[normalem]{ulem}
+#+LATEX_HEADER: \usepackage{xspace}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{lscape}
+#+LATEX_HEADER: \newcommand{\review}[1]{\textcolor[rgb]{1,0,0}{[Orientador: #1]}}
+#+LATEX_HEADER: \newcommand{\Orientador}[1]{\textcolor[rgb]{0.2,0.2,0.7}{[Orientador: #1]}}
+#+LATEX_HEADER: \newcommand{\source}{Source: Author}
+#+LATEX_HEADER: \input{configuration.tex}
+
+* Export to PDF (org-mode installation + emacnos configuration)    :noexport:
+
+_org-mode installation_
+
+Use the org-version =8.3.4=. To check, run M-x then type org-version,
+then hit the enter key. You should see the current version. If your
+version is older, or if the command you just type is unrecognized, you
+have to install the latest version of org by following these steps:
+
+#+BEGIN_SRC sh :results silent :exports none
+git clone git://orgmode.org/org-mode.git; cd org-mode;
+git checkout release_8.3.4; make
+#+END_SRC
+
+Then, edit the file =local.mk= changing the variable =prefix=. I
+suggest you install in your HOME directory by putting something like:
+
+=/home/schnorr/install/org-mode/=
+
+For me, I have this (just an example):
+
+#+BEGIN_EXAMPLE
+prefix  = /home/schnorr/install/org-mode/
+#+END_EXAMPLE
+
+Finally, within the org-mode directory, just type:
+
+#+BEGIN_SRC sh :results silent :exports none
+make install
+#+END_SRC
+
+_Emacs configuration_
+
+Now, you need to configure emacs.
+
+Create a directory =.emacs.d= in your HOME directory.
+
+Make sure your version of emacs is at least 24.4. Mine is:
+
+#+begin_src sh :results output :session :exports both
+emacs --version
+#+end_src
+
+#+RESULTS:
+: GNU Emacs 24.4.1
+: Copyright (C) 2014 Free Software Foundation, Inc.
+: GNU Emacs comes with ABSOLUTELY NO WARRANTY.
+: You may redistribute copies of Emacs
+: under the terms of the GNU General Public License.
+: For more information about these matters, see the file named COPYING.
+
+Then, create (in =.emacs.d= directory) a =init.el= file with the following:
+
+#+BEGIN_EXAMPLE
+(add-to-list 'load-path "~/install/org-mode/emacs/site-lisp/org")
+(mapc #'org-babel-load-file (directory-files dotfiles-dir t "\\.org$"))
+#+END_EXAMPLE
+
+To have the shortcuts and facilities I employ when coding in org, you
+might want to put in the =.emacs.d= directory the contents described here:
+
+http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php
+
+Or, just execute the following sequence of commands:
+
+#+begin_src sh :results output :session :exports both
+cd $HOME/.emacs.d/
+wget http://mescal.imag.fr/membres/arnaud.legrand/misc/init.org -O mine.org
+#+end_src
+
+Note that the name has to be different from =init.org=, otherwise in the
+first run of =emacs=, the initialization process will destroy the
+configuration file you have just created. In this example, I have then
+called the file =mine.org=.
+
+Hope this helps.
+
+* Front page preparation                                           :ignore:
+#+BEGIN_LaTeX
+\title{Plano de Ensino e Pesquisa}
+\author{Bronzatti Moro}{Gabriel}
+\advisor[Prof.~Dr.]{Mello Schnorr}{Lucas}
+
+\date{Outubro}{2016}
+\location{Porto Alegre}{RS}
+
+% \renewcommand{\nominataReit}{Prof\textsuperscript{a}.~Wrana Maria Panizzi}
+% \renewcommand{\nominataReitname}{Reitora}
+% \renewcommand{\nominataPRE}{Prof.~Jos{\'e} Carlos Ferraz Hennemann}
+% \renewcommand{\nominataPREname}{Pr{\'o}-Reitor de Ensino}
+% \renewcommand{\nominataPRAPG}{Prof\textsuperscript{a}.~Joc{\'e}lia Grazia}
+% \renewcommand{\nominataPRAPGname}{Pr{\'o}-Reitora Adjunta de P{\'o}s-Gradua{\c{c}}{\~a}o}
+% \renewcommand{\nominataDir}{Prof.~Philippe Olivier Alexandre Navaux}
+% \renewcommand{\nominataDirname}{Diretor do Instituto de Inform{\'a}tica}
+% \renewcommand{\nominataCoord}{Prof.~Carlos Alberto Heuser}
+% \renewcommand{\nominataCoordname}{Coordenador do PPGC}
+% \renewcommand{\nominataBibchefe}{Beatriz Regina Bastos Haro}
+% \renewcommand{\nominataBibchefename}{Bibliotec{\'a}ria-chefe do Instituto de Inform{\'a}tica}
+% \renewcommand{\nominataChefeINA}{Prof.~Jos{\'e} Valdeni de Lima}
+% \renewcommand{\nominataChefeINAname}{Chefe do \deptINA}
+% \renewcommand{\nominataChefeINT}{Prof.~Leila Ribeiro}
+% \renewcommand{\nominataChefeINTname}{Chefe do \deptINT}
+
+
+%
+% TODO: provide these keywords
+%
+%\keyword{HPC}
+#+END_LaTeX
+
+* Front page                                                       :ignore:
+#+BEGIN_LaTeX
+\maketitle
+#+END_LaTeX
+
+* Abstract                                                         :ignore:
+
+#+BEGIN_LaTeX
+\begin{abstract}
+#+END_LaTeX
+#+BEGIN_LaTeX
+Abstract ...
+\end{abstract}
+#+END_LaTeX
+
+* Lists                                                            :ignore:
+
+#+BEGIN_LaTeX
+%\listoffigures
+%\listoftables
+
+% lista de abreviaturas e siglas
+% o parametro deve ser a abreviatura mais longa
+%\begin{listofabbrv}{SPMD}
+%   \item[ANTLR] Another Tool For Language Recognition
+%   \item[CSV] Comma Separated Values
+%   \item [DBMS] Database Management System    
+%   \item[GC] Garbage Collector 
+%   \item[HPC] High Performance Computing
+%   \item[JDBC] Java Database Connectivity
+%   \item[JVM] Java Virtual Machine
+%\end{listofabbrv}
+
+
+% idem para a lista de símbolos
+% \begin{listofsymbols}{$\alpha\beta\pi\omega$}
+%     \item[$\sum{\frac{a}{b}}$] Somatório do produtório
+%     \item[$\alpha\beta\pi\omega$] Fator de inconstância do resultado
+% \end{listofsymbols}
+#+END_LaTeX
+
+* Sumário                                                            :ignore:
+
+#+BEGIN_LaTeX
+\tableofcontents
+#+END_LaTeX
+
+* Configuring Emacs to correctly export to PDF                     :noexport:
+
+Org mode is configured by default to export only the base classes.
+
+See for details:
++ http://orgmode.org/worg/org-tutorials/org-latex-export.html
+
+Execute the following code (with C-c C-c) prior to export this file to PDF.
+
+#+BEGIN_SRC emacs-lisp :results silent :exports nones
+(add-to-list 'load-path ".")
+(require 'ox-extra)
+(ox-extras-activate '(ignore-headlines))
+(add-to-list 'org-latex-classes
+             '("iiufrgs"
+               "\\documentclass{iiufrgs}"
+               ("\\chapter{%s}" . "\\chapter*{%s}")
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+#+END_SRC
+* 2016-03-18 First entry (proper emacs configuration file)   :noexport:Orientador:
+
+I recommend you use Arnaud's emacs configuration file, available here:
++ http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php
+
+Download the file =init.org=:
+
+#+begin_src sh :results output :session :exports both
+wget http://mescal.imag.fr/membres/arnaud.legrand/misc/init.org
+#+end_src
+
+#+RESULTS:
+
+* 2016-04-29 How to compile with _bibtex_ entries              :Orientador:noexport:
+
+Do as follows:
+
+1. Export as usual to latex
+2. Then, type in the terminal
+   #+begin_src sh :results output :session :exports both
+   pdflatex Dissertation.tex
+   bibtex Dissertation
+   pdflatex Dissertation.tex
+   pdflatex Dissertation.tex
+   #+end_src
+
+* Introdução
+
+Cada programa/aplicação possui aspectos peculiares, os quais definem
+seu tipo, modelo e demais características de processamento. Além
+dessas características influenciarem o comportamento de uma aplicação,
+a plataforma de execução aonde a aplicação é executada influencia
+diretamente no seu comportamento. Aplicações memory-bound, por
+exemplo, definem uma classe de aplicações que possuem uma alta taxa de
+cache misses, fazendo com que ela seja limitada pelo acesso a
+memória em algumas partes da sua execução. Outras aplicações,
+realizam mais processamento e acessam a memória menos vezes, o que é o
+caso por exemplo das aplicações mais CPU-bound, as quais possuem um
+IPC (
+#+BEGIN_LaTeX
+\textit{Instruction Per Cycle}
+#+END_LaTeX
+) maior que demais tipos de aplicações,
+dependendo da arquitetura alvo.
+
+Uma aplicação paralela é composta por várias regiões paralelas, as
+quais são executadas por threads distintas. Por exemplo, em uma
+aplicação que simula a troca de calor através de uma placa de metal é
+possível definir duas regiões paralelas: a primeira define uma
+condição inicial da placa metálica, outra realiza os cálculos de
+transferência de calor através dos diferentes pontos da placa, a fim
+de calcular o cálculo da troca de calor. Nesse exemplo, podemos
+visualizar que a segunda região é mais memory-bound do que a outra,
+visto que é efetuado o mesmo cálculo sobre diferentes dados em
+diferentes iterações, fazendo com que o registro da informação seja
+realizado e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
+em uma aplicação é possível ter diferentes comportamentos em uma
+granularidade mais fina, compreendendo o comportamento das diferentes
+regiões da aplicação. O objetivo do trabalho é estudar
+as regiões memory-bound de aplicações paralelas em uma granularidade
+mais refinada das abordagens investigadas, de maneira que possa ser
+realizado um ajuste de frequência de processador utilizando a técnica
+DVFS (
+#+BEGIN_LaTeX
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+) para obter um consumo de energia nas fases mais memory-bound da
+aplicação.
+
+O presente trabalho está organizado da seguinte maneira: no capítulo 2
+será apresentado os conceitos básicos utilizados em nossa abordagem;
+já no capítulo 3 é investigado o estado da arte com vários trabalhos que
+contribuem diretamente para essa pesquisa; o capítulo 4 apresenta os
+experimentos realizados e alguns resultados preliminares do trabalho;
+e no capítulo 5 é apresentado as conclusões do trabalho, como também
+os próximos passos da pesquisa e cronograma de atividades que serão
+realizadas no decorrer do mestrado.
+
+* Conceitos Básicos
+\label{chapter.basic_concepts}
+
+Este capítulo apresentará alguns conceitos que são fundamentais para a
+compreensão da proposta do trabalho. Como o trabalho leva em
+consideração o comportamento de aplicações paralelas, será abordado
+nesse capítulo um pouco sobre os tipos de aplicações e suas
+principais características, o que pode impactar diretamente no
+comportamento de uma aplicação. 
+
+** Tipos de Aplicações Paralelas
+
+Existem vários modelos de aplicações paralelas para memória
+compartilhada, dentre esses modelos, os tipos de aplicações utilizadas
+nos experimentos desse trabalho podem ser classificadas em abordagens
+de tipo: Fork-join, Stencil, Mapeamento e Redução.
+
+*** Fork-join
+
+O modelo Fork-join consiste em um processo que dispara várias threads
+(fork), após essa divisão, geralmente ocorre um processamento
+específico em cada thread (abordagem muito usada em Pthreads) ou um
+processamento similar, sobre diferentes dados (abordagem mais usada em
+OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a
+abordagem de divisão e conquista, como por exemplo o algoritmo
+Merge-sort, fazem uso do modelo Fork-Join. Na Figura
+\ref{fig.fork-join} é possível visualizar um exemplo de fork-join, um
+processo que inicializa duas threads.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Exemplo de Aplicação Fork-Join \cite{pacheco2011introduction}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/applicationFork-join.pdf}
+\label{fig.fork-join} 
+\end{figure}
+#+END_LaTeX
+
+*** Stencil
+
+Aplicações do tipo Stencil realizam uma espécie de computação
+matricial, aplicando cálculos sobre determinada célula da matriz,
+levando em consideração suas células vizinhas \cite{Roth1997}. Muitas
+dependências podem ocorrer nesse tipo de abordagem, o que torna esse
+tipo de aplicação mais complexo do ponto de vista de implementação. A
+Figura \ref{fig.stencil} apresenta o funcionamento básico desse tipo
+de aplicação.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Exemplo de Aplicação Stencil.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/applicationStencil.pdf}
+\label{fig.stencil} 
+\end{figure}
+#+END_LaTeX
+
+O exemplo da Figura \ref{fig.stencil} apresenta uma matriz, uma parte
+dela é selecionada pelo algoritmo, nessa parte é realizado um cálculo
+que leva em consideração os valores dos vizinhos da célula alvo. O
+mesmo procedimento é realizado para todos os elementos da
+matriz. Nesse exemplo é possível visualizar uma dependência muito
+comum, quando a célula fizer parte de uma borda, faltará
+alguns vizinhos para a mesma. Dependendo do cálculo que está sendo
+realizado e do algoritmo, a solução para o problema das bordas pode
+ser a duplicação das mesmas ou o preenchimento com um valor
+constante.
+
+Uma aplicação muito conhecida que implementa a abordagem Stencil é o
+#+BEGIN_LaTeX
+\textit{Heat Transfer}
+#+END_LaTeX
+, na qual utiliza-se uma matriz base para representar uma placa
+metálica e outra matriz menor que pode ser chamada de matriz de
+convolução. Essa matriz de convolução atua sobre cada elemento da
+matriz base, a fim de calcular a sua temperatura. Esse procedimento é
+realizado inúmeras vezes para cada célula, de acordo com o número de
+iterações definido.
+
+*** Mapeamento
+
+Mapeamento é um tipo de aplicação paralela muito desenvolvida quando se
+utiliza o padrão OpenMP, especialmente quando paraleliza-se laços
+"for". Ao definir os "pragmas", indica-se ao compilador aonde iniciará
+a divisão do fluxo principal de execução em vários fluxos de
+processamento (threads). A seguir no código \ref{lst.mm} é apresentado
+um exemplo da técnica de Mapeamento, utilizando a biblioteca OpenMP em um problema
+de multiplicação de matrizes.
+
+#+LaTeX: \lstset{language=C,caption={Multiplicação de matrizes usando Mapeamento \cite{Krause2016}.},label=lst.mm}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+/*Multiplicacao das matrizes matA e matB*/
+int i,j,k;
+double tmp=0.0;
+
+#pragma omp parallel for private(i,j,k)
+for(i=0;i < size; i++) {
+  for(j=0;j < size; j++) {
+	  tmp=0;
+	  for(k=0; k < size; k++) {
+	    tmp = tmp + A[i * size + k] * B[k * size + j];
+    }
+	    R[i * size + j] = tmp;
+	}
+}
+\end{lstlisting}
+
+#+END_LaTeX
+
+A abordagem tradicional de multiplicação de matrizes utiliza três
+laços aninhados, o primeiro que percorre as linhas da matriz, o mais
+interno permite o deslocamento nas colunas e o terceiro laço permite
+passar por cada elemento da linha e da coluna desejada. Na
+implementação do exemplo \ref{lst.mm}, a diretiva "pragma omp parallel
+for" sinaliza o momento em que ocorrerá o disparo das threads, aonde
+cada thread receberá do processo principal "x" iterações do primeiro
+laço, ou seja, a tarefa de percorrer "x" linhas da matriz. Cada thread
+executará o mesmo código, mas o índice "i" será diferente para cada
+thread para que elas realizem o mesmo trabalho em localizações
+diferentes da matriz.
+
+*** Redução
+
+Geralmente esse tipo de implementação envolve a combinação de pequenas
+soluções obtidas a partir do processamento de partes de uma coleção de
+elementos de entrada. A saída desse tipo de implementação é um
+resultado único, o qual foi calculado por processamentos
+consecutivos. Na Figura \ref{fig.reduction} é possível visualizar um
+exemplo para ilustrar essa abordagem.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Exemplo de Redução.}
+\centering
+\includegraphics[width=.40\linewidth]{./img/applicationReduction.pdf}
+\label{fig.reduction} 
+\end{figure}
+#+END_LaTeX
+
+Um exemplo de algoritmo de redução é o algoritmo para calcular o
+número de Fibonacci, utilizando tarefas em OpenMP, essa implementação
+pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta
+uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa
+da recursão são somadas em uma apenas. O recurso da diretiva "omp
+task" permite que realizar uma concorrência daquela tarefa dentre as
+threads, as quais realizam o trabalho e após isso concorrem pela
+próxima tarefa. A diretiva de sincronização é simbolizada com o
+"pragma omp taskwait", fazendo com que as threads que terminaram as
+duas tarefas responsáveis por "x" e "y", esperem uma pela outra para
+realizar o cálculo "x + y". 
+
+#+LaTeX: \lstset{language=C,caption={Fibonacci implementado usando tarefas OpenMP \cite{addison2009openmp}.},label=lst.fib}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+int fib(int n) {
+    int x, y;
+    if (n < 2)
+        return n;
+    else {
+        #pragma omp task shared(x)
+            x = fib(n - 1);
+        #pragma omp task shared(y)
+            y = fib(n - 2);
+        #pragma omp taskwait
+            return x + y;
+    }
+}
+\end{lstlisting}
+
+#+END_LaTeX
+
+** Balanceamento de Carga
+
+\citeonline{Li2005} definem balanceamento de carga como uma ação que
+permite dividir a carga de trabalho da aplicação para vários
+processadores, máquinas ou threads, a fim de obter o aumento de
+desempenho em uma aplicação paralela. A carga de trabalho nesse
+contexto pode ser a divisão de dados ou tarefas, o que está
+relacionado diretamente com o tipo de aplicação a ser paralelizada,
+por exemplo, em uma aplicação Stencil, o balanceamento de carga pode
+ser a divisão da matriz base utilizada pela aplicação, assim cada
+processo/thread atuará sobre determinadas regiões da mesma matriz
+base. Outra abordagem de balanceamento de carga para uma aplicação
+Stencil, poderia ser a divisão das iterações realizadas sobre
+determinado elemento da matriz. 
+
+*** Balanceamento Estático
+
+O balanceamento de carga estático leva em consideração um conhecimento
+prévio da plataforma de execução (características de máquina) e da
+aplicação. A divisão da carga de trabalho ocorre antes da computação,
+fazendo com que esse tipo de técnica possua um baixo overhead, quando
+comparada com o balanceamento dinâmico \cite{Li2005}. 
+
+Para memória compartilhada, utilizando OpenMP é possível informar o
+tipo de balanceamento que será realizado na aplicação. No código
+\ref{lst.static} é possível visualizar um exemplo de algoritmo de
+multiplicação de matrizes que utiliza um escalonamento estático. Como
+a carga é conhecida, nesse problema é possível obter um bom desempenho
+com esse tipo de escalonador, visto que cada thread receberá um número
+de iterações a serem realizadas sobre determinadas partes da matriz,
+as quais são configuradas pelas variáveis privadas em que cada thread
+realizará o seu trabalho. 
+
+#+LaTeX: \lstset{language=C,caption={Uso de escalonador estático com OpenMP.} ,label=lst.static}
+#+BEGIN_LaTeX
+\begin{lstlisting}
+#pragma omp parallel for private(i,j,k,tmp) schedule(static)
+    for(i=0;i < size; i++) {
+		for(j=0;j < size; j++) {
+			tmp=0;
+			for(k=0; k < size; k++)
+				tmp = tmp + A[i][k] * B[k][j];
+			R[i][j] = tmp;
+		}
+	}
+\end{lstlisting}
+
+
+#+END_LaTeX
+
+*** Balanceamento Dinâmico
+
+Diferente do balanceamento de carga estático, aonde a carga é
+homogênea e conhecida, no balanceamento de carga dinâmico a carga é
+heterogênea e geralmente não conhecida. Isso exige um comportamento
+adaptativo do escalonador, fazendo com que ele decida com base nas
+mudanças da aplicação e da plataforma de execução, qual é a melhor
+opção de balanceamento para melhorar o desempenho da aplicação
+\cite{Li2005}. 
+
+O conjunto de Mandelbrot é um exemplo de algoritmo onde ocorre um
+balanceamento de carga dinâmico. Esse algoritmo consiste no cálculo de
+quais pontos do plano fazem parte do conjunto de Mandelbrot, em cada
+ponto do plano (imagem) são realizados vários cálculos, com várias
+iterações, fazendo com que a carga seja desbalanceada entre as threads
+\cite{chandra2001parallel}. 
+
+** Comportamentos de Aplicações
+
+O comportamento de uma aplicação está relacionado diretamente com a
+abordagem da aplicação, por exemplo, um algoritmo de multiplicação de
+vetores é diferente de um algoritmo de busca em grafos. Ambos
+algoritmos possuem entrada, processamento e saída, mas o núcleo é
+diferente, porque realizam processamentos distintos. O algoritmo de
+busca em grafos, por exemplo, possui um comportamento mais
+memory-bound, do que o algoritmo de multiplicação de vetores, pois
+quando é realizado uma busca em grafos, por determinado nó, ocorre
+vários "misses" de cache, fazendo com que o algoritmo acesse a memória
+principal várias vezes. Diferente do que ocorre no algoritmo de
+multiplicação de vetores, aonde os dados estão mais bem localizados na
+memória cache, pela estrutura de dados utilizada ser um vetor e a
+leitura dos elementos ser realizada de maneira sequencial, os dados
+permitem que a busca na memória principal ocorra menos vezes, pelo
+princípio da localidade. 
+
+\citeonline{jesshope2006advances} definem que as aplicações memory-bound 
+são aquelas que o desempenho aumenta a medida que for reduzido a taxa de 
+cache misses para o segundo nível de cache (cache L2). Diferente disso, nas 
+aplicações non-memory-bound não ocorre o aumento de desempenho a medida 
+que a taxa de cache misses diminui. Uma das maneiras de medir esse 
+comportamento é a partir de contadores de hardware, os quais informam a 
+quantidade de acessos aos níveis de cache, memória principal, a taxa de hit 
+nas memórias, a quantidade de instruções realizadas e assim por diante.
+
+Além da taxa de misses para o segundo nível de cache para definir o 
+comportamento de uma aplicação, também é possível utilizar a 
+métrica IPC (
+#+BEGIN_LaTeX
+\textit{Instructions per Clock Cycle}
+#+END_LaTeX
+). Essa métrica permite verificar 
+quantas instruções o programa realiza por ciclo de processador, dessa maneira 
+podemos analisar se reduzindo o número de instruções de uma aplicação, aumentamos 
+o seu desempenho, se isso acontecer podemos classificar a aplicação como non-memory-bound ou CPU-bound \cite{jesshope2006advances}.
+
+#+BEGIN_LaTeX
+%\begin{figure}[!htb]
+%\caption{JavaCC's file generation flow}
+%\centering
+%\includegraphics[width=.85\linewidth]{./img/javaccex.pdf}
+%\label{fig.javaccex} 
+%\\\source
+%\end{figure}
+#+END_LaTeX
+
+* Trabalhos Relacionados
+\label{chapter.relatedwork}
+
+A coleta dos trabalhos relacionados foi realizada utilizando a técnica
+chamada mapeamento sistemático da literatura \cite{Kitchenham2007}. Essa 
+técnica permite realizar um estudo prévio sobre a literatura com uma 
+boa cobertura, tendo por base um protocolo de pesquisa para seleção 
+dos artigos. O protocolo definido para investigar o estado da arte pode ser 
+visualizado na Tabela \ref{table:protocoloDePesquisa}.
+
+#+BEGIN_LaTeX
+\begin{table}[!htb]
+\centering
+\caption{Protocolo de Pesquisa}\label{table:protocoloDePesquisa}
+\vspace{0.5cm}
+\begin{tabular}{|l|} 
+\hline
+\textbf{Critérios de Seleção} \\
+\hline
+- publicados acima de 2005 \\
+- artigos de bases confiáveis, revistas, periódicos e conferências \\
+- trabalho deve apresentar uma metodologia consistente, com uma \\ 
+descrição detalhada dos experimentos \\
+\hline
+\textbf{Critério de Inclusão} \\
+\hline
+- trabalhos destinados a redução do consumo de energia de aplicações \\
+paralelas, distribuídas e sequenciais \\
+\hline
+\textbf{Critérios de Exclusão} \\
+\hline
+- artigos com o número menor ou igual a 6 páginas \\
+- artigos não escritos em inglês \\
+\hline
+\textbf{Palavras-chave} \\
+\hline
+``memory-bound'' + ``behavior'' + \\ 
+``applications'' + ``power consumption'' + \\ 
+``hpc'' \\
+\hline
+\textbf{Questão de Pesquisa} \\
+\hline
+- Quais são as abordagens/técnicas que permitem diminuir a redução de \\
+energia de aplicações, levando em consideração o comportamento de aplicações? \\
+\hline
+\end{tabular}
+\end{table}
+#+END_LaTeX
+
+Não existe uma solução definitiva para detectar se uma região de
+código é mais memory-bound ou CPU-bound. Alguns trabalhos focam mais
+na detecção de fases para aplicações sequenciais
+\cite{spiliopoulos2012power}, outros se concentram mais na perspectiva
+de aplicações distribuídas \cite{freeh2005exploring} e paralelas
+\cite{laurenzano2011reducing, millani2016fr}.
+
+\citeonline{spiliopoulos2012power} apresentam uma ferramenta chamada
+Power-Sleuth que é capaz de fornecer uma descrição detalhada do
+comportamento de uma aplicação quando executada em determinada
+frequência. Esse trabalho utiliza três técnicas fundamentais para
+compreender o comportamento de um programa, detecção de fases, modelo DVFS (
+#+BEGIN_LaTeX
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+) e modelos de correlação. A abordagem desenvolvida pelos autores
+identificam as fases da aplicação utilizando uma biblioteca chamada
+ScarPhase que utiliza o histórico de execução da
+aplicação, agrupando em fases, as funções do programa que possuem um
+comportamento similar (acessos a memória, taxa de misses, entre
+outros). Esse artigo investiga apenas aplicações sequenciais, nessa
+perspectiva a identificação de áreas de regiões memory-bound podem ser
+obtidas em uma granularidade mais grosseira no intervalo entre
+amostras. Já para aplicações paralelas, como são executadas sobre
+diferentes fluxos de processamento, cada fluxo pode possuir um
+comportamento distinto de acordo com o balanceamento da carga da
+aplicação, até mesmo para mesmas regiões de código.
+
+Além da abordagem de \citeonline{spiliopoulos2012power}, a qual é mais
+voltada para aplicações sequenciais, \citeonline{Poellabauer2005}
+demonstram uma técnica chamada 
+#+BEGIN_LaTeX
+\textit{Feed-back loop}
+#+END_LaTeX
+, essa técnica utiliza uma métrica chamada MAR (
+#+BEGIN_LaTeX
+data cache misses / instructions executed
+#+END_LaTeX
+) e também DVFS. A partir da equação MAR é possível analisar a
+porcentagem de misses nas instruções executadas pela aplicação como um
+todo, fazendo com que a partir desses resultados seja possível
+realizar previsões sobre o comportamento de aplicações em determinada
+arquitetura. Os resultados dessa pesquisa apresentam uma economia de
+energia de até 27% para as seis aplicações executadas.
+
+
+\citeonline{laurenzano2011reducing} definem uma
+abordagem automatizada que permite selecionar a frequência mais
+adequada de processador para determinado laço do programa. A
+frequência do processador é escolhida utilizando como base uma análise
+estática (realizada antes da execução) e outra análise realizada 
+durante o tempo de execução da aplicação, utilizando os rastros
+obtidos. Os autores utilizaram vários benchmarks, tendo como
+base de execução o framework chamado pcubed (
+#+BEGIN_LaTeX
+\textit{PMaC's Performance and Power benchmark}
+#+END_LaTeX
+) que permite explorar diferentes comportamentos de laços de
+interações, a fim de definir uma caracterização para a máquina alvo. A
+caracterização da máquina define valores como consumo de potência,
+desempenho, padrões de execução e frequências de processador. Os
+resultados obtidos no experimento podem ser utilizados posteriormente
+como base de conhecimento, assim é possível visualizar o comportamento
+do consumo de energia quando se ajusta os fatores de caracterização da
+máquina. Dentre os resultados obtidos pelo trabalho, o melhor foi a
+redução de até 10,6% no consumo de energia. 
+
+Diferente de \citeonline{laurenzano2011reducing},
+\citeonline{freeh2005exploring} apresentam uma abordagem voltada à memória
+distribuída para aplicações MPI. Essa abordagem encontra a melhor
+frequência para cada nó, a frequência é definida por uma heurística
+chamada ``gear'' que define um ganho entre consumo de energia e
+desempenho. Com o trace obtido a partir de uma pré-execução, a
+abordagem define blocos (
+#+BEGIN_LaTeX
+ \textit{Basic blocks}
+#+END_LaTeX
+) que realizam operações comuns, depois dessa classificação é obtido
+as fases da aplicação que correspondem a junção desses blocos. Para
+cada bloco é definido o ganho desejado. O ganho é a melhor
+configuração encontrada (frequência de processador) entre consumo de
+energia e desempenho para determinada fase da aplicação. Os resultados
+apresentam um ganho considerável para mais da metade das aplicações
+executadas, o melhor resultado obtido foi a redução do consumo de
+energia em 9% e do tempo de execução em 1%. Em contraste a abordagem de 
+\citeonline{freeh2005exploring}, \citeonline{Ge2005} apresenta uma abordagem 
+que também utiliza a técnica DVFS para aplicações paralelas em Clusters, mas 
+nessa abordagem ao invés de utilizar as regiões mais memory-bound da aplicação 
+para aplicar a redução da frequência, os autores realizam a redução de frequência 
+de processador quando o desempenho da CPU não é necessário, por exemplo quando 
+ocorre comunicações entre os processos MPI.
+
+Para aplicações paralelas escritas com OpenMP,
+\citeonline{millani2016fr} apresentam uma abordagem que analisa as
+regiões paralelas de um programa, utilizando uma análise detalhada com a técnica 
+#+BEGIN_LaTeX
+\textit{Design of Experiments}
+#+END_LaTeX
+ e 
+#+BEGIN_LaTeX
+\textit{Screening Design}.
+#+END_LaTeX
+Os autores realizaram experimentos com sete benchmarks, através das
+execuções eles concluíram que é possível obter um ganho considerável
+de energia e desempenho com a utilização da abordagem, dependendo das
+características comportamentais da aplicação. A técnica consiste na
+instrumentação manual de código para assinalar as regiões paralelas no
+código fonte. Diferente disso, o foco desse trabalho é direcionado na
+identificação automática dessas regiões paralelas, baseando-se em
+contadores de hardware específicos.
+
+** Detecção de Regiões Memory-bound	
+
+Cada um dos trabalhos analisados utiliza uma abordagem diferenciada
+para analisar o comportamento de uma aplicação, classificando trechos
+de execução mais memory-bound, partes em
+que a aplicação espera por IO (entrada ou saída de dados), entre
+outros comportamentos. Como o alvo desse trabalho é a detecção de regiões
+memory-bound de aplicações paralelas, para que seja possível reduzir o
+consumo de energia de toda aplicação pelo uso da técnica DVFS. Nessa
+seção será abordado as medidas utilizadas pelas técnicas, ao
+definir o comportamento memory-bound de um programa. Na Tabela
+\ref{table:comparativoDeTrabalhos} é possível visualizar um
+comparativo entre as abordagens. 
+
+#+BEGIN_LaTeX
+\begin{table}[h]
+\centering
+\caption{Comparativo de trabalhos}\label{table:comparativoDeTrabalhos}
+\vspace{0.5cm}
+\begin{tabular}{rrr} 
+\citeonline{laurenzano2011reducing} & \citeonline{spiliopoulos2012power} & \citeonline{freeh2005exploring} \\
+\hline
+Tamanho de Array & Miss na LLC & Miss na L2 \\
+Stride & Cycles &  Operações por Miss \\
+Taxa de Hit & Stall Cycles & -\\
+Operações de Memória & Latência de Memória & - \\
+Operações de FP & Tempo de Reorder Buffer & - \\
+Instruções por Laço & - & - \\
+\end{tabular}
+\end{table}
+
+%\begin{table}[h]
+%\centering
+%\caption{Comparativo de trabalhos}\label{table:comparativoDeTrabalhos}
+%\vspace{0.5cm}
+%\begin{tabular}{r|lr} 
+%Trabalho & Medidas & Overhead \\
+%\hline
+%\citeonline{spiliopoulos2012power} & Miss na LLC \\ Cycles & 2% \\
+% & Cycles &  \\
+% & Stall Cycles & \\
+% & Latência de Memória & \\
+% & Tempo de Reorder Buffer & \\
+%\citeonline{freeh2005exploring} & Operações por Miss & - \\
+% & Miss na L2 &  \\
+%\citeonline{laurenzano2011reducing} & Tamanho de Array & 4x mais lento \\
+% & stride & \\
+% & Taxa de hit & \\
+% & Número de Operações de Memória & \\
+% & Número de Operações de FP & \\
+% & Instruções por Laço & \\
+%\citeonline{millani2016fr} & - & - \\
+%\end{tabular}
+%\end{table}
+#+END_LaTeX
+
+Dentre os trabalhos, pode-se visualizar que
+\citeonline{laurenzano2011reducing} utilizam mais medidas que as outras
+técnicas, a fim de compreender o comportamento da aplicação em uma
+granularidade mais fina, analisando além das fases da aplicação onde
+ocorre mais processamento, também os padrões de acesso à memória. Já
+\citeonline{spiliopoulos2012power} apresentam uma abordagem diferente,
+analisando também o tempo em que o 
+#+BEGIN_LaTeX
+\textit{Reorder Buffer}
+#+END_LaTeX
+ leva para encher. A abordagem que utiliza menos medidas é a de
+ \citeonline{freeh2005exploring}, a qual analisa apenas o índice de cache
+ misses para o segundo nível de cache, já que em sua abordagem é
+ levado em consideração uma aplicação distribuída, o grão é o próprio
+ nó de processamento.
+
+* Experimentos Preliminares
+\label{chapter.experiments} 
+
+Os experimentos preliminares foram realizados com o objetivo de
+investigar em uma granularidade fina, pontos de execução da aplicação
+aonde ocorre um comportamento mais memory-bound, levando em
+consideração o índice de cache misses na L2 e na cache L3. A
+metodologia utilizada para realizar esse tipo de análise pode ser
+visualizada na Figura \ref{fig.methodology}.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Visão geral da metodologia utilizada para coletar os hardware counters \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/experimentosMetodologia.pdf}
+\label{fig.methodology} 
+\end{figure}
+#+END_LaTeX
+
+A metodologia utilizada nesse trabalho define algumas etapas, dentre
+elas a compilação do código fonte, execução com instrumentação,
+agrupamento dos arquivos ".evt" e agrupamento dos rastros em um
+arquivo final. O arquivo binário é gerado a partir de uma compilação
+comum, após isso o programa é executado utilizando a ferramenta
+likwid-perfctr, utilizando o modo 
+#+BEGIN_LaTeX
+\textit{timeline} 
+#+END_LaTeX
+que permite coletar
+contadores de hardware ao longo do tempo de execução da aplicação \cite{psti}. Na
+diretiva de execução da aplicação com a ferramenta likwid, deve ser
+definido os hardware counters desejados e também o intervalo em que
+será realizado a amostragem. A partir da execução da aplicação é
+gerado um arquivo de rastro para cada núcleo de processamento, os
+quais são agrupados por um script para gerar o arquivo 
+#+BEGIN_LaTeX
+\textit{trace} 
+#+END_LaTeX
+para
+realizarmos a análise do comportamento da aplicação. 
+
+** Experimento com o Nas Parallel Benchmark (NPB)
+
+O experimento foi realizado em uma máquina com 2 processadores
+Intel(R) Xeon(R) E5-2650 CPU 2.00 GHz, cada um com 8 cores físicos e
+tecnologia Hyper-Threading. A metodologia foi aplicada para três
+aplicações do NPB, dentre elas: 3D Discrete Fast Fourier Transform
+(FT), Lower-Upper Gauss-Seidel Solver (LU) e a Conjugante Gradient
+(CG), utilizando a configuração padrão de threads do OpenMP para a
+plataforma com 32 threads em execução.
+
+*** Discrete 3D Fast Fourier Transform (NPB-FT, B Class)
+
+A Figura \ref{fig.ftExecution} apresenta a taxa de cache misses da L2 e da L3 para a
+aplicação FT, com amostragem realizada a cada 100 milisegundos de
+execução. É possível visualizar claramente as fases mais memory-bound
+da aplicação, as quais são representadas pelos picos em intervalos
+regulares, quando analisamos esse comportamento para a cache L2. Já
+para a cache L3 é observável que depois da fase de inicialização (onde
+existe um pico de 37%), a taxa decresce em direção a zero. A maior
+taxa de misses para a L2 foi 30%, entre 7.5 e 10 segundos de
+execução. Já a menor taxa para a L2 foi de 10% de misses durante a
+fase de inicialização da aplicação.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Taxa de Misses para Caches L2 e L3, aplicação Fast Fourier Transform (NPB-FT, Classe B) \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/ft_L2_L3_100ms.pdf}
+\label{fig.ftExecution} 
+\end{figure}
+#+END_LaTeX
+
+*** Lower-Upper Gauss-Seidel Solver (NPB-LU, B Class)
+
+A Figura \ref{fig.luExecution} apresenta a taxa de cache misses da L2
+e da L3 para a aplicação LU. O comportamento da aplicação é bem
+diferente da FT (conforme a Figura {fig.ftExecution}). A partir do
+gráfico é possível visualizar que a taxa de misses ocorridos na L2
+fica em aproximadamente 20%, enquanto que na cache L3, a taxa se
+aproxima de zero durante toda a execução, com exceção da inicialização
+da aplicação. 
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Taxa de Misses para Caches L2 e L3, aplicação Lower-Upper Gauss-Seidel Solver (NPB-LU, Classe B) \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/lu_L2_L3_100ms.pdf}
+\label{fig.luExecution} 
+\end{figure}
+#+END_LaTeX
+
+*** Conjugate Gradient (NPB-CG, B Class)
+
+Na Figura \ref{fig.cgExecution} é possível visualizar o comportamento
+da aplicação CG, levando em consideração a taxa de misses nas caches
+L2 e L3. A partir da fase de inicialização, o comportamento de mabas
+métricas se torna estável, aproximando-se de 38% de misses para a L2 e
+zero para L3. Comparando com as aplicações anteriores (FT e LU) é
+possível visualizar que a taxa de misses na L2 é maior do que as
+outras, sugerindo um comportamento mais memory-bound. Dessa maneira,
+essa aplicação potencialmente seria candidata para aplicação da
+técnica DVFS, reduzindo a frequência nos pontos mais memory-bound, a
+fim de obter a redução no consumo de energia.
+
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Taxa de Misses para Caches L2 e L3, aplicação Conjugate Gradient (NPB-CG, Classe B) \cite{Morowsppd}.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/cg_L2_L3_100ms.pdf}
+\label{fig.cgExecution} 
+\end{figure}
+#+END_LaTeX
+
+** Overhead da Técnica
+
+Para analisar o overhead do uso da biblioteca likwid \cite{psti} para
+monitorar o comportamento da aplicação foi realizado um experimento
+com as aplicações FT, CG e LU (NPB, Classe B), executadas com 1, 8,
+16, 24 e 32 threads. Os intervalos utilizados para amostragem foram
+50, 100, 150 e 200 milesegundos. Também, foram realizadas execuções com o uso
+da ferramenta likwid e outras execuções sem likwid. Dentre essas
+configurações, o experimento utilizou 30 replicações para cada
+configurações (fatores e valores), de maneira aleatória, a fim de evitar qualquer vício no
+ambiente de execução. Além disso, o experimento foi realizado em uma
+máquina com 2 processadores Intel(R) Xeon(R) E5-2650 CPU 2.00 GHz,
+cada um com 8 cores físicos e tecnologia Hyper-Threading. Na Figura
+\ref{fig.overhead} é possível visualizar o resultado do experimento.
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Overhead da técnica para as aplicações FT, CG e LU (NPB, Classe B).}
+\centering
+\includegraphics[width=.85\linewidth]{./img/exp5Overhead.pdf}
+\label{fig.overhead} 
+\end{figure}
+#+END_LaTeX
+
+O gráfico de overhead para as três aplicações apresenta na maioria dos
+casos, um maior overhead com amostragem a cada 50 milisegundos. Em
+alguns casos, isso não ocorreu, um exemplo foi na aplicação ft.B,
+quando executada com 32 threads, aonde o overhead mais baixo foi com
+50 milisegundos. Um dos motivos associados a isso pode ser que os
+trechos aonde foi coletado as amostras a cada 50 milisegundos, o
+overhead da comunicação ou da sincronização das threads não estava
+ocorrendo tão intensamente como nos trechos de coleta com 150
+milisegundos (maior overhead para ft.B com 32 threads).
+
+O maior overhead de uso da ferramenta likwid obtido foi de 1.04% em
+dois casos, o primeiro na aplicação ft.B executada com apenas 1
+thread, já o segundo caso ocorreu na aplicação lu.B com 16
+threads. Ambos os casos quando a amostragem realizada foi de 50
+milesegundos, conforme esperado, quanto menor é a frequência das
+amostragens maior é o overhead da ferramenta sobre o tempo de execução
+da aplicação. Outro aspecto interessante foi que o menor overhead
+obtido foi de aproximadamente 0.92%, muito próximo do maior, esse
+comportamento ocorreu com a aplicação ft.B, quando executada sobre 1
+thread, onde a amostragem foi realizada a cada 100 milisegundos. Em
+média, o overhead para todo o experimento ficou em cerca de 0.99% , a
+baixo de 1%, o que implica que a ferramenta apresenta um baixo
+overhead.
+
+* Considerações Finais
+
+O objetivo desse trabalho é realizar um estudo aprofundado sobre as
+regiões memory-bound de aplicações paralelas em uma granularidade mais
+refinada das abordagens investigadas, de maneira que possa ser
+realizado um ajuste de frequência de processador utilizando a técnica
+DVFS ( 
+#+BEGIN_LaTeX 
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+) para obter um consumo de energia nas fases mais memory-bound da
+aplicação.
+
+Os resultados preliminares apresentam que a metodologia e a ferramenta
+utilizada é capaz de identificar trechos de execução aonde a aplicação
+é mais memory-bound, diferente dos trabalhos investigados, aonde o
+overhead de instrumentação muitas vezes se aproxima de 2% (conforme é
+o caso de \citeonline{spiliopoulos2012power}), o uso da biblioteca
+likwid gerou em nossos experimentos um overhead de 0.99% em
+média, o que mostra uma das vantagens de uso.
+
+Como trabalhos futuros, pretende-se investigar como utilizar a técnica
+DVFS para obter a redução do consumo de energia nos trechos
+memory-bound da aplicação, os quais já são conhecidos pelo uso da
+técnica desenvolvida anteriormente em \citeonline{Morowsppd}.
+
+** Cronograma de Atividades
+
+As atividades a serem realizadas ao decorrer do trabalho podem ser
+organizadas em um cronograma, conforme a Tabela \ref{table:cronograma}. 
+
+#+BEGIN_LaTeX
+\begin{landscape}
+\begin{table}[h]
+\centering
+\caption{Cronograma de Atividades}\label{table:cronograma}
+\vspace{0.5cm}
+\begin{tabular}{llllllll}
+Atividades & 2016 & & & 2017 & & & \\
+ & Out & Nov & Dez & Jan & Fev & Mar & Abr \\
+\hline
+Ajustar frequência de amostragem adequada para aplicações paralelas & X & X & X & - & - & - & - \\
+Realizar experimento para verificar o ajuste de frequências de amostragem & - & X & X & - & - & - & - \\
+Analisar resultados do experimento de ajuste de frequências & - & - & X & X & - & - & - \\
+Estudar sobre a técnica DVFS (Dynamic Voltage Frequency Scaling) & X & X & X & X & - & - & - \\
+Criação de um Programa Sintético de perfil completamente Memory-bound & - & - & X & X & - & - & - \\
+Aplicar DVFS sobre o Programa Sintético & - & - & - & - & X & - & - \\
+Utilizar a técnica DVFS nas fases mais memory-bound & - & - & - & - & X & X & - \\
+Realizar experimento final para verificar a técnica como um todo & - & - & - & - & - & X & - \\
+Analisar resultados  & - & - & - & - & - & X & - \\
+Realizar uma revisão sistemática da literatura aprofundada & - & - & - & X & X & - & - \\
+Escrever dissertação & - & - & - & X & X & X & X \\
+\end{tabular}
+\end{table}
+ \end{landscape}
+#+END_LaTeX
+
+
+#+LATEX: \bibliography{References}
+
+* 2016-08-20 FT (gráficos)                                         :noexport:
+
+#+begin_src R :results output graphics :file img/ft_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session *2*
+library(dplyr);
+df2 <- read.csv("../../dados/exp3_NASandLikwid/ftl2.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp3_NASandLikwid/ftl3.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "FT";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+      scale_color_discrete(name="Nível de Cache") + facet_wrap(~Application) +
+      labs(x = "Tempo de Execução (segundos)", y= "Taxa de Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/ft_L2_L3_100ms.pdf]]
+
+* 2016-08-20 LU (gráficos)                                         :noexport:
+
+#+begin_src R :results output graphics :file img/lu_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/luB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "LU";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.8),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Nível de Cache") + facet_wrap(~Application) +
+      labs(x = "Tempo de Execução (segundos)", y= "Taxa de Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/lu_L2_L3_100ms.pdf]]
+
+* 2016-08-20 CG (gráficos)                                         :noexport:
+
+#+begin_src R :results output graphics :file img/cg_L2_L3_100ms.pdf :exports both :width 6 :height 3 :session
+library(dplyr);
+df2 <- read.csv("../../dados/exp1_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+df2 <- df2[df2$Metric == "M7", ];
+df2$Metric <- "L2";
+df3 <- read.csv("../../dados/exp2_NASandLikwid/cgB.csv", sep=" ", strip.white=T);
+df3 <- df3[df3$Metric == "M7", ];
+df3$Metric <- "L3";
+df <- rbind (df2, df3);
+df$Application <- "CG";
+g <- df %>% group_by(Time,Metric,Application) %>% summarize (N=n(), mean=mean(Value)*100) %>% as.data.frame();
+
+library(ggplot2);
+ggplot(g, aes(x=Time, y=mean,color=as.factor(Metric))) +
+  	geom_line(size=0.5) + geom_point(size=1) + theme_bw() + ylim(0,50) +  
+     theme(legend.position=c(0.9,0.4),
+               legend.background = element_rect(fill="gray90", size=.5, linetype="dotted")) + 
+     scale_color_discrete(name="Nível de Cache") + facet_wrap(~Application) +
+      labs(x = "Tempo de Execução (segundos)", y= "Taxa de Cache Misses (%)");
+
+#+end_src
+
+#+RESULTS:
+[[file:img/cg_L2_L3_100ms.pdf]]
+
+* [12:41:29; 30.09.2016] Gráfico do Overhead                       :noexport:
+
+- Professor eu utilizei gráfico de barras, porque na minha opinião
+  fica mais fácil de visualizar esse tipo de métrica.
+
+#+begin_src R :results output graphics :file "img/exp5Overhead.pdf" :exports both :session *mmexp2* 
+library(dplyr);
+library(ggplot2);
+
+df <- read.csv("../../dados/exp5NAS_overhead/ResultExp5_overhead.csv");
+k <- df %>% select(versions, threads, sampling, use, tempo) %>%
+     group_by(versions, threads,  use, sampling) %>%
+     summarize(mean=mean(tempo), se=3*sd(tempo)/sqrt(n())) %>%
+     as.data.frame();
+
+sem <- k[k$use!='com',]
+com <- k[k$use!='sem',]
+
+k$overhead <- sem$mean / com$mean;
+#k <- k[k$sampling!=150 & k$sampling!=100,]
+
+ggplot(k, aes(x=as.factor(threads), y=overhead, 
+fill=as.factor(sampling))) + 
+#  labs(fill = sampling) + 
+#  geom_line(aes(group=sampling)) + 
+geom_bar(stat="identity", position=position_dodge(), width=0.5) + #coord_flip() +
+  theme_bw() + ylab("overhead (%)") + xlab("threads") + 
+facet_wrap(~versions, ncol=1);
+
+#+end_src
+
+#+RESULTS:
+[[file:img/exp5Overhead.pdf]]
+
