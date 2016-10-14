@@ -314,14 +314,7 @@ realizadas no decorrer do mestrado.
 * Conceitos Básicos
 \label{chapter.basic_concepts}
 
-Como o trabalho leva em consideração o comportamento de aplicações
-paralelas, a eficiência energética e outros aspectos fundamentais da
-técnica 
-#+BEGIN_LaTeX
-\textit{Design Of Experiments}
-#+END_LaTeX
-, esse capítulo apresentará alguns conceitos que são fundamentais para
-a compreensão da proposta do trabalho. 
+Esse capítulo apresenta os conceitos básicos que estão relacionados com o trabalho, dentre eles, comportamento de aplicações paralelas, modelos de programação, consumo de energia de aplicações, entre outros.
 
 ** Tipos de Aplicações Paralelas
 
@@ -333,13 +326,17 @@ de tipo: Fork-join, Stencil, Mapeamento e Redução.
 *** Fork-join
 
 O modelo Fork-join consiste em um processo que dispara várias threads
-(fork), após essa divisão, geralmente ocorre um processamento
+(
+#+BEGIN_LaTeX:
+\textit{fork}
+#+END_LaTeX
+), após essa divisão, geralmente ocorre um processamento
 específico em cada thread (abordagem muito usada em Pthreads) ou um
 processamento similar, sobre diferentes dados (abordagem mais usada em
 OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a
 abordagem de divisão e conquista, como por exemplo o algoritmo
-Merge-sort, fazem uso do modelo Fork-Join. Na Figura
-\ref{fig.fork-join} é possível visualizar um exemplo de fork-join, um
+Merge-sort, fazem uso do modelo Fork-join. Na Figura
+\ref{fig.fork-join} é possível visualizar um exemplo de Fork-join, um
 processo que inicializa duas threads, nessa computação podemos
 visualizar a utilização de três fluxos de execução em paralelo.
 
@@ -405,11 +402,14 @@ A abordagem tradicional de multiplicação de matrizes utiliza três
 laços aninhados, o primeiro que percorre as linhas da matriz, o mais
 interno permite o deslocamento nas colunas e o terceiro laço permite
 passar por cada elemento da linha e da coluna desejada. Na
-implementação do exemplo \ref{lst.mm}, a diretiva "pragma omp parallel
-for" sinaliza o momento em que ocorrerá o disparo das threads, aonde
-cada thread receberá do processo principal "x" iterações do primeiro
-laço, ou seja, a tarefa de percorrer "x" linhas da matriz. Cada thread
-executará o mesmo código, mas o índice "i" será diferente para cada
+implementação do exemplo \ref{lst.mm}, a diretiva 
+#+BEGIN_LaTeX:
+``\textit{pragma omp parallel for}''
+#+END_LaTeX
+ sinaliza o momento em que ocorrerá o disparo das threads, aonde
+cada thread receberá do processo principal ``x'' iterações do primeiro
+laço, ou seja, a tarefa de percorrer ``x'' linhas da matriz. Cada thread
+executará o mesmo código, mas o índice ``i'' será diferente para cada
 thread para que elas realizem o mesmo trabalho em localizações
 diferentes da matriz.
 
@@ -435,13 +435,19 @@ Um exemplo de algoritmo de redução é o algoritmo para calcular o
 número de Fibonacci, utilizando tarefas em OpenMP, essa implementação
 pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta
 uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa
-da recursão são somadas em uma apenas. O recurso da diretiva "omp
-task" permite que realizar uma concorrência daquela tarefa dentre as
+da recursão são somadas em uma apenas. O recurso da diretiva 
+#+BEGIN_LaTeX:
+``\textit{omp task}''
+#+END_LaTeX
+ permite realizar uma concorrência daquela tarefa dentre as
 threads, as quais realizam o trabalho e após isso concorrem pela
-próxima tarefa. A diretiva de sincronização é simbolizada com o
-"pragma omp taskwait", fazendo com que as threads que terminaram as
-duas tarefas responsáveis por "x" e "y", esperem uma pela outra para
-realizar o cálculo "x + y". 
+próxima tarefa. A diretiva de sincronização é simbolizada com o 
+#+BEGIN_LaTeX:
+``\textit{pragma omp taskwait}''
+#+END_LaTeX
+, fazendo com que as threads que terminaram as
+ tarefas responsáveis por ``x'' e ``y'', esperem uma pela outra para
+realizar o cálculo ``x + y''. 
 
 #+LaTeX: \lstset{language=C,caption={Fibonacci implementado usando tarefas OpenMP \cite{addison2009openmp}.},label=lst.fib}
 #+BEGIN_LaTeX
@@ -483,20 +489,24 @@ determinado elemento da matriz.
 O balanceamento de carga estático leva em consideração um conhecimento
 prévio da plataforma de execução (características de máquina) e da
 aplicação. A divisão da carga de trabalho ocorre antes da computação,
-fazendo com que esse tipo de técnica possua um baixo overhead, quando
+fazendo com que esse tipo de técnica possua um 
+#+BEGIN_LaTeX:
+\textit{overhead}
+#+END_LaTeX
+ baixo, quando
 comparada com o balanceamento dinâmico \cite{Li2005}. 
 
 Para memória compartilhada, utilizando OpenMP é possível informar o
 tipo de balanceamento que será realizado na aplicação. No código
 \ref{lst.static} é possível visualizar um exemplo de algoritmo de
-multiplicação de matrizes que utiliza um escalonamento estático. Como
+multiplicação de matrizes que utiliza um balanceamento estático. Como
 a carga é conhecida, nesse problema é possível obter um bom desempenho
 com esse tipo de escalonador, visto que cada thread receberá um número
 de iterações a serem realizadas sobre determinadas partes da matriz,
 as quais são configuradas pelas variáveis privadas em que cada thread
 realizará o seu trabalho. 
 
-#+LaTeX: \lstset{language=C,caption={Uso de escalonador estático com OpenMP.} ,label=lst.static}
+#+LaTeX: \lstset{language=C,caption={Uso de balanceamento estático em OpenMP.} ,label=lst.static}
 #+BEGIN_LaTeX
 \begin{lstlisting}
 #pragma omp parallel for private(i,j,k,tmp) schedule(static)
@@ -515,8 +525,8 @@ realizará o seu trabalho.
 
 *** Balanceamento Dinâmico
 
-Diferente do balanceamento de carga estático, aonde a carga é
-homogênea e conhecida, no balanceamento de carga dinâmico a carga é
+Diferente do balanceamento estático, onde a carga é
+homogênea e conhecida, no balanceamento dinâmico, a carga é
 heterogênea e geralmente não conhecida. Isso exige um comportamento
 adaptativo do escalonador, fazendo com que ele decida com base nas
 mudanças da aplicação e da plataforma de execução, qual é a melhor
@@ -524,7 +534,7 @@ opção de balanceamento para melhorar o desempenho da aplicação
 \cite{Li2005}. 
 
 O conjunto de Mandelbrot é um exemplo de algoritmo onde ocorre um
-balanceamento de carga dinâmico. Esse algoritmo consiste no cálculo de
+balanceamento dinâmico. Esse algoritmo consiste no cálculo de
 quais pontos do plano fazem parte do conjunto de Mandelbrot, em cada
 ponto do plano (imagem) são realizados vários cálculos, com várias
 iterações, fazendo com que a carga seja desbalanceada entre as threads
