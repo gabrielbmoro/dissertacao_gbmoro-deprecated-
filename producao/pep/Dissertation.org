@@ -20,6 +20,13 @@
 #+LATEX_HEADER: \usepackage{algorithm}
 #+LATEX_HEADER: \usepackage{algorithmic}
 #+LATEX_HEADER: \usepackage{listings}
+#+LATEX_HEADER: \lstset{language=C++,
+#+LATEX_HEADER:  basicstyle=\ttfamily,
+#+LATEX_HEADER:  keywordstyle=\color{blue}\ttfamily,
+#+LATEX_HEADER:  stringstyle=\color{red}\ttfamily,
+#+LATEX_HEADER:  commentstyle=\color{green}\ttfamily,
+#+LATEX_HEADER:  morecomment=[l][\color{magenta}]{\#}
+#+LATEX_HEADER: }
 #+LATEX_HEADER: \newcommand{\prettysmall}{\fontsize{6.5}{6.5}\selectfont}
 #+LATEX_HEADER: \newcommand{\prettysmallbis}{\fontsize{7}{7}\selectfont}
 #+LATEX_HEADER: \newcommand{\mtilde}{~}
@@ -394,7 +401,6 @@ de multiplicação de matrizes.
 #+LaTeX: \lstset{language=C,caption={Multiplicação de matrizes usando Mapeamento \cite{Krause2016}.},label=lst.mm}
 #+BEGIN_LaTeX
 \begin{lstlisting}
-/*Multiplicacao das matrizes matA e matB*/
 int i,j,k;
 double tmp=0.0;
 
@@ -606,16 +612,78 @@ instrução \cite{SilveiraAndMoro}.
 
 
 Além de conhecer o quanto de energia a aplicação consome, vários
-trabalhos possuem propostas de redução no consumo energético, uma
-técnica amplamente utilizada para economizar energia a partir da
-redução da frequência do processador é a técnica DVFS (
+trabalhos possuem propostas de redução no consumo energético, dentre
+os assuntos investigados, uma técnica amplamente utilizada para
+economizar energia a partir da redução da frequência do processador é a técnica DVFS (
 #+BEGIN_LaTeX
 \textit{Dynamic Voltage and Frequency Scaling}
 #+END_LaTeX
 ). Essa técnica permite reduzir a frequência do processador em
-determinados trechos de execução do programa.
+determinados trechos de execução do programa, os quais possuem um
+comportamento mais memory-bound \cite{Sueur2010}. A seguir na equação
+retirada de \citeonline{Sueur2010} é possível visualizarmos o impacto
+que a redução da frequência possui no cálculo de potência.
 
-*** Dynamic Voltage and Frequency Scaling
+#+BEGIN_LaTeX
+\begin{equation}\label{eq:powerconsumption}
+P = CfV^{2} + P_{static}
+\end{equation}
+#+END_LaTeX
+
+O cálculo da potência (``P'') leva em consideração a capacitância (``C'') do circuito,
+a frequência em que as operações são realizadas e a voltagem (``V'')
+utilizada, ambos parâmetros são somados à potência estática, assim é
+obtido a potência de sistema. A frequência está relacionada a
+velocidade em que as operações são realizadas, reduzindo esse valor é
+possível realizar a mesma carga de trabalho, só que o tempo de
+processamento será maior do que quando utilizado uma frequência
+maior. É fundamental conhecer essa relação, visto que, em trechos onde
+o processador espera por acessos à memória, reduzindo a frequência é
+possível reduzir o consumo de energia, sem impactar no desempenho da
+aplicação. 
+
+O framework CPUfreq possibilita alternar a frequência utilizada pelo
+processador, esse framework possui dois modos, o 
+#+BEGIN_LaTeX
+\textit{Governor}
+#+END_LaTeX
+ que realiza as decisões de acordo com a política adotada e o 
+#+BEGIN_LaTeX
+\textit{Driver}
+#+END_LaTeX
+ que realiza as ações de acordo com a decisão do 
+#+BEGIN_LaTeX
+\textit{Governor}
+#+END_LaTeX
+. As políticas disponíveis no framework são: 
+#+BEGIN_LaTeX
+\textit{Performance, Powersave, Ondemand, Userspace} e \textit{Consertative}
+#+END_LaTeX
+\cite{Wiki2012}. Cada uma das políticas (ou também chamadas de 
+#+BEGIN_LaTeX
+\textit{Governors}
+#+END_LaTeX
+) define uma prioridade a ser atingida, na 
+#+BEGIN_LaTeX
+\textit{Performance}
+#+END_LaTeX
+ o processador executa sempre a maior frequência disponível,
+ diferentemente da política 
+#+BEGIN_LaTeX
+\textit{Powersave}
+#+END_LaTeX
+ que sempre executa na menor frequência, a fim de obter o menor
+ consumo de energia possível, não levando em consideração o
+ desempenho \cite{KernelDocumentacao}. Além dessas duas políticas, a política 
+#+BEGIN_LaTeX
+\textit{Ondemand}
+#+END_LaTeX
+ realiza o ajuste de frequência do processador de acordo com o sua
+ utilização e a política 
+#+BEGIN_LaTeX
+\textit{Userspace} 
+#+END_LaTeX
+permite que o usuário possa selecionar uma frequência específica.
 
 ** Design of Experiments
 * Trabalhos Relacionados
