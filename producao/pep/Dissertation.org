@@ -1,4 +1,4 @@
-#+TITLE:
+#+TITLE: 
 #+AUTHOR: Gabriel Bronzatti Moro
 
 #+STARTUP: overview indent
@@ -125,7 +125,7 @@ Hope this helps.
 
 * Front page preparation                                           :ignore:
 #+BEGIN_LaTeX
-\title{Plano de Ensino e Pesquisa}
+\title{Reduzindo o Consumo de Energia nas Regiões Memory-bound de Aplicações Paralelas}
 \author{Bronzatti Moro}{Gabriel}
 \advisor[Prof.~Dr.]{Mello Schnorr}{Lucas}
 
@@ -153,7 +153,7 @@ Hope this helps.
 %
 % TODO: provide these keywords
 %
-%\keyword{HPC}
+\keyword{Aplicações Paralelas, Consumo de Energia, Memory-bound, DVFS}
 #+END_LaTeX
 
 * Front page                                                       :ignore:
@@ -167,7 +167,21 @@ Hope this helps.
 \begin{abstract}
 #+END_LaTeX
 #+BEGIN_LaTeX
-Abstract ...
+Além de reduzir o tempo de execução de uma aplicação paralela, 
+o consumo energético é um problema constantemente abordado na 
+área de computação de alto desempenho. A partir do entendimento  
+do comportamento de uma aplicação paralela é possível 
+identificar regiões em que ocorre mais processamento e outras regiões 
+que esperam mais pela memória, as chamadas regiões memory-bound. Este trabalho 
+tem por objetivo identificar as regiões memory-bound de uma aplicação paralela de 
+maneira automatizada, a partir do conhecimento dessas regiões, nossa abordagem 
+utilizará a técnica DVFS (\textit{Dynamic Voltage and Frequency Scaling}) para realizar ajustes 
+em uma granularidade refinada de frequência de processador para reduzir 
+o consumo de energia da aplicação como um todo. 
+Os experimentos preliminares apresentam resultados de várias execuções realizadas, onde foi possível 
+identificar trechos memory-bound das aplicações. Os próximos passos da pesquisa será definir as fases 
+da aplicação e utilizar o framework CPUfreq para instanciar nossa metodologia, realizando ajustes 
+de frequência.
 \end{abstract}
 #+END_LaTeX
 
@@ -264,7 +278,8 @@ alta capacidade de processamento consomem muita energia para operar,
 dependendo do tipo de computação e da aplicação, esse consumo pode ser
 muito maior. Nisso, muitas pesquisas são realizadas para reduzir o
 consumo de energia, tanto a nível de processador, trabalhando com
-diferentes configurações de frequência para o processamento (uso de DVFS), como também a nível de software, utilizando técnicas de balanceamento de carga, a fim de melhor distribuir a
+diferentes configurações de frequência para o processamento (uso de DVFS), como também a nível de software, 
+utilizando técnicas de balanceamento de carga, a fim de melhor distribuir a
 computação entre os recursos de processamento.  
 
 Uma aplicação possui aspectos peculiares, os quais definem
@@ -272,9 +287,9 @@ seu tipo, modelo e demais características de processamento. Além
 dessas características influenciarem o comportamento de uma aplicação,
 a plataforma de execução influencia
 diretamente no seu comportamento. Aplicações memory-bound são uma classe de aplicações que possuem alta taxa de
-cache misses, fazendo com que essas aplicações sejam limitadas pelo acesso a memória em alguns trechos de execução. Outras aplicações,
-realizam mais processamento e acessam a memória menos vezes, como é o
-caso das aplicações mais CPU-bound que possuem um
+cache misses, fazendo com que essas aplicações sejam limitadas pelo acesso a memória em alguns trechos de execução. 
+Outras aplicações, realizam mais processamento e acessam a memória menos vezes, como é o caso das aplicações mais 
+CPU-bound que possuem um
 IPC (
 #+BEGIN_LaTeX
 \textit{Instruction Per Cycle}
@@ -287,7 +302,8 @@ possível definir duas regiões paralelas: a primeira determina uma
 condição inicial para a placa (matriz), outra realiza os cálculos de
 transferência de calor através dos diferentes pontos. Nesse exemplo, podemos
 visualizar que a segunda região é mais memory-bound do que a outra,
-pois é efetuado o mesmo cálculo sobre diferentes dados, dessa forma, o registro da informação é realizado e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
+pois é efetuado o mesmo cálculo sobre diferentes dados, dessa forma, o registro da informação é realizado 
+e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
 em uma aplicação é possível ter diferentes comportamentos em uma
 granularidade mais fina, compreendendo o comportamento das diferentes
 regiões da aplicação. O objetivo do trabalho é detectar as regiões
@@ -314,7 +330,9 @@ realizadas no decorrer do mestrado.
 * Conceitos Básicos
 \label{chapter.basic_concepts}
 
-Esse capítulo apresenta os conceitos básicos que estão relacionados com o trabalho, dentre eles, comportamento de aplicações paralelas, modelos de programação, consumo de energia de aplicações, entre outros.
+Esse capítulo apresenta os conceitos básicos que estão relacionados com o trabalho, dentre eles, 
+comportamento de aplicações paralelas, modelos de programação, consumo de energia de aplicações, 
+entre outros.
 
 ** Tipos de Aplicações Paralelas
 
@@ -576,7 +594,8 @@ métrica IPC (
 ). Essa métrica permite verificar 
 quantas instruções o programa realiza por ciclo de processador, dessa maneira 
 podemos analisar se reduzindo o número de instruções de uma aplicação, aumentamos 
-o seu desempenho, se isso acontecer podemos classificar a aplicação como non-memory-bound ou CPU-bound \cite{jesshope2006advances}.
+o seu desempenho, se isso acontecer podemos classificar a aplicação como non-memory-bound 
+ou CPU-bound \cite{jesshope2006advances}.
 
 #+BEGIN_LaTeX
 %\begin{figure}[!htb]
