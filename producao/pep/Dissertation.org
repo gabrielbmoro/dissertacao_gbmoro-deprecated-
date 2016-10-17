@@ -345,7 +345,7 @@ de tipo: Fork-join, Stencil, Mapeamento e Redução.
 
 O modelo Fork-join consiste em um processo que dispara várias threads
 (
-#+BEGIN_LaTeX:
+#+BEGIN_LaTeX
 \textit{fork}
 #+END_LaTeX
 ), após essa divisão, geralmente ocorre um processamento
@@ -421,7 +421,7 @@ laços aninhados, o primeiro que percorre as linhas da matriz, o mais
 interno permite o deslocamento nas colunas e o terceiro laço permite
 passar por cada elemento da linha e da coluna desejada. Na
 implementação do exemplo \ref{lst.mm}, a diretiva 
-#+BEGIN_LaTeX:
+#+BEGIN_LaTeX
 ``\textit{pragma omp parallel for}''
 #+END_LaTeX
  sinaliza o momento em que ocorrerá o disparo das threads, aonde
@@ -454,13 +454,13 @@ número de Fibonacci, utilizando tarefas em OpenMP, essa implementação
 pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta
 uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa
 da recursão são somadas em uma apenas. O recurso da diretiva 
-#+BEGIN_LaTeX:
+#+BEGIN_LaTeX
 ``\textit{omp task}''
 #+END_LaTeX
  permite realizar uma concorrência daquela tarefa dentre as
 threads, as quais realizam o trabalho e após isso concorrem pela
 próxima tarefa. A diretiva de sincronização é simbolizada com o 
-#+BEGIN_LaTeX:
+#+BEGIN_LaTeX
 ``\textit{pragma omp taskwait}''
 #+END_LaTeX
 , fazendo com que as threads que terminaram as
@@ -508,7 +508,7 @@ O balanceamento de carga estático leva em consideração um conhecimento
 prévio da plataforma de execução (características de máquina) e da
 aplicação. A divisão da carga de trabalho ocorre antes da computação,
 fazendo com que esse tipo de técnica possua um 
-#+BEGIN_LaTeX:
+#+BEGIN_LaTeX
 \textit{overhead}
 #+END_LaTeX
  baixo, quando
