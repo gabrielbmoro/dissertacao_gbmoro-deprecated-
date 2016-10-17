@@ -1,4 +1,4 @@
-#+TITLE:
+#+TITLE: 
 #+AUTHOR: Gabriel Bronzatti Moro
 
 #+STARTUP: overview indent
@@ -20,6 +20,13 @@
 #+LATEX_HEADER: \usepackage{algorithm}
 #+LATEX_HEADER: \usepackage{algorithmic}
 #+LATEX_HEADER: \usepackage{listings}
+#+LATEX_HEADER: \lstset{language=C++,
+#+LATEX_HEADER:  basicstyle=\ttfamily,
+#+LATEX_HEADER:  keywordstyle=\color{blue}\ttfamily,
+#+LATEX_HEADER:  stringstyle=\color{red}\ttfamily,
+#+LATEX_HEADER:  commentstyle=\color{green}\ttfamily,
+#+LATEX_HEADER:  morecomment=[l][\color{magenta}]{\#}
+#+LATEX_HEADER: }
 #+LATEX_HEADER: \newcommand{\prettysmall}{\fontsize{6.5}{6.5}\selectfont}
 #+LATEX_HEADER: \newcommand{\prettysmallbis}{\fontsize{7}{7}\selectfont}
 #+LATEX_HEADER: \newcommand{\mtilde}{~}
@@ -118,7 +125,7 @@ Hope this helps.
 
 * Front page preparation                                           :ignore:
 #+BEGIN_LaTeX
-\title{Plano de Ensino e Pesquisa}
+\title{Reduzindo o Consumo de Energia nas Regiões Memory-bound de Aplicações Paralelas}
 \author{Bronzatti Moro}{Gabriel}
 \advisor[Prof.~Dr.]{Mello Schnorr}{Lucas}
 
@@ -146,7 +153,7 @@ Hope this helps.
 %
 % TODO: provide these keywords
 %
-%\keyword{HPC}
+\keyword{Aplicações Paralelas, Consumo de Energia, Memory-bound, DVFS}
 #+END_LaTeX
 
 * Front page                                                       :ignore:
@@ -160,7 +167,21 @@ Hope this helps.
 \begin{abstract}
 #+END_LaTeX
 #+BEGIN_LaTeX
-Abstract ...
+Além de reduzir o tempo de execução de uma aplicação paralela, 
+o consumo energético é um problema constantemente abordado na 
+área de computação de alto desempenho. A partir do entendimento  
+do comportamento de uma aplicação paralela é possível 
+identificar regiões em que ocorre mais processamento e outras regiões 
+que esperam mais pela memória, as chamadas regiões memory-bound. Este trabalho 
+tem por objetivo identificar as regiões memory-bound de uma aplicação paralela de 
+maneira automatizada, a partir do conhecimento dessas regiões, nossa abordagem 
+utilizará a técnica DVFS (\textit{Dynamic Voltage and Frequency Scaling}) para realizar ajustes 
+em uma granularidade refinada de frequência de processador para reduzir 
+o consumo de energia da aplicação como um todo. 
+Os experimentos preliminares apresentam resultados de várias execuções realizadas, onde foi possível 
+identificar trechos memory-bound das aplicações. Os próximos passos da pesquisa será definir as fases 
+da aplicação e utilizar o framework CPUfreq para instanciar nossa metodologia, realizando ajustes 
+de frequência.
 \end{abstract}
 #+END_LaTeX
 
@@ -247,45 +268,54 @@ Do as follows:
 
 * Introdução
 
-Cada programa/aplicação possui aspectos peculiares, os quais definem
+Em computação de alto desempenho, o objetivo principal é obter o máximo de desempenho nas aplicações,
+utilizando de maneira eficiente os recursos de processamento, os quais
+podem estar em diferentes localidades (nós distribuídos) ou conectados
+por barramento (memória compartilhada) no mesmo nó. Além da eficiência de desempenho das aplicações, a eficiência
+energética é uma questão cada vez mais importante no
+cenário econômico atual, recursos computacionais de
+alta capacidade de processamento consomem muita energia para operar,
+dependendo do tipo de computação e da aplicação, esse consumo pode ser
+muito maior. Nisso, muitas pesquisas são realizadas para reduzir o
+consumo de energia, tanto a nível de processador, trabalhando com
+diferentes configurações de frequência para o processamento (uso de DVFS), como também a nível de software, 
+utilizando técnicas de balanceamento de carga, a fim de melhor distribuir a
+computação entre os recursos de processamento.  
+
+Uma aplicação possui aspectos peculiares, os quais definem
 seu tipo, modelo e demais características de processamento. Além
 dessas características influenciarem o comportamento de uma aplicação,
-a plataforma de execução aonde a aplicação é executada influencia
-diretamente no seu comportamento. Aplicações memory-bound, por
-exemplo, definem uma classe de aplicações que possuem uma alta taxa de
-cache misses, fazendo com que ela seja limitada pelo acesso a
-memória em algumas partes da sua execução. Outras aplicações,
-realizam mais processamento e acessam a memória menos vezes, o que é o
-caso por exemplo das aplicações mais CPU-bound, as quais possuem um
+a plataforma de execução influencia
+diretamente no seu comportamento. Aplicações memory-bound são uma classe de aplicações que possuem alta taxa de
+cache misses, fazendo com que essas aplicações sejam limitadas pelo acesso a memória em alguns trechos de execução. 
+Outras aplicações, realizam mais processamento e acessam a memória menos vezes, como é o caso das aplicações mais 
+CPU-bound que possuem um
 IPC (
 #+BEGIN_LaTeX
 \textit{Instruction Per Cycle}
 #+END_LaTeX
-) maior que demais tipos de aplicações,
-dependendo da arquitetura alvo.
+) maior.
 
-Uma aplicação paralela é composta por várias regiões paralelas, as
-quais são executadas por threads distintas. Por exemplo, em uma
+As regiões paralelas de uma aplicação são executadas por threads distintas. Por exemplo, em uma
 aplicação que simula a troca de calor através de uma placa de metal é
-possível definir duas regiões paralelas: a primeira define uma
-condição inicial da placa metálica, outra realiza os cálculos de
-transferência de calor através dos diferentes pontos da placa, a fim
-de calcular o cálculo da troca de calor. Nesse exemplo, podemos
+possível definir duas regiões paralelas: a primeira determina uma
+condição inicial para a placa (matriz), outra realiza os cálculos de
+transferência de calor através dos diferentes pontos. Nesse exemplo, podemos
 visualizar que a segunda região é mais memory-bound do que a outra,
-visto que é efetuado o mesmo cálculo sobre diferentes dados em
-diferentes iterações, fazendo com que o registro da informação seja
-realizado e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
+pois é efetuado o mesmo cálculo sobre diferentes dados, dessa forma, o registro da informação é realizado 
+e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
 em uma aplicação é possível ter diferentes comportamentos em uma
 granularidade mais fina, compreendendo o comportamento das diferentes
-regiões da aplicação. O objetivo do trabalho é estudar
-as regiões memory-bound de aplicações paralelas em uma granularidade
-mais refinada das abordagens investigadas, de maneira que possa ser
-realizado um ajuste de frequência de processador utilizando a técnica
-DVFS (
+regiões da aplicação. O objetivo do trabalho é detectar as regiões
+memory-bound de aplicações paralelas de maneira automática, em uma
+granularidade refinada, diferente das abordagens investigadas, de maneira
+que possa ser realizado ajustes de frequência de processador
+utilizando a técnica 
+DVFS ( 
 #+BEGIN_LaTeX
 \textit{Dynamic Voltage and Frequency Scaling}
 #+END_LaTeX
-) para obter um consumo de energia nas fases mais memory-bound da
+) para reduzir o consumo de energia nas fases mais memory-bound da
 aplicação.
 
 O presente trabalho está organizado da seguinte maneira: no capítulo 2
@@ -300,12 +330,9 @@ realizadas no decorrer do mestrado.
 * Conceitos Básicos
 \label{chapter.basic_concepts}
 
-Este capítulo apresentará alguns conceitos que são fundamentais para a
-compreensão da proposta do trabalho. Como o trabalho leva em
-consideração o comportamento de aplicações paralelas, será abordado
-nesse capítulo um pouco sobre os tipos de aplicações e suas
-principais características, o que pode impactar diretamente no
-comportamento de uma aplicação. 
+Esse capítulo apresenta os conceitos básicos que estão relacionados com o trabalho, dentre eles, 
+comportamento de aplicações paralelas, modelos de programação, consumo de energia de aplicações, 
+entre outros.
 
 ** Tipos de Aplicações Paralelas
 
@@ -317,14 +344,19 @@ de tipo: Fork-join, Stencil, Mapeamento e Redução.
 *** Fork-join
 
 O modelo Fork-join consiste em um processo que dispara várias threads
-(fork), após essa divisão, geralmente ocorre um processamento
+(
+#+BEGIN_LaTeX:
+\textit{fork}
+#+END_LaTeX
+), após essa divisão, geralmente ocorre um processamento
 específico em cada thread (abordagem muito usada em Pthreads) ou um
 processamento similar, sobre diferentes dados (abordagem mais usada em
 OpenMP) \cite{pacheco2011introduction}. Algoritmos que utilizam a
 abordagem de divisão e conquista, como por exemplo o algoritmo
-Merge-sort, fazem uso do modelo Fork-Join. Na Figura
-\ref{fig.fork-join} é possível visualizar um exemplo de fork-join, um
-processo que inicializa duas threads.
+Merge-sort, fazem uso do modelo Fork-join. Na Figura
+\ref{fig.fork-join} é possível visualizar um exemplo de Fork-join, um
+processo que inicializa duas threads, nessa computação podemos
+visualizar a utilização de três fluxos de execução em paralelo.
 
 #+BEGIN_LaTeX
 \begin{figure}[!htb]
@@ -337,44 +369,22 @@ processo que inicializa duas threads.
 
 *** Stencil
 
-Aplicações do tipo Stencil realizam uma espécie de computação
-matricial, aplicando cálculos sobre determinada célula da matriz,
-levando em consideração suas células vizinhas \cite{Roth1997}. Muitas
+Aplicações do tipo Stencil realizam o processo de convolução para
+obter um novo resultado para determinado elemento da matriz, levando
+em consideração suas células vizinhas \cite{Roth1997}. Muitas
 dependências podem ocorrer nesse tipo de abordagem, o que torna esse
-tipo de aplicação mais complexo do ponto de vista de implementação. A
-Figura \ref{fig.stencil} apresenta o funcionamento básico desse tipo
-de aplicação.
+tipo de aplicação mais complexo do ponto de vista de implementação.  
 
-#+BEGIN_LaTeX
-\begin{figure}[!htb]
-\caption{Exemplo de Aplicação Stencil.}
-\centering
-\includegraphics[width=.85\linewidth]{./img/applicationStencil.pdf}
-\label{fig.stencil} 
-\end{figure}
-#+END_LaTeX
-
-O exemplo da Figura \ref{fig.stencil} apresenta uma matriz, uma parte
-dela é selecionada pelo algoritmo, nessa parte é realizado um cálculo
-que leva em consideração os valores dos vizinhos da célula alvo. O
-mesmo procedimento é realizado para todos os elementos da
-matriz. Nesse exemplo é possível visualizar uma dependência muito
-comum, quando a célula fizer parte de uma borda, faltará
-alguns vizinhos para a mesma. Dependendo do cálculo que está sendo
-realizado e do algoritmo, a solução para o problema das bordas pode
-ser a duplicação das mesmas ou o preenchimento com um valor
-constante.
-
-Uma aplicação muito conhecida que implementa a abordagem Stencil é o
-#+BEGIN_LaTeX
-\textit{Heat Transfer}
-#+END_LaTeX
-, na qual utiliza-se uma matriz base para representar uma placa
-metálica e outra matriz menor que pode ser chamada de matriz de
-convolução. Essa matriz de convolução atua sobre cada elemento da
-matriz base, a fim de calcular a sua temperatura. Esse procedimento é
-realizado inúmeras vezes para cada célula, de acordo com o número de
-iterações definido.
+Um exemplo de algoritmo que utiliza esse tipo de abordagem é o Filtro
+Gaussiano, no qual é utilizado duas matrizes, a primeira matriz é
+chamada de matriz de convolução e a partir dela é realizado o cálculo
+sobre cada elemento da matriz base, que por sua vez é a matriz
+original que representa a imagem tratada pela aplicação. Nesse exemplo
+é possível visualizar uma dependência muito comum, quando a célula
+fizer parte de uma borda da matriz, faltará alguns vizinhos para
+realizar o cálculo. Dependendo do cálculo que está sendo realizado e
+do algoritmo, a solução para o problema das bordas pode ser a
+duplicação das mesmas ou o preenchimento com um valor constante. 
 
 *** Mapeamento
 
@@ -389,7 +399,6 @@ de multiplicação de matrizes.
 #+LaTeX: \lstset{language=C,caption={Multiplicação de matrizes usando Mapeamento \cite{Krause2016}.},label=lst.mm}
 #+BEGIN_LaTeX
 \begin{lstlisting}
-/*Multiplicacao das matrizes matA e matB*/
 int i,j,k;
 double tmp=0.0;
 
@@ -411,11 +420,14 @@ A abordagem tradicional de multiplicação de matrizes utiliza três
 laços aninhados, o primeiro que percorre as linhas da matriz, o mais
 interno permite o deslocamento nas colunas e o terceiro laço permite
 passar por cada elemento da linha e da coluna desejada. Na
-implementação do exemplo \ref{lst.mm}, a diretiva "pragma omp parallel
-for" sinaliza o momento em que ocorrerá o disparo das threads, aonde
-cada thread receberá do processo principal "x" iterações do primeiro
-laço, ou seja, a tarefa de percorrer "x" linhas da matriz. Cada thread
-executará o mesmo código, mas o índice "i" será diferente para cada
+implementação do exemplo \ref{lst.mm}, a diretiva 
+#+BEGIN_LaTeX:
+``\textit{pragma omp parallel for}''
+#+END_LaTeX
+ sinaliza o momento em que ocorrerá o disparo das threads, aonde
+cada thread receberá do processo principal ``x'' iterações do primeiro
+laço, ou seja, a tarefa de percorrer ``x'' linhas da matriz. Cada thread
+executará o mesmo código, mas o índice ``i'' será diferente para cada
 thread para que elas realizem o mesmo trabalho em localizações
 diferentes da matriz.
 
@@ -441,13 +453,19 @@ Um exemplo de algoritmo de redução é o algoritmo para calcular o
 número de Fibonacci, utilizando tarefas em OpenMP, essa implementação
 pode ser visualizada no código \ref{lst.fib}. Esse algoritmo apresenta
 uma abordagem recursiva, na qual as duas soluções obtidas a cada etapa
-da recursão são somadas em uma apenas. O recurso da diretiva "omp
-task" permite que realizar uma concorrência daquela tarefa dentre as
+da recursão são somadas em uma apenas. O recurso da diretiva 
+#+BEGIN_LaTeX:
+``\textit{omp task}''
+#+END_LaTeX
+ permite realizar uma concorrência daquela tarefa dentre as
 threads, as quais realizam o trabalho e após isso concorrem pela
-próxima tarefa. A diretiva de sincronização é simbolizada com o
-"pragma omp taskwait", fazendo com que as threads que terminaram as
-duas tarefas responsáveis por "x" e "y", esperem uma pela outra para
-realizar o cálculo "x + y". 
+próxima tarefa. A diretiva de sincronização é simbolizada com o 
+#+BEGIN_LaTeX:
+``\textit{pragma omp taskwait}''
+#+END_LaTeX
+, fazendo com que as threads que terminaram as
+ tarefas responsáveis por ``x'' e ``y'', esperem uma pela outra para
+realizar o cálculo ``x + y''. 
 
 #+LaTeX: \lstset{language=C,caption={Fibonacci implementado usando tarefas OpenMP \cite{addison2009openmp}.},label=lst.fib}
 #+BEGIN_LaTeX
@@ -489,20 +507,24 @@ determinado elemento da matriz.
 O balanceamento de carga estático leva em consideração um conhecimento
 prévio da plataforma de execução (características de máquina) e da
 aplicação. A divisão da carga de trabalho ocorre antes da computação,
-fazendo com que esse tipo de técnica possua um baixo overhead, quando
+fazendo com que esse tipo de técnica possua um 
+#+BEGIN_LaTeX:
+\textit{overhead}
+#+END_LaTeX
+ baixo, quando
 comparada com o balanceamento dinâmico \cite{Li2005}. 
 
 Para memória compartilhada, utilizando OpenMP é possível informar o
 tipo de balanceamento que será realizado na aplicação. No código
 \ref{lst.static} é possível visualizar um exemplo de algoritmo de
-multiplicação de matrizes que utiliza um escalonamento estático. Como
+multiplicação de matrizes que utiliza um balanceamento estático. Como
 a carga é conhecida, nesse problema é possível obter um bom desempenho
 com esse tipo de escalonador, visto que cada thread receberá um número
 de iterações a serem realizadas sobre determinadas partes da matriz,
 as quais são configuradas pelas variáveis privadas em que cada thread
 realizará o seu trabalho. 
 
-#+LaTeX: \lstset{language=C,caption={Uso de escalonador estático com OpenMP.} ,label=lst.static}
+#+LaTeX: \lstset{language=C,caption={Uso de balanceamento estático em OpenMP.} ,label=lst.static}
 #+BEGIN_LaTeX
 \begin{lstlisting}
 #pragma omp parallel for private(i,j,k,tmp) schedule(static)
@@ -521,8 +543,8 @@ realizará o seu trabalho.
 
 *** Balanceamento Dinâmico
 
-Diferente do balanceamento de carga estático, aonde a carga é
-homogênea e conhecida, no balanceamento de carga dinâmico a carga é
+Diferente do balanceamento estático, onde a carga é
+homogênea e conhecida, no balanceamento dinâmico, a carga é
 heterogênea e geralmente não conhecida. Isso exige um comportamento
 adaptativo do escalonador, fazendo com que ele decida com base nas
 mudanças da aplicação e da plataforma de execução, qual é a melhor
@@ -530,7 +552,7 @@ opção de balanceamento para melhorar o desempenho da aplicação
 \cite{Li2005}. 
 
 O conjunto de Mandelbrot é um exemplo de algoritmo onde ocorre um
-balanceamento de carga dinâmico. Esse algoritmo consiste no cálculo de
+balanceamento dinâmico. Esse algoritmo consiste no cálculo de
 quais pontos do plano fazem parte do conjunto de Mandelbrot, em cada
 ponto do plano (imagem) são realizados vários cálculos, com várias
 iterações, fazendo com que a carga seja desbalanceada entre as threads
@@ -572,7 +594,8 @@ métrica IPC (
 ). Essa métrica permite verificar 
 quantas instruções o programa realiza por ciclo de processador, dessa maneira 
 podemos analisar se reduzindo o número de instruções de uma aplicação, aumentamos 
-o seu desempenho, se isso acontecer podemos classificar a aplicação como non-memory-bound ou CPU-bound \cite{jesshope2006advances}.
+o seu desempenho, se isso acontecer podemos classificar a aplicação como non-memory-bound 
+ou CPU-bound \cite{jesshope2006advances}.
 
 #+BEGIN_LaTeX
 %\begin{figure}[!htb]
@@ -583,6 +606,96 @@ o seu desempenho, se isso acontecer podemos classificar a aplicação como non-m
 %\\\source
 %\end{figure}
 #+END_LaTeX
+
+** Consumo de Energia de Aplicações
+
+Segundo \citeonline{Orgerie2014}, o consumo de energia de recursos
+computacionais pode ser medido através de sensores de energia (gasto
+real) ou a partir de modelos (estimativa teórica). Algumas ferramentas
+podem ser utilizadas para acessar esses sensores, um exemplo de
+ferramenta que permite obter uma relação do consumo de energia total
+gasto pela aplicação é a Intel PCM, fornecendo o consumo de energia
+gasto pela CPU (considerando as memórias caches) e memória principal
+\cite{SilveiraAndMoro}. Outra maneira é estimar a energia utilizando
+modelos, o CACTI é um exemplo de ferramenta que permite especificar o
+modelo de memória utilizado pela plataforma de execução, a partir
+disso é possível obter uma estimativa de gasto de energia por
+instrução \cite{SilveiraAndMoro}.  
+
+
+Além de conhecer o quanto de energia a aplicação consome, vários
+trabalhos possuem propostas de redução no consumo energético, dentre
+os assuntos investigados, uma técnica amplamente utilizada para
+economizar energia a partir da redução da frequência do processador é a técnica DVFS (
+#+BEGIN_LaTeX
+\textit{Dynamic Voltage and Frequency Scaling}
+#+END_LaTeX
+). Essa técnica permite reduzir a frequência do processador em
+determinados trechos de execução do programa, os quais possuem um
+comportamento mais memory-bound \cite{Sueur2010}. A seguir na equação
+retirada de \citeonline{Sueur2010} é possível visualizarmos o impacto
+que a redução da frequência possui no cálculo de potência.
+
+#+BEGIN_LaTeX
+\begin{equation}\label{eq:powerconsumption}
+P = CfV^{2} + P_{static}
+\end{equation}
+#+END_LaTeX
+
+O cálculo da potência (``P'') leva em consideração a capacitância (``C'') do circuito,
+a frequência em que as operações são realizadas e a voltagem (``V'')
+utilizada, ambos parâmetros são somados à potência estática, assim é
+obtido a potência de sistema. A frequência está relacionada a
+velocidade em que as operações são realizadas, reduzindo esse valor é
+possível realizar a mesma carga de trabalho, só que o tempo de
+processamento será maior do que quando utilizado uma frequência
+maior. É fundamental conhecer essa relação, visto que, em trechos onde
+o processador espera por acessos à memória, reduzindo a frequência é
+possível reduzir o consumo de energia, sem impactar no desempenho da
+aplicação. 
+
+O framework CPUfreq possibilita alternar a frequência utilizada pelo
+processador, esse framework possui dois modos, o 
+#+BEGIN_LaTeX
+\textit{Governor}
+#+END_LaTeX
+ que realiza as decisões de acordo com a política adotada e o 
+#+BEGIN_LaTeX
+\textit{Driver}
+#+END_LaTeX
+ que realiza as ações de acordo com a decisão do 
+#+BEGIN_LaTeX
+\textit{Governor}
+#+END_LaTeX
+. As políticas disponíveis no framework são: 
+#+BEGIN_LaTeX
+\textit{Performance, Powersave, Ondemand, Userspace} e \textit{Consertative}
+#+END_LaTeX
+\cite{Wiki2012}. Cada uma das políticas (ou também chamadas de 
+#+BEGIN_LaTeX
+\textit{Governors}
+#+END_LaTeX
+) define uma prioridade a ser atingida, na 
+#+BEGIN_LaTeX
+\textit{Performance}
+#+END_LaTeX
+ o processador executa sempre a maior frequência disponível,
+ diferentemente da política 
+#+BEGIN_LaTeX
+\textit{Powersave}
+#+END_LaTeX
+ que sempre executa na menor frequência, a fim de obter o menor
+ consumo de energia possível, não levando em consideração o
+ desempenho \cite{KernelDocumentacao}. Além dessas duas políticas, a política 
+#+BEGIN_LaTeX
+\textit{Ondemand}
+#+END_LaTeX
+ realiza o ajuste de frequência do processador de acordo com o sua
+ utilização e a política 
+#+BEGIN_LaTeX
+\textit{Userspace} 
+#+END_LaTeX
+permite que o usuário possa selecionar uma frequência específica.
 
 * Trabalhos Relacionados
 \label{chapter.relatedwork}
@@ -603,15 +716,16 @@ visualizado na Tabela \ref{table:protocoloDePesquisa}.
 \hline
 \textbf{Critérios de Seleção} \\
 \hline
-- publicados acima de 2005 \\
-- artigos de bases confiáveis, revistas, periódicos e conferências \\
-- trabalho deve apresentar uma metodologia consistente, com uma \\ 
-descrição detalhada dos experimentos \\
+- publicados a partir de 2005 \\
+- artigos de bases confiáveis, revistas, periódicos e \\ 
+conferências \\
+- trabalho deve apresentar uma metodologia consistente,\\
+com uma descrição detalhada dos experimentos \\
 \hline
 \textbf{Critério de Inclusão} \\
 \hline
-- trabalhos destinados a redução do consumo de energia de aplicações \\
-paralelas, distribuídas e sequenciais \\
+- trabalhos destinados a redução do consumo de energia \\
+de aplicações paralelas, distribuídas e sequenciais \\
 \hline
 \textbf{Critérios de Exclusão} \\
 \hline
@@ -626,8 +740,9 @@ paralelas, distribuídas e sequenciais \\
 \hline
 \textbf{Questão de Pesquisa} \\
 \hline
-- Quais são as abordagens/técnicas que permitem diminuir a redução de \\
-energia de aplicações, levando em consideração o comportamento de aplicações? \\
+- Quais são as abordagens/técnicas que permitem diminuir\\
+a redução de energia de aplicações, levando em consideração\\
+ o comportamento de aplicações? \\
 \hline
 \end{tabular}
 \end{table}
@@ -763,8 +878,8 @@ comparativo entre as abordagens.
 \centering
 \caption{Comparativo de trabalhos}\label{table:comparativoDeTrabalhos}
 \vspace{0.5cm}
-\begin{tabular}{rrr} 
-\citeonline{laurenzano2011reducing} & \citeonline{spiliopoulos2012power} & \citeonline{freeh2005exploring} \\
+\begin{tabular}{lll} 
+Laurenzano et al. (2011) & Spiliopoulos et al. (2012) & Freeh et al. (2005) \\
 \hline
 Tamanho de Array & Miss na LLC & Miss na L2 \\
 Stride & Cycles &  Operações por Miss \\
