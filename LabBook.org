@@ -4398,3 +4398,90 @@ cd src/exp1ComMandelbro
 
 #+RESULTS:
 
+* [17:14:04; 21.10.2016] Experimento com Scorep para verificar regiões e cache misses com PAPI :Gabriel:
+
+- O objetivo desse experimento é monitorar a taxa de cache misses para
+  a seguinte região de código:
+
+#+BEGIN_EXAMPLE
+#pragma omp parallel for private(i,j,k,tmp)
+for(i=0; i < size; i++) {
+	for(j=0; j < size; j++) {
+		for(k=0; k < size; k++) {
+			tmp = tmp + A[i * size + k] * B[k * size + j];
+		}
+		R[i * size + j] = tmp;
+	}
+}
+#+END_EXAMPLE
+
+- Eu realizei três execuções, ambas na beagle1, a primeira execução
+  utilizei o número de threads padrão do openmp para a máquina e como
+  entrada matrizes de 1000 x 1000. Mas essa execução gerou um trace de
+  1.9G. A partir disso, realizei uma nova execução, mas com apenas 2
+  threads e com o mesmo tamanho de matriz, mas o tamanho do trace
+  ficou praticamente o mesmo. Após isso, realizei a terceira execução,
+  utilizando duas threads e matrizes de 200 x 200. Nessa execução
+  utilizei os seguintes comandos para tratar o arquivo gerado pelo
+  otf2-print.
+
+#+BEGIN_EXAMPLE
+inicio=$(cat -n saida.txt | grep -i THREAD_FORK | awk ' { print $1 } ' | bc) #linha aonde inicia o fork
+fim=$(cat -n saida.txt | grep -i THREAD_JOIN | awk ' { print $1 } ' | bc) #linha aonde as threads juntam-se
+sed -n '$inicio,$fimp' saida.txt >> saidaFiltrada.txt #aqui o tamanho do trace diminuiu drasticamente
+sed -i 's/\"*[a-zA-Z][[:space:]]//g' saidaFiltrada.txt
+sed -i 's/[\"(),:;<>$!@]//g' saidaFiltrada.txt #removendo caracteres desnecessários
+cat saidaFiltrada.txt | awk ' { print $1,$2,$3,$4,$5,$8,$11,$12,$15 } '
+#+END_EXAMPLE
+
+#+begin_src sh :results output :exports both
+cd dados/traceScorep2threads_200_MM/
+echo "statusApp idThread idRegiao activity idActivity Metric1 Valor Metric2 Valor"
+cat saidaFiltrada.txt | awk ' { print $1,$2,$3,$4,$5,$8,$11,$12,$15 } '
+#+end_src
+
+#+RESULTS:
+#+begin_example
+statusApp idThread idRegiao activity idActivity Metric1 Valor Metric2 Valor
+THREAD_FOR 0 2750384016603318 Model OpenMP RequesteThreads   
+THREAD_TEAM_BEGI 0 2750384016916580 ThreaTeam 0    
+METRI 0 2750384016935070 Metric 0 PAPI_L2_DCH 815115 PAPI_L2_TCA 2176829
+ENTE 0 2750384016935070 Region omparalleMatricesMultiplication.c38    
+METRI 0 2750384016944372 Metric 0 PAPI_L2_DCH 815137 PAPI_L2_TCA 2177111
+ENTE 0 2750384016944372 Region omfoMatricesMultiplication.c38    
+THREAD_TEAM_BEGI 4294967296 2750384017663850 ThreaTeam 0    
+METRI 4294967296 2750384017932614 Metric 0 PAPI_L2_DCH 76 PAPI_L2_TCA 584
+ENTE 4294967296 2750384017932614 Region omparalleMatricesMultiplication.c38    
+METRI 4294967296 2750384017951112 Metric 0 PAPI_L2_DCH 89 PAPI_L2_TCA 886
+ENTE 4294967296 2750384017951112 Region omfoMatricesMultiplication.c38    
+METRI 0 2750384026709928 Metric 0 PAPI_L2_DCH 827363 PAPI_L2_TCA 2688701
+ENTE 0 2750384026709928 Region omimplicibarrieMatricesMultiplication.c47    
+METRI 4294967296 2750384027886310 Metric 0 PAPI_L2_DCH 10801 PAPI_L2_TCA 512492
+ENTE 4294967296 2750384027886310 Region omimplicibarrieMatricesMultiplication.c47    
+METRI 0 2750384027897118 Metric 0 PAPI_L2_DCH 827365 PAPI_L2_TCA 2689019
+LEAV 0 2750384027897118 Region omimplicibarrieMatricesMultiplication.c47    
+METRI 4294967296 2750384027897858 Metric 0 PAPI_L2_DCH 10804 PAPI_L2_TCA 512839
+LEAV 4294967296 2750384027897858 Region omimplicibarrieMatricesMultiplication.c47    
+METRI 0 2750384027901040 Metric 0 PAPI_L2_DCH 827369 PAPI_L2_TCA 2689113
+LEAV 0 2750384027901040 Region omfoMatricesMultiplication.c38    
+METRI 4294967296 2750384027902676 Metric 0 PAPI_L2_DCH 10809 PAPI_L2_TCA 512934
+LEAV 4294967296 2750384027902676 Region omfoMatricesMultiplication.c38    
+METRI 0 2750384027904196 Metric 0 PAPI_L2_DCH 827373 PAPI_L2_TCA 2689150
+LEAV 0 2750384027904196 Region omparalleMatricesMultiplication.c38    
+METRI 4294967296 2750384027905848 Metric 0 PAPI_L2_DCH 10811 PAPI_L2_TCA 512956
+LEAV 4294967296 2750384027905848 Region omparalleMatricesMultiplication.c38    
+THREAD_TEAM_EN 0 2750384027909694 ThreaTeam 0    
+THREAD_TEAM_EN 4294967296 2750384027910998 ThreaTeam 0    
+THREAD_JOI 0 2750384027928552 Model OpenMP    
+#+end_example
+
+- Foi possível visualizar que o scorep nos permite obter os misses em
+  uma granularidade mais grossa, diferente da ferramenta likwid. Mas o
+  scorep nos dá além da região do código o número da linha do código
+  aonde aquela região inicia, o scorep utiliza a seguinte nomenclatura
+  =região.cNumeroDeLinha=.
+- Dúvidas:
+
+	- Qual melhor formato de trace nesse tipo de situação?
+	- Devo considerar o que ocorre antes|depois do fork da aplicação?
+	- Como posso fazer para diminuir os traces gerados?
