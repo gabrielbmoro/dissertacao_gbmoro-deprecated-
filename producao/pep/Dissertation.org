@@ -268,49 +268,54 @@ Do as follows:
 
 * Introdução
 
-Em computação de alto desempenho, o objetivo principal é obter o máximo de desempenho nas aplicações,
-utilizando de maneira eficiente os recursos de processamento, os quais
-podem estar em diferentes localidades (nós distribuídos) ou conectados
-por barramento (memória compartilhada) no mesmo nó. Além da eficiência de desempenho das aplicações, a eficiência
-energética é uma questão cada vez mais importante no
-cenário econômico atual, recursos computacionais de
-alta capacidade de processamento consomem muita energia para operar,
+Em computação de alto desempenho, o objetivo principal é obter o
+máximo de desempenho nas aplicações, utilizando de maneira eficiente
+os recursos de processamento, os quais podem estar em diferentes
+localidades (nós distribuídos) ou conectados por barramento (memória
+compartilhada) no mesmo nó. Além da eficiência de desempenho das
+aplicações, a eficiência energética é uma questão cada vez mais
+importante no cenário econômico atual, recursos computacionais de alta
+capacidade de processamento consomem muita energia para operar,
 dependendo do tipo de computação e da aplicação, esse consumo pode ser
-muito maior. Nisso, muitas pesquisas são realizadas para reduzir o
+muito maior. Nisso, muitas pesquisas são realizadas para reduzir o 
 consumo de energia, tanto a nível de processador, trabalhando com
-diferentes configurações de frequência para o processamento (uso de DVFS), como também a nível de software, 
-utilizando técnicas de balanceamento de carga, a fim de melhor distribuir a
-computação entre os recursos de processamento.  
+diferentes configurações de frequência para o processamento (uso de
+DVFS), como também a nível de software, utilizando técnicas de
+balanceamento de carga, a fim de melhor distribuir a computação entre
+os recursos de processamento.
 
-Uma aplicação possui aspectos peculiares, os quais definem
-seu tipo, modelo e demais características de processamento. Além
-dessas características influenciarem o comportamento de uma aplicação,
-a plataforma de execução influencia
-diretamente no seu comportamento. Aplicações memory-bound são uma classe de aplicações que possuem alta taxa de
-cache misses, fazendo com que essas aplicações sejam limitadas pelo acesso a memória em alguns trechos de execução. 
-Outras aplicações, realizam mais processamento e acessam a memória menos vezes, como é o caso das aplicações mais 
-CPU-bound que possuem um
+Uma aplicação possui aspectos peculiares, os quais definem seu tipo,
+modelo e demais características de processamento. Além dessas
+características influenciarem o comportamento de uma aplicação, a
+plataforma de execução influencia diretamente no seu
+comportamento. Aplicações memory-bound é uma classe de aplicações
+que possui alta taxa de cache misses, fazendo com que essas
+aplicações sejam limitadas pelo acesso a memória em alguns trechos de
+execução. Outras aplicações, realizam mais processamento e acessam a
+memória menos vezes, como é o caso das aplicações mais CPU-bound que
+possuem um 
 IPC (
 #+BEGIN_LaTeX
 \textit{Instruction Per Cycle}
 #+END_LaTeX
 ) maior.
 
-As regiões paralelas de uma aplicação são executadas por threads distintas. Por exemplo, em uma
-aplicação que simula a troca de calor através de uma placa de metal é
-possível definir duas regiões paralelas: a primeira determina uma
-condição inicial para a placa (matriz), outra realiza os cálculos de
-transferência de calor através dos diferentes pontos. Nesse exemplo, podemos
-visualizar que a segunda região é mais memory-bound do que a outra,
-pois é efetuado o mesmo cálculo sobre diferentes dados, dessa forma, o registro da informação é realizado 
-e buscado antes do novo cálculo \cite{Morowsppd}. Portanto,
-em uma aplicação é possível ter diferentes comportamentos em uma
-granularidade mais fina, compreendendo o comportamento das diferentes
-regiões da aplicação. O objetivo do trabalho é detectar as regiões
-memory-bound de aplicações paralelas de maneira automática, em uma
-granularidade refinada, diferente das abordagens investigadas, de maneira
-que possa ser realizado ajustes de frequência de processador
-utilizando a técnica 
+As regiões paralelas de uma aplicação são executadas por threads
+distintas. Por exemplo, em uma aplicação que simula a troca de calor
+através de uma placa de metal é possível definir duas regiões
+paralelas: a primeira determina uma condição inicial para a placa
+(matriz), outra realiza os cálculos de transferência de calor através
+dos diferentes pontos. Nesse exemplo é possível visualizar que, a segunda
+região é mais memory-bound do que a outra, pois é efetuado o mesmo
+cálculo sobre diferentes dados, dessa forma, o registro da informação
+é realizado e buscado antes do novo cálculo
+\cite{Morowsppd}. Portanto, em uma aplicação é possível ter diferentes
+comportamentos em uma granularidade mais fina, compreendendo o
+comportamento das diferentes regiões da aplicação. O objetivo do
+trabalho é detectar as regiões memory-bound de aplicações paralelas de
+maneira automática, em uma granularidade refinada, diferente das
+abordagens investigadas, de maneira que possa ser realizado ajustes de
+frequência de processador utilizando a técnica 
 DVFS ( 
 #+BEGIN_LaTeX
 \textit{Dynamic Voltage and Frequency Scaling}
@@ -330,9 +335,10 @@ realizadas no decorrer do mestrado.
 * Conceitos Básicos
 \label{chapter.basic_concepts}
 
-Esse capítulo apresenta os conceitos básicos que estão relacionados com o trabalho, dentre eles, 
-comportamento de aplicações paralelas, modelos de programação, consumo de energia de aplicações, 
-entre outros.
+Esse capítulo apresenta os conceitos básicos que estão relacionados
+com o trabalho, dentre eles, comportamento de aplicações paralelas,
+modelos de programação, consumo de energia de aplicações, entre
+outros. 
 
 ** Tipos de Aplicações Paralelas
 
@@ -373,7 +379,7 @@ Aplicações do tipo Stencil realizam o processo de convolução para
 obter um novo resultado para determinado elemento da matriz, levando
 em consideração suas células vizinhas \cite{Roth1997}. Muitas
 dependências podem ocorrer nesse tipo de abordagem, o que torna esse
-tipo de aplicação mais complexo do ponto de vista de implementação.  
+tipo de aplicação mais complexa do ponto de vista de implementação.  
 
 Um exemplo de algoritmo que utiliza esse tipo de abordagem é o Filtro
 Gaussiano, no qual é utilizado duas matrizes, a primeira matriz é
@@ -381,7 +387,7 @@ chamada de matriz de convolução e a partir dela é realizado o cálculo
 sobre cada elemento da matriz base, que por sua vez é a matriz
 original que representa a imagem tratada pela aplicação. Nesse exemplo
 é possível visualizar uma dependência muito comum, quando a célula
-fizer parte de uma borda da matriz, faltará alguns vizinhos para
+compor uma borda da matriz, faltará alguns vizinhos para
 realizar o cálculo. Dependendo do cálculo que está sendo realizado e
 do algoritmo, a solução para o problema das bordas pode ser a
 duplicação das mesmas ou o preenchimento com um valor constante. 
@@ -390,7 +396,7 @@ duplicação das mesmas ou o preenchimento com um valor constante.
 
 Mapeamento é um tipo de aplicação paralela muito desenvolvida quando se
 utiliza o padrão OpenMP, especialmente quando paraleliza-se laços
-"for". Ao definir os "pragmas", indica-se ao compilador aonde iniciará
+``for''. Ao definir os ``pragmas'', indica-se ao compilador aonde iniciará
 a divisão do fluxo principal de execução em vários fluxos de
 processamento (threads). A seguir no código \ref{lst.mm} é apresentado
 um exemplo da técnica de Mapeamento, utilizando a biblioteca OpenMP em um problema
@@ -457,7 +463,7 @@ da recursão são somadas em uma apenas. O recurso da diretiva
 #+BEGIN_LaTeX
 ``\textit{omp task}''
 #+END_LaTeX
- permite realizar uma concorrência daquela tarefa dentre as
+ permite realizar uma concorrência daquela tarefa entre as
 threads, as quais realizam o trabalho e após isso concorrem pela
 próxima tarefa. A diretiva de sincronização é simbolizada com o 
 #+BEGIN_LaTeX
@@ -568,7 +574,7 @@ diferente, porque realizam processamentos distintos. O algoritmo de
 busca em grafos, por exemplo, possui um comportamento mais
 memory-bound, do que o algoritmo de multiplicação de vetores, pois
 quando é realizado uma busca em grafos, por determinado nó, ocorre
-vários "misses" de cache, fazendo com que o algoritmo acesse a memória
+vários misses de cache, fazendo com que o algoritmo acesse a memória
 principal várias vezes. Diferente do que ocorre no algoritmo de
 multiplicação de vetores, aonde os dados estão mais bem localizados na
 memória cache, pela estrutura de dados utilizada ser um vetor e a
@@ -583,7 +589,7 @@ aplicações non-memory-bound não ocorre o aumento de desempenho a medida
 que a taxa de cache misses diminui. Uma das maneiras de medir esse 
 comportamento é a partir de contadores de hardware, os quais informam a 
 quantidade de acessos aos níveis de cache, memória principal, a taxa de hit 
-nas memórias, a quantidade de instruções realizadas e assim por diante.
+nas memórias, a quantidade de instruções executadas e assim por diante.
 
 Além da taxa de misses para o segundo nível de cache para definir o 
 comportamento de uma aplicação, também é possível utilizar a 
@@ -655,7 +661,7 @@ possível reduzir o consumo de energia, sem impactar no desempenho da
 aplicação. 
 
 O framework CPUfreq possibilita alternar a frequência utilizada pelo
-processador, esse framework possui dois modos, o 
+processador, esse framework possui dois módulos, o 
 #+BEGIN_LaTeX
 \textit{Governor}
 #+END_LaTeX
@@ -952,7 +958,7 @@ visualizada na Figura \ref{fig.methodology}.
 
 A metodologia utilizada nesse trabalho define algumas etapas, dentre
 elas a compilação do código fonte, execução com instrumentação,
-agrupamento dos arquivos ".evt" e agrupamento dos rastros em um
+agrupamento dos arquivos ``.evt'' e agrupamento dos rastros em um
 arquivo final. O arquivo binário é gerado a partir de uma compilação
 comum, após isso o programa é executado utilizando a ferramenta
 likwid-perfctr, utilizando o modo 
