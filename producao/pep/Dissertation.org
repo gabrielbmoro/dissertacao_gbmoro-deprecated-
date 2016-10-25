@@ -32,7 +32,7 @@
 #+LATEX_HEADER: \newcommand{\mtilde}{~}
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
-#+LATEX_HEADER: \usepackage{palatino}
+#+LATEX_HEADER: %\usepackage{palatino}
 #+LATEX_HEADER: \usepackage{hyperref}
 #+LATEX_HEADER: \usepackage{cleveref}
 #+LATEX_HEADER: \usepackage{booktabs}
