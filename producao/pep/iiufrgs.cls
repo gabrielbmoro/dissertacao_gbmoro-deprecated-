@@ -140,7 +140,7 @@
 \fi
 
 % espaçamento entre as linhas
-\newcommand{\setlinespacing}{\setstretch{1.415}}
+\newcommand{\setlinespacing}{\setstretch{1}}
 \setlinespacing
 
 % estes valores estão no segundo parágrafo da introdução dos documentos da biblioteca e, portanto, estão corretos
