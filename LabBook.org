@@ -4517,3 +4517,787 @@ SCOREP_METRIC_RUSAGE=ru_utime,ru_stime \
 SCOREP_FILTERING_FILE=/home/gabrielbmoro/src/bestSolution/filter_timestemp \
 ./program_exec 
 #+END_EXAMPLE
+* Dealing with ScoreP traces
+** Fibonacci in OpenMP                                      :openmp:tracing:
+
+#+BEGIN_SRC C :tangle fib_openmp_tasks.c
+#include <stdio.h>
+#include <omp.h>
+int fib(int n)
+{
+  int i, j;
+  if (n<2)
+    return n;
+  else
+    {
+       #pragma omp task shared(i) firstprivate(n)
+       i=fib(n-1);
+
+       #pragma omp task shared(j) firstprivate(n)
+       j=fib(n-2);
+
+       #pragma omp taskwait
+       return i+j;
+    }
+}
+
+int main(int argc, char **argv)
+{
+  int n = atoi(argv[1]);
+
+  omp_set_dynamic(0);
+  omp_set_num_threads(4);
+
+  #pragma omp parallel shared(n)
+  {
+    #pragma omp single
+    printf ("fib(%d) = %d\n", n, fib(n));
+  }
+}
+#+END_SRC
+
+Compiled with:
+#+BEGIN_SRC sh
+scorep --nocompiler --nocuda --noonline-access --nopdt --nouser  --noopencl gcc fib_openmp_tasks.c -fopenmp
+#+END_SRC
+
+Run with:
+#+BEGIN_SRC sh
+export SCOREP_TOTAL_MEMORY=604MB
+export SCOREP_ENABLE_TRACING=True
+./a.out 30
+#+END_SRC
+
+Convert to Paje with:
+#+BEGIN_SRC sh
+~/dev/akypuera/src/otf2-omp-print/otf2ompprint2paje.sh scorep-20160323_0805_2475054235691795/traces.otf2  > ~/traces.paje
+#+END_SRC
+
+Select a thread to analyze and clean-up with:
+#+BEGIN_SRC sh
+~/dev/pajeng/b/pj_dump ~/traces.paje | grep 4294967296 | grep ^State | sed -e "s/\!\$omp //" -e "s/@fib_openmp_tasks.c:.*<.*>//" -e "s/create task/create/"  > ~/traces-fib-4294967296.csv
+#+END_SRC
+
+Then, analyze:
+#+begin_src R :results output :session :exports both
+read_paje_trace <- function(file) {
+  df <- read.csv(file, header=FALSE, strip.white=TRUE)
+  names(df) <- c("Nature","ResourceId","Type","Start","End","Duration", "Depth", "Value")
+  df$Origin=file
+  m <- min(df$Start)
+  df$Start <- df$Start - m
+  df$End <- df$Start+df$Duration
+  df$Origin <- NULL
+  df$Nature <- NULL
+  df$Type <- NULL
+  df
+}
+df <- read_paje_trace("~/traces-fib-4294967296.csv");
+head(df);
+#+end_src
+
+#+RESULTS:
+:   ResourceId    Start      End Duration Depth            Value
+: 1 4294967296 0.000000 9.658611 9.658611     0         parallel
+: 2 4294967296 0.000911 9.658611 9.657700     1           single
+: 3 4294967296 0.001295 9.658611 9.657316     2 implicit barrier
+: 4 4294967296 0.002115 9.658611 9.656496     3             task
+: 5 4294967296 0.003130 0.004674 0.001544     4           create
+: 6 4294967296 0.005816 0.006797 0.000981     4           create
+
+#+begin_src R :results output graphics :file img/openmp-fib-imbric-1.png :exports both :width 600 :height 120 :session
+library(ggplot2);
+ggplot(df[df$Depth > 26 & df$Depth < 34,]
+, aes(x=Start, y=Depth, color=Value)) + theme_bw()  +
+    geom_segment(aes(x=Start, xend=End, y=factor(Depth), yend=factor(Depth)), size=10) + xlim(0.049,0.069);
+#+end_src
+
+#+RESULTS:
+[[file:img/openmp-fib-imbric-1.png]]
+
+#+begin_src R :results output :session :exports both
+m <- df[df$Start > 0.049 & df$End < 0.069,];
+m
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   ResourceId    Start      End Duration Depth    Value
+63 4294967296 0.049811 0.068516 0.018705    27     task
+64 4294967296 0.050121 0.050795 0.000674    28   create
+65 4294967296 0.050983 0.051636 0.000653    28   create
+66 4294967296 0.051801 0.068328 0.016527    28 taskwait
+67 4294967296 0.052089 0.056226 0.004137    29     task
+68 4294967296 0.052457 0.053048 0.000591    30   create
+69 4294967296 0.053263 0.053754 0.000491    30   create
+70 4294967296 0.053915 0.056018 0.002103    30 taskwait
+71 4294967296 0.054177 0.054521 0.000344    31     task
+72 4294967296 0.054976 0.055278 0.000302    31     task
+73 4294967296 0.056820 0.067562 0.010742    29     task
+74 4294967296 0.057129 0.057709 0.000580    30   create
+75 4294967296 0.057891 0.058523 0.000632    30   create
+76 4294967296 0.058685 0.067390 0.008705    30 taskwait
+77 4294967296 0.058982 0.059302 0.000320    31     task
+78 4294967296 0.059718 0.066682 0.006964    31     task
+79 4294967296 0.060028 0.063395 0.003367    32   create
+80 4294967296 0.063611 0.064189 0.000578    32   create
+81 4294967296 0.064354 0.066513 0.002159    32 taskwait
+82 4294967296 0.064650 0.065057 0.000407    33     task
+83 4294967296 0.065567 0.065909 0.000342    33     task
+#+end_example
+
+#+begin_src R :results output :session :exports both
+library(plyr);
+k <- ddply(m, .(Value), summarize, sum=sum(Duration));
+k
+task = k[k$Value=="task",]$sum;
+taskwait = k[k$Value=="taskwait",]$sum;
+create = k[k$Value=="create",]$sum;
+load = (task-taskwait-create)+create
+slice=max(m$End)-min(m$Start);
+load
+slice
+occupation=load/slice;
+occupation
+#+end_src
+
+#+RESULTS:
+:      Value      sum
+: 1   create 0.007566
+: 2     task 0.042263
+: 3 taskwait 0.029494
+: [1] 0.012769
+: [1] 0.018705
+: [1] 0.6826517
+
+#+begin_src R :results output graphics :file img/openmp-fib-imbric-2.png :exports both :width 600 :height 100 :session
+library(ggplot2);
+ggplot(df[df$Depth > 26 & df$Depth < 34,]
+, aes(x=Start, y=1, color=Value)) + theme_bw()  +
+    geom_segment(aes(x=Start, xend=End, y=factor(1), yend=factor(1)), size=10) + xlim(0.049,0.069);
+#+end_src
+
+#+RESULTS:
+[[file:img/openmp-fib-imbric-2.png]]
+
+Entered on [2016-03-23 Wed 08:00]
+** Testing again after second try                    :falles:openmp:tracing:
+
+
+See this entry first:
+- [[*Fibonacci in OpenMP][Fibonacci in OpenMP]]
+
+Select a thread to analyze and clean-up with:
+
+#+BEGIN_SRC sh
+~/dev/pajeng/b/pj_dump --no-imbrication ~/traces.paje | grep 4294967296 | grep ^State | sed -e "s/\!\$omp //" -e "s/@fib_openmp_tasks.c:.*<.*>//" -e "s/create task/create/"  > ~/traces-fib-not_imbricated-4294967296.csv
+#+END_SRC
+
+
+#+begin_src R :results output :session :exports both
+read_paje_trace <- function(file) {
+  df <- read.csv(file, header=FALSE, strip.white=TRUE)
+  names(df) <- c("Nature","ResourceId","Type","Start","End","Duration", "Depth", "Value")
+  df$Origin=file
+  m <- min(df$Start)
+  df$Start <- df$Start - m
+  df$End <- df$Start+df$Duration
+  df$Origin <- NULL
+  df$Nature <- NULL
+  df$Type <- NULL
+  df
+}
+df <- read_paje_trace("~/traces-fib-not_imbricated-4294967296.csv");
+head(df);
+#+end_src
+
+#+RESULTS:
+:   ResourceId    Start      End Duration Depth            Value
+: 1 4294967296 0.000000 0.000911 0.000911     0         parallel
+: 2 4294967296 0.000911 0.001295 0.000384     1           single
+: 3 4294967296 0.001295 0.002115 0.000820     2 implicit barrier
+: 4 4294967296 0.002115 0.003130 0.001015     3             task
+: 5 4294967296 0.003130 0.004674 0.001544     4           create
+: 6 4294967296 0.004674 0.005816 0.001142     3             task
+
+#+begin_src R :results output graphics :file img/openmp-fib-NO_imbric-2.png :exports both :width 600 :height 600 :session
+  library(ggplot2);
+  ggplot(df, aes(x=Start, y=Depth, color=Value)) + theme_bw()  +
+      geom_segment(aes(x=Start, xend=End, y=factor(Depth), yend=factor(Depth)), size=4) + xlim(0.049,0.069) +
+      facet_wrap(~Value, ncol=1);
+#+end_src
+
+#+RESULTS:
+[[file:img/openmp-fib-NO_imbric-2.png]]
+
+** No imbrication for OpenMP's floorplan with dynamic :falles:openmp:tracing:
+
+_Changes_
+
+These are the changes committed to the Paje core simulator:
+
+On PushState
+- state on top of the stack is ended
+- normal behavior
+
+On PopState
+- normal behavior
+- state on top of the stack is ended
+- get the value of new top of the stack
+- pop again
+- push a new state with the same value, new start time
+
+_Validation_
+
+Test file (BOTS' floorplan, dynamic on turing machine):
+
+#+begin_src sh :results output :session :exports both
+ls -lh /home/falles/raw/OpenMP/01/BOTS/floorplan/dynamic/01/traces.paje
+#+end_src
+
+#+RESULTS:
+: -rw-r--r-- 1 falles falles 777M Mar 17 01:49 /home/falles/raw/OpenMP/01/BOTS/floorplan/dynamic/01/traces.paje
+
+You need latest Paje to try this, then:
+
+#+begin_src sh :results output :session :exports both
+./pj_dump --no-imbrication /home/falles/raw/OpenMP/01/BOTS/floorplan/dynamic/01/traces.paje > raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated.csv
+#+end_src
+
+Output is:
+
+#+begin_src sh :results output :session :exports both
+ls -lh ~/dev/pajeng/b/raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated.csv
+#+end_src
+
+#+RESULTS:
+: -rw-r--r-- 1 schnorr schnorr 1.6G Mar 24 14:36 /home/schnorr/dev/pajeng/b/raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated.csv
+
+Much larger trace file now. That's normal.
+
+#+begin_src sh :results output :session :exports both
+cat raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated.csv| grep 98784247808 | grep ^State | sed -e "s/\!\$omp //" -e "s/ @floorplan.c:.*<.*>//" > raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated-98784247808.csv
+#+end_src
+
+#+begin_src R :results output :session :exports both
+read_paje_trace <- function(file) {
+  df <- read.csv(file, header=FALSE, strip.white=TRUE)
+  names(df) <- c("Nature","ResourceId","Type","Start","End","Duration", "Depth", "Value")
+  df$Origin=file
+  m <- min(df$Start)
+  df$Start <- df$Start - m
+  df$End <- df$Start+df$Duration
+  df$Origin <- NULL
+  df$Nature <- NULL
+  df$Type <- NULL
+  df
+}
+df <- read_paje_trace("~/dev/pajeng/b/raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated-98784247808.csv");
+head(df);
+#+end_src
+
+#+RESULTS:
+:    ResourceId     Start       End  Duration Depth            Value
+: 1 98784247808  0.000000  0.001696  0.001696     0         parallel
+: 2 98784247808  0.001696  0.003661  0.001965     1           single
+: 3 98784247808  0.003661  0.062116  0.058455     2 implicit barrier
+: 4 98784247808  0.062116 12.940802 12.878686     3           atomic
+: 5 98784247808 12.940802 14.349705  1.408903     4         taskwait
+: 6 98784247808 14.349705 16.532153  2.182448     5           atomic
+
+
+#+begin_src R :results output graphics :file img/openmp-floorplan-dynamic-not_imbricated_v2.png :exports both :width 600 :height 200 :session
+library(ggplot2);
+ggplot(df[df$Value == "atomic" | df$Value == "taskwait",], aes(x=Start, y=ResourceId, color=Value)) + theme_bw()  +
+    geom_segment(aes(x=Start, xend=End, y=factor(ResourceId), yend=factor(ResourceId)), size=4) + facet_wrap(~Value, ncol=1) + xlim(1000,1200);
+#+end_src
+
+#+RESULTS:
+[[file:img/openmp-floorplan-dynamic-not_imbricated_v2.png]]
+
+Great, it works.
+
+What is the execution time of this thread:
+
+#+begin_src R :results output :session :exports both
+execution_time = max(df$End)-min(df$Start)
+execution_time
+#+end_src
+
+#+RESULTS:
+: [1] 168152.2
+
+Now let's calculate the load for this thread's full execution.
+
+Load is considered to be _everything_ but the state *taskwait*.
+
+#+begin_src R :results output :session :exports both
+library(plyr);
+k <- ddply(df, .(Value), summarize, sum=sum(Duration), ratio=sum(Duration)/execution_time*100);
+k
+#+end_src
+
+#+RESULTS:
+:              Value          sum        ratio
+: 1           atomic 95056.684770 5.653014e+01
+: 2 implicit barrier     5.212183 3.099681e-03
+: 3         parallel     0.002739 1.628881e-06
+: 4           single     0.002456 1.460581e-06
+: 5         taskwait 73090.318241 4.346676e+01
+
+This thread has passed ~43.4% of the time in the taskwait. So, the
+load is the rest.
+
+_Full trace_
+
+Let's try out for all threads to see the load balancing.
+
+#+begin_src sh :results output :session :exports both
+cat raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated.csv| grep ^State | sed -e "s/\!\$omp //" -e "s/ @floorplan.c:.*<.*>//" > raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated-cleaned_up.csv
+#+end_src
+
+#+begin_src R :results output :session :exports both
+df_full <- read_paje_trace("~/dev/pajeng/b/raw-openmp-01-bots-floorplan-dynamic-01-not_imbricated-cleaned_up.csv");
+head(df_full);
+#+end_src
+
+#+RESULTS:
+:   ResourceId    Start      End Duration Depth         Value
+: 1       zero 0.000000 0.016431 0.016431     0      parallel
+: 2       zero 0.016431 0.023661 0.007230     1        single
+: 3       zero 0.023661 0.040341 0.016680     2 single sblock
+: 4       zero 0.040341 0.047670 0.007329     3      taskwait
+: 5       zero 0.047670 0.172861 0.125191     4        atomic
+: 6       zero 0.172861 0.182818 0.009957     5      taskwait
+
+Let's summarize all this information.
+
+#+begin_src R :results output :session :exports both
+library(plyr);
+execution_time = max(df_full$End) - min(df_full$Start);
+k_full <- ddply(df_full, .(ResourceId, Value), summarize, sum=sum(Duration), ratio=sum(Duration)/execution_time*100);
+k_full
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      ResourceId            Value          sum        ratio
+1   103079215104           atomic 5.257568e+03 3.125931e+00
+2   103079215104 implicit barrier 2.429104e+00 1.444244e-03
+3   103079215104         parallel 3.012000e-03 1.790809e-06
+4   103079215104           single 1.798000e-03 1.069016e-06
+5   103079215104         taskwait 1.629311e+05 9.687203e+01
+6   107374182400           atomic 9.506838e+04 5.652369e+01
+7   107374182400 implicit barrier 5.231560e+00 3.110467e-03
+8   107374182400         parallel 3.196000e-03 1.900208e-06
+9   107374182400           single 1.603000e-03 9.530769e-07
+10  107374182400         taskwait 7.310996e+04 4.346813e+01
+11  111669149696           atomic 6.298359e+04 3.744741e+01
+12  111669149696 implicit barrier 7.301773e+00 4.341329e-03
+13  111669149696         parallel 3.184000e-03 1.893074e-06
+14  111669149696           single 2.493000e-03 1.482234e-06
+15  111669149696         taskwait 1.051696e+05 6.252948e+01
+16  115964116992           atomic 9.489289e+04 5.641935e+01
+17  115964116992 implicit barrier 1.156814e+01 6.877934e-03
+18  115964116992         parallel 6.929000e-03 4.119694e-06
+19  115964116992           single 6.760000e-03 4.019214e-06
+20  115964116992         taskwait 7.326552e+04 4.356062e+01
+21  120259084288           atomic 9.706492e+04 5.771075e+01
+22  120259084288 implicit barrier 5.111085e+00 3.038838e-03
+23  120259084288         parallel 2.583000e-03 1.535744e-06
+24  120259084288           single 2.110000e-03 1.254518e-06
+25  120259084288         taskwait 7.111605e+04 4.228264e+01
+26  124554051584           atomic 9.364358e+04 5.567656e+01
+27  124554051584 implicit barrier 5.730175e+00 3.406923e-03
+28  124554051584         parallel 2.924000e-03 1.738488e-06
+29  124554051584           single 1.729000e-03 1.027991e-06
+30  124554051584         taskwait 7.453172e+04 4.431345e+01
+31   12884901888           atomic 9.452417e+04 5.620013e+01
+32   12884901888 implicit barrier 5.283357e+00 3.141264e-03
+33   12884901888         parallel 2.707000e-03 1.609469e-06
+34   12884901888           single 1.486000e-03 8.835136e-07
+35   12884901888         taskwait 7.364873e+04 4.378846e+01
+36  128849018880           atomic 9.542451e+04 5.673543e+01
+37  128849018880 implicit barrier 5.614005e+00 3.337853e-03
+38  128849018880         parallel 2.529000e-03 1.503638e-06
+39  128849018880           single 1.463000e-03 8.698387e-07
+40  128849018880         taskwait 7.273420e+04 4.324472e+01
+41  133143986176           atomic 9.485870e+04 5.639903e+01
+42  133143986176 implicit barrier 8.365849e+00 4.973985e-03
+43  133143986176         parallel 4.789000e-03 2.847340e-06
+44  133143986176           single 3.740000e-03 2.223648e-06
+45  133143986176         taskwait 7.331113e+04 4.358774e+01
+46  137438953472           atomic 6.365093e+01 3.784419e-02
+47  137438953472 implicit barrier 1.127640e-01 6.704477e-05
+48  137438953472         parallel 2.790000e-03 1.658818e-06
+49  137438953472           single 1.747000e-03 1.038693e-06
+50  137438953472         taskwait 1.681281e+05 9.996197e+01
+51  141733920768           atomic 8.705159e+04 5.175724e+01
+52  141733920768 implicit barrier 3.345680e+00 1.989202e-03
+53  141733920768         parallel 2.917000e-03 1.734326e-06
+54  141733920768           single 2.128000e-03 1.265220e-06
+55  141733920768         taskwait 8.112779e+04 4.823520e+01
+56  146028888064           atomic 9.278821e+04 5.516800e+01
+57  146028888064 implicit barrier 8.522323e+00 5.067018e-03
+58  146028888064         parallel 5.551000e-03 3.300393e-06
+59  146028888064           single 1.763000e-03 1.048206e-06
+60  146028888064         taskwait 7.536190e+04 4.480704e+01
+61  150323855360           atomic 9.354745e+04 5.561941e+01
+62  150323855360 implicit barrier 4.332564e+00 2.575962e-03
+63  150323855360         parallel 2.526000e-03 1.501854e-06
+64  150323855360           single 1.617000e-03 9.614007e-07
+65  150323855360         taskwait 7.462551e+04 4.436922e+01
+66  154618822656           atomic 9.371393e+04 5.571839e+01
+67  154618822656 implicit barrier 5.114638e+00 3.040950e-03
+68  154618822656         parallel 2.435000e-03 1.447749e-06
+69  154618822656           single 1.395000e-03 8.294088e-07
+70  154618822656         taskwait 7.446869e+04 4.427597e+01
+71  158913789952           atomic 9.555366e+04 5.681222e+01
+72  158913789952 implicit barrier 4.532980e+00 2.695121e-03
+73  158913789952         parallel 3.650000e-03 2.170138e-06
+74  158913789952           single 2.459000e-03 1.462019e-06
+75  158913789952         taskwait 7.262195e+04 4.317798e+01
+76  163208757248           atomic 6.681130e+04 3.972321e+01
+77  163208757248 implicit barrier 2.621608e+00 1.558699e-03
+78  163208757248         parallel 4.171000e-03 2.479903e-06
+79  163208757248           single 3.065000e-03 1.822321e-06
+80  163208757248         taskwait 1.013486e+05 6.025765e+01
+81  167503724544           atomic 9.100315e+04 5.410667e+01
+82  167503724544 implicit barrier 2.700217e+00 1.605436e-03
+83  167503724544         parallel 9.255000e-03 5.502637e-06
+84  167503724544           single 1.870000e-03 1.111824e-06
+85  167503724544         taskwait 7.716586e+04 4.587960e+01
+86   17179869184           atomic 9.762094e+04 5.804133e+01
+87   17179869184 implicit barrier 3.584296e+00 2.131073e-03
+88   17179869184         parallel 3.066000e-03 1.822916e-06
+89   17179869184           single 1.372000e-03 8.157339e-07
+90   17179869184         taskwait 7.056391e+04 4.195436e+01
+91  171798691840           atomic 5.757921e+04 3.423419e+01
+92  171798691840 implicit barrier 4.591601e+00 2.729974e-03
+93  171798691840         parallel 2.914000e-03 1.732543e-06
+94  171798691840           single 1.549000e-03 9.209708e-07
+95  171798691840         taskwait 1.106056e+05 6.576149e+01
+96  176093659136           atomic 9.372887e+04 5.572727e+01
+97  176093659136 implicit barrier 5.641873e+00 3.354422e-03
+98  176093659136         parallel 2.954000e-03 1.756325e-06
+99  176093659136           single 2.387000e-03 1.419211e-06
+100 176093659136         taskwait 7.444982e+04 4.426476e+01
+101 180388626432           atomic 9.430199e+04 5.606803e+01
+102 180388626432 implicit barrier 2.388878e+01 1.420327e-02
+103 180388626432         parallel 4.801000e-03 2.854474e-06
+104 180388626432           single 1.841000e-03 1.094582e-06
+105 180388626432         taskwait 7.385322e+04 4.391004e+01
+106 184683593728           atomic 9.514623e+04 5.656998e+01
+107 184683593728 implicit barrier 6.527981e+00 3.881265e-03
+108 184683593728         parallel 3.480000e-03 2.069063e-06
+109 184683593728           single 1.440000e-03 8.561639e-07
+110 184683593728         taskwait 7.302441e+04 4.341726e+01
+111 188978561024           atomic 8.188731e+03 4.868678e+00
+112 188978561024 implicit barrier 5.286582e+00 3.143181e-03
+113 188978561024         parallel 3.011000e-03 1.790215e-06
+114 188978561024           single 1.907000e-03 1.133823e-06
+115 188978561024         taskwait 1.599971e+05 9.512760e+01
+116 193273528320           atomic 9.532625e+04 5.667701e+01
+117 193273528320 implicit barrier 1.440928e+01 8.567158e-03
+118 193273528320         parallel 3.495000e-03 2.077981e-06
+119 193273528320           single 2.733000e-03 1.624928e-06
+120 193273528320         taskwait 7.284130e+04 4.330840e+01
+121 197568495616           atomic 9.460927e+04 5.625072e+01
+122 197568495616 implicit barrier 9.475717e+00 5.633866e-03
+123 197568495616         parallel 4.216000e-03 2.506658e-06
+124 197568495616           single 2.035000e-03 1.209926e-06
+125 197568495616         taskwait 7.355751e+04 4.373423e+01
+126 201863462912           atomic 9.287340e+04 5.521865e+01
+127 201863462912 implicit barrier 9.406122e+00 5.592488e-03
+128 201863462912         parallel 4.838000e-03 2.876473e-06
+129 201863462912           single 2.158000e-03 1.283057e-06
+130 201863462912         taskwait 7.528725e+04 4.476266e+01
+131 206158430208           atomic 3.990368e+04 2.372506e+01
+132 206158430208 implicit barrier 1.097700e-01 6.526466e-05
+133 206158430208         parallel 2.530000e-03 1.504232e-06
+134 206158430208           single 1.444000e-03 8.585421e-07
+135 206158430208         taskwait 1.282857e+05 7.627330e+01
+136 210453397504           atomic 9.136347e+04 5.432091e+01
+137 210453397504 implicit barrier 2.972672e+00 1.767427e-03
+138 210453397504         parallel 9.312000e-03 5.536527e-06
+139 210453397504           single 7.709000e-03 4.583450e-06
+140 210453397504         taskwait 7.680798e+04 4.566682e+01
+141  21474836480           atomic 9.543556e+04 5.674200e+01
+142  21474836480 implicit barrier 5.513241e+00 3.277943e-03
+143  21474836480         parallel 3.108000e-03 1.847887e-06
+144  21474836480           single 2.469000e-03 1.467964e-06
+145  21474836480         taskwait 7.273889e+04 4.324751e+01
+146 214748364800           atomic 9.508381e+04 5.653287e+01
+147 214748364800 implicit barrier 6.105220e+00 3.629909e-03
+148 214748364800         parallel 8.869000e-03 5.273137e-06
+149 214748364800           single 8.022000e-03 4.769546e-06
+150 214748364800         taskwait 7.307054e+04 4.344469e+01
+151 219043332096           atomic 9.493237e+04 5.644282e+01
+152 219043332096 implicit barrier 6.714173e+00 3.991967e-03
+153 219043332096         parallel 8.232000e-03 4.894404e-06
+154 219043332096           single 2.743000e-03 1.630873e-06
+155 219043332096         taskwait 7.321500e+04 4.353058e+01
+156 223338299392           atomic 9.274606e+04 5.514293e+01
+157 223338299392 implicit barrier 8.841944e+00 5.257051e-03
+158 223338299392         parallel 2.649000e-03 1.574985e-06
+159 223338299392           single 1.874000e-03 1.114202e-06
+160 223338299392         taskwait 7.543199e+04 4.484871e+01
+161 227633266688           atomic 9.341270e+04 5.553930e+01
+162 227633266688 implicit barrier 1.707644e+00 1.015294e-03
+163 227633266688         parallel 3.145000e-03 1.869886e-06
+164 227633266688           single 2.190000e-03 1.302083e-06
+165 227633266688         taskwait 7.477068e+04 4.445553e+01
+166 231928233984           atomic 9.512620e+04 5.655807e+01
+167 231928233984 implicit barrier 8.565546e+00 5.092716e-03
+168 231928233984         parallel 4.891000e-03 2.907984e-06
+169 231928233984           single 1.631000e-03 9.697245e-07
+170 231928233984         taskwait 7.303129e+04 4.342135e+01
+171 236223201280           atomic 9.535300e+04 5.669291e+01
+172 236223201280 implicit barrier 6.915178e+00 4.111476e-03
+173 236223201280         parallel 1.056300e-02 6.280319e-06
+174 236223201280           single 7.653000e-03 4.550154e-06
+175 236223201280         taskwait 7.279234e+04 4.327928e+01
+176 240518168576           atomic 3.149671e+04 1.872663e+01
+177 240518168576 implicit barrier 4.942890e-01 2.938836e-04
+178 240518168576         parallel 2.683000e-03 1.595200e-06
+179 240518168576           single 1.481000e-03 8.805408e-07
+180 240518168576         taskwait 1.366930e+05 8.127196e+01
+181 244813135872           atomic 9.328208e+04 5.546163e+01
+182 244813135872 implicit barrier 6.214451e+00 3.694853e-03
+183 244813135872         parallel 3.917000e-03 2.328885e-06
+184 244813135872           single 2.540000e-03 1.510178e-06
+185 244813135872         taskwait 7.489530e+04 4.452962e+01
+186 249108103168           atomic 8.891512e+04 5.286522e+01
+187 249108103168 implicit barrier 1.139623e+01 6.775720e-03
+188 249108103168         parallel 4.029000e-03 2.395475e-06
+189 249108103168           single 2.240000e-03 1.331811e-06
+190 249108103168         taskwait 7.924971e+04 4.711857e+01
+191 253403070464           atomic 9.492178e+04 5.643653e+01
+192 253403070464 implicit barrier 3.411526e+00 2.028351e-03
+193 253403070464         parallel 3.206000e-03 1.906154e-06
+194 253403070464           single 2.577000e-03 1.532177e-06
+195 253403070464         taskwait 7.324763e+04 4.354998e+01
+196  25769803776           atomic 8.251269e+04 4.905860e+01
+197  25769803776 implicit barrier 8.358756e+00 4.969767e-03
+198  25769803776         parallel 1.349800e-02 8.025347e-06
+199  25769803776           single 7.242000e-03 4.305791e-06
+200  25769803776         taskwait 8.564163e+04 5.091894e+01
+201 257698037760           atomic 9.623549e+04 5.721761e+01
+202 257698037760 implicit barrier 4.012270e+00 2.385528e-03
+203 257698037760         parallel 3.086000e-03 1.834807e-06
+204 257698037760           single 1.810000e-03 1.076150e-06
+205 257698037760         taskwait 7.194660e+04 4.277645e+01
+206 261993005056           atomic 9.493811e+04 5.644624e+01
+207 261993005056 implicit barrier 3.718292e+00 2.210741e-03
+208 261993005056         parallel 4.724000e-03 2.808693e-06
+209 261993005056           single 2.124000e-03 1.262842e-06
+210 261993005056         taskwait 7.323923e+04 4.354499e+01
+211 266287972352           atomic 9.542436e+04 5.673534e+01
+212 266287972352 implicit barrier 8.477932e+00 5.040625e-03
+213 266287972352         parallel 8.120000e-03 4.827813e-06
+214 266287972352           single 2.448000e-03 1.455479e-06
+215 266287972352         taskwait 7.273152e+04 4.324313e+01
+216 270582939648           atomic 9.491402e+04 5.643192e+01
+217 270582939648 implicit barrier 1.055890e+01 6.277879e-03
+218 270582939648         parallel 3.847000e-03 2.287266e-06
+219 270582939648           single 2.918000e-03 1.734921e-06
+220 270582939648         taskwait 7.322932e+04 4.353910e+01
+221  30064771072           atomic 9.431902e+04 5.607815e+01
+222  30064771072 implicit barrier 5.448438e+00 3.239414e-03
+223  30064771072         parallel 2.747000e-03 1.633252e-06
+224  30064771072           single 3.520000e-03 2.092845e-06
+225  30064771072         taskwait 7.384707e+04 4.390638e+01
+226  34359738368           atomic 8.505622e+04 5.057088e+01
+227  34359738368 implicit barrier 3.753017e+00 2.231387e-03
+228  34359738368         parallel 2.650000e-03 1.575579e-06
+229  34359738368           single 1.454000e-03 8.644877e-07
+230  34359738368         taskwait 8.312856e+04 4.942477e+01
+231  38654705664           atomic 9.524944e+04 5.663134e+01
+232  38654705664 implicit barrier 3.823535e+00 2.273314e-03
+233  38654705664         parallel 3.387000e-03 2.013769e-06
+234  38654705664           single 1.861000e-03 1.106473e-06
+235  38654705664         taskwait 7.293109e+04 4.336178e+01
+236   4294967296           atomic 9.311534e+04 5.536249e+01
+237   4294967296 implicit barrier 1.124473e+01 6.685647e-03
+238   4294967296         parallel 3.950000e-03 2.348505e-06
+239   4294967296           single 2.208000e-03 1.312785e-06
+240   4294967296         taskwait 7.505615e+04 4.462526e+01
+241  42949672960           atomic 9.448855e+04 5.617895e+01
+242  42949672960 implicit barrier 1.539861e+01 9.155372e-03
+243  42949672960         parallel 3.114000e-03 1.851454e-06
+244  42949672960           single 2.798000e-03 1.663574e-06
+245  42949672960         taskwait 7.366207e+04 4.379639e+01
+246  47244640256           atomic 9.517358e+04 5.658624e+01
+247  47244640256 implicit barrier 1.086556e+01 6.460211e-03
+248  47244640256         parallel 3.290000e-03 1.956097e-06
+249  47244640256           single 6.311000e-03 3.752257e-06
+250  47244640256         taskwait 7.298345e+04 4.339291e+01
+251  51539607552           atomic 7.336560e+04 4.362013e+01
+252  51539607552 implicit barrier 2.807430e-01 1.669181e-04
+253  51539607552         parallel 3.458000e-03 2.055982e-06
+254  51539607552           single 1.202000e-03 7.146590e-07
+255  51539607552         taskwait 9.482182e+04 5.637710e+01
+256  55834574848           atomic 9.605475e+04 5.711014e+01
+257  55834574848 implicit barrier 1.511454e+01 8.986473e-03
+258  55834574848         parallel 2.867000e-03 1.704599e-06
+259  55834574848           single 1.504000e-03 8.942156e-07
+260  55834574848         taskwait 7.211207e+04 4.287482e+01
+261  60129542144           atomic 9.471805e+04 5.631540e+01
+262  60129542144 implicit barrier 2.223101e+00 1.321763e-03
+263  60129542144         parallel 3.353000e-03 1.993554e-06
+264  60129542144           single 2.272000e-03 1.350836e-06
+265  60129542144         taskwait 7.345444e+04 4.367294e+01
+266  64424509440           atomic 9.469022e+04 5.629885e+01
+267  64424509440 implicit barrier 5.401929e+00 3.211762e-03
+268  64424509440         parallel 7.701000e-03 4.578693e-06
+269  64424509440           single 2.450000e-03 1.456668e-06
+270  64424509440         taskwait 7.346081e+04 4.367673e+01
+271  68719476736           atomic 3.100461e+04 1.843405e+01
+272  68719476736 implicit barrier 5.993857e+00 3.563697e-03
+273  68719476736         parallel 3.048000e-03 1.812214e-06
+274  68719476736           single 1.908000e-03 1.134417e-06
+275  68719476736         taskwait 1.371796e+05 8.156126e+01
+276  73014444032           atomic 9.478440e+04 5.635485e+01
+277  73014444032         critical 6.927200e-02 4.118624e-05
+278  73014444032  critical sblock 1.616400e-02 9.610440e-06
+279  73014444032 implicit barrier 9.162490e+00 5.447634e-03
+280  73014444032         parallel 3.776000e-03 2.245052e-06
+281  73014444032           single 7.792000e-03 4.632798e-06
+282  73014444032         taskwait 7.337939e+04 4.362832e+01
+283  77309411328           atomic 9.561862e+04 5.685084e+01
+284  77309411328 implicit barrier 8.130450e+00 4.834026e-03
+285  77309411328         parallel 3.271000e-03 1.944800e-06
+286  77309411328           single 1.962000e-03 1.166523e-06
+287  77309411328         taskwait 7.253196e+04 4.312448e+01
+288  81604378624           atomic 9.468575e+04 5.629619e+01
+289  81604378624 implicit barrier 5.988258e+00 3.560368e-03
+290  81604378624         parallel 7.220000e-03 4.292711e-06
+291  81604378624           single 6.406000e-03 3.808740e-06
+292  81604378624         taskwait 7.346462e+04 4.367900e+01
+293   8589934592           atomic 9.037003e+04 5.373025e+01
+294   8589934592 implicit barrier 9.148242e+00 5.439163e-03
+295   8589934592         parallel 2.997000e-03 1.781891e-06
+296   8589934592           single 1.771000e-03 1.052963e-06
+297   8589934592         taskwait 7.779978e+04 4.625650e+01
+298  85899345920           atomic 8.850544e+04 5.262164e+01
+299  85899345920         critical 2.498700e-02 1.485623e-05
+300  85899345920  critical sblock 5.033000e-03 2.992412e-06
+301  85899345920 implicit barrier 2.789060e+00 1.658259e-03
+302  85899345920         parallel 3.496000e-03 2.078576e-06
+303  85899345920           single 2.320000e-03 1.379375e-06
+304  85899345920         taskwait 7.967866e+04 4.737361e+01
+305  90194313216           atomic 9.146077e+04 5.437876e+01
+306  90194313216 implicit barrier 9.804743e+00 5.829491e-03
+307  90194313216         parallel 5.060000e-03 3.008465e-06
+308  90194313216           single 2.716000e-03 1.614820e-06
+309  90194313216         taskwait 7.671460e+04 4.561130e+01
+310  94489280512           atomic 9.484374e+04 5.639013e+01
+311  94489280512 implicit barrier 9.518932e+00 5.659560e-03
+312  94489280512         parallel 3.170000e-03 1.884750e-06
+313  94489280512           single 2.580000e-03 1.533960e-06
+314  94489280512         taskwait 7.331458e+04 4.358979e+01
+315  98784247808           atomic 9.505668e+04 5.651674e+01
+316  98784247808 implicit barrier 5.212183e+00 3.098946e-03
+317  98784247808         parallel 2.739000e-03 1.628495e-06
+318  98784247808           single 2.456000e-03 1.460235e-06
+319  98784247808         taskwait 7.309032e+04 4.345645e+01
+320         zero           atomic 1.470320e-01 8.741909e-05
+321         zero implicit barrier 1.411000e-02 8.389217e-06
+322         zero         parallel 1.842500e-02 1.095474e-05
+323         zero           single 9.336000e-03 5.550796e-06
+324         zero    single sblock 2.089600e-02 1.242389e-05
+325         zero         taskwait 1.681919e+05 9.999988e+01
+#+end_example
+
+Let's look only to the taskwait to see if it is different.
+
+#+begin_src R :results output :session :exports both
+k_full[k_full$Value == "taskwait",];
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      ResourceId    Value       sum    ratio
+5   103079215104 taskwait 162931.10 96.87203
+10  107374182400 taskwait  73109.96 43.46813
+15  111669149696 taskwait 105169.64 62.52948
+20  115964116992 taskwait  73265.52 43.56062
+25  120259084288 taskwait  71116.05 42.28264
+30  124554051584 taskwait  74531.72 44.31345
+35   12884901888 taskwait  73648.73 43.78846
+40  128849018880 taskwait  72734.20 43.24472
+45  133143986176 taskwait  73311.13 43.58774
+50  137438953472 taskwait 168128.12 99.96197
+55  141733920768 taskwait  81127.79 48.23520
+60  146028888064 taskwait  75361.90 44.80704
+65  150323855360 taskwait  74625.51 44.36922
+70  154618822656 taskwait  74468.69 44.27597
+75  158913789952 taskwait  72621.95 43.17798
+80  163208757248 taskwait 101348.60 60.25765
+85  167503724544 taskwait  77165.86 45.87960
+90   17179869184 taskwait  70563.91 41.95436
+95  171798691840 taskwait 110605.62 65.76149
+100 176093659136 taskwait  74449.82 44.26476
+105 180388626432 taskwait  73853.22 43.91004
+110 184683593728 taskwait  73024.41 43.41726
+115 188978561024 taskwait 159997.10 95.12760
+120 193273528320 taskwait  72841.30 43.30840
+125 197568495616 taskwait  73557.51 43.73423
+130 201863462912 taskwait  75287.25 44.76266
+135 206158430208 taskwait 128285.65 76.27330
+140 210453397504 taskwait  76807.98 45.66682
+145  21474836480 taskwait  72738.89 43.24751
+150 214748364800 taskwait  73070.54 43.44469
+155 219043332096 taskwait  73215.00 43.53058
+160 223338299392 taskwait  75431.99 44.84871
+165 227633266688 taskwait  74770.68 44.45553
+170 231928233984 taskwait  73031.29 43.42135
+175 236223201280 taskwait  72792.34 43.27928
+180 240518168576 taskwait 136693.01 81.27196
+185 244813135872 taskwait  74895.30 44.52962
+190 249108103168 taskwait  79249.71 47.11857
+195 253403070464 taskwait  73247.63 43.54998
+200  25769803776 taskwait  85641.63 50.91894
+205 257698037760 taskwait  71946.60 42.77645
+210 261993005056 taskwait  73239.23 43.54499
+215 266287972352 taskwait  72731.52 43.24313
+220 270582939648 taskwait  73229.32 43.53910
+225  30064771072 taskwait  73847.07 43.90638
+230  34359738368 taskwait  83128.56 49.42477
+235  38654705664 taskwait  72931.09 43.36178
+240   4294967296 taskwait  75056.15 44.62526
+245  42949672960 taskwait  73662.07 43.79639
+250  47244640256 taskwait  72983.45 43.39291
+255  51539607552 taskwait  94821.82 56.37710
+260  55834574848 taskwait  72112.07 42.87482
+265  60129542144 taskwait  73454.44 43.67294
+270  64424509440 taskwait  73460.81 43.67673
+275  68719476736 taskwait 137179.59 81.56126
+282  73014444032 taskwait  73379.39 43.62832
+287  77309411328 taskwait  72531.96 43.12448
+292  81604378624 taskwait  73464.62 43.67900
+297   8589934592 taskwait  77799.78 46.25650
+304  85899345920 taskwait  79678.66 47.37361
+309  90194313216 taskwait  76714.60 45.61130
+314  94489280512 taskwait  73314.58 43.58979
+319  98784247808 taskwait  73090.32 43.45645
+325         zero taskwait 168191.89 99.99988
+#+end_example
+
+Some threads that are not thread zero do almost nothing.
+
+Let's create a stacked bar plot to see this.
+
+#+begin_src R :results output graphics :file img/openmp-floorplan-dynamic-load_balance.png :exports both :width 800 :height 400 :session
+ggplot(k_full,
+     aes(x = as.factor(ResourceId), y = ratio, fill=as.factor(Value))) +
+     geom_bar(stat='identity', width=0.8) +
+     ylim(0,100) +
+     theme_bw();
+#+end_src
+
+#+RESULTS:
+[[file:img/openmp-floorplan-dynamic-load_balance.png]]
+
+
+Some threads do not work at all.
