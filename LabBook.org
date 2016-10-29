@@ -4592,7 +4592,7 @@ for row in ${ref[@]}; do
 	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
 
 	   while [ $c -lt $numberOfCpus ]; do 
-			echo -n "$governors" > "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_governor"
+			sudo echo -n "$governors" > "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_governor"
 			let c=$c+1
 	   done
 	   c=0
