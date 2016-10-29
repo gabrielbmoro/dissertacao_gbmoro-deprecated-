@@ -4517,6 +4517,53 @@ SCOREP_METRIC_RUSAGE=ru_utime,ru_stime \
 SCOREP_FILTERING_FILE=/home/gabrielbmoro/src/bestSolution/filter_timestemp \
 ./program_exec 
 #+END_EXAMPLE
+
+* [18:36:44; 28.10.2016] Experimento de Energia com Graph500 com algumas políticas do CPUFreq :Gabriel:
+
+#+begin_src R :results output :session *RpjectD* :exports both 
+require(DoE.base);
+  expGraph500Governors <- fac.design (
+           nfactors=2,
+           replications=20,
+           repeat.only=FALSE,
+           blocks=1,
+           randomize=TRUE,
+           seed=10373,
+           nlevels=c(2,3),
+           factor.names=list(
+		  governors=c("powersave","performance"),
+                threads=c(1,16,32)));                
+
+  export.design(expGraph500Governors,
+                path=".",
+                filename=NULL,
+                type="csv",
+                replace=TRUE,
+                response.names=c("time", "cpuenergy"));
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Loading required package: DoE.base
+Loading required package: grid
+Loading required package: conf.design
+
+Attaching package: ‘DoE.base’
+
+The following objects are masked from ‘package:stats’:
+
+    aov, lm
+
+The following object is masked from ‘package:graphics’:
+
+    plot.design
+
+The following object is masked from ‘package:base’:
+
+    lengths
+ creating full factorial with 6 runs ...
+#+end_example
+
 * Dealing with ScoreP traces
 ** Fibonacci in OpenMP                                      :openmp:tracing:
 
