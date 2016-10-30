@@ -799,6 +799,7 @@ MPI.
 # aos blocos básicos definidos pelo compilador. Evitar usar esse termo
 # se possível portanto, a menos que te refira a mesma coisa, o que não
 # parece ser o caso.}
+
 # R: Sim professor, mas o conceito abordado pelo autor é basic block
 # mesmo, aquelas operações básicas que não utilizam acessos à memória
 
@@ -892,7 +893,6 @@ seria atribuir uma frequência adequada de processador para essas
 regiões, possibilitando encontrar uma configuração que a aplicação
 possua o melhor desempenho, menor consumo de energia ou a melhor
 configuração para ambos requisitos. 
-
 
 * Proposta
 
@@ -1175,7 +1175,6 @@ As atividades a serem realizadas ao decorrer do trabalho podem ser
 organizadas em um cronograma, conforme a Tabela \ref{table:cronograma}. 
 
 #+BEGIN_LaTeX
-\begin{landscape}
 \begin{table}[h]
 \centering
 \caption{Cronograma de Atividades}\label{table:cronograma}
@@ -1184,20 +1183,28 @@ organizadas em um cronograma, conforme a Tabela \ref{table:cronograma}.
 Atividades & 2016 & & & 2017 & & & \\
  & Out & Nov & Dez & Jan & Fev & Mar & Abr \\
 \hline
-Ajustar frequência de amostragem adequada para aplicações paralelas & X & X & X & - & - & - & - \\
-Realizar experimento para verificar o ajuste de frequências de amostragem & - & X & X & - & - & - & - \\
-Analisar resultados do experimento de ajuste de frequências & - & - & X & X & - & - & - \\
-Estudar sobre a técnica DVFS (Dynamic Voltage Frequency Scaling) & X & X & X & X & - & - & - \\
-Criação de um Programa Sintético de perfil completamente Memory-bound & - & - & X & X & - & - & - \\
-Aplicar DVFS sobre o Programa Sintético & - & - & - & - & X & - & - \\
-Utilizar a técnica DVFS nas fases mais memory-bound & - & - & - & - & X & X & - \\
-Realizar experimento final para verificar a técnica como um todo & - & - & - & - & - & X & - \\
+Ajustar frequência de amostragem adequada & & & & & & & \\ 
+para aplicações paralelas & X & X & X & - & - & - & - \\
+Realizar experimento para verificar o & & & & & & & \\ 
+ajuste de frequências de amostragem & - & X & X & - & - & - & - \\
+Analisar resultados do experimento & & & & & & & \\ 
+de ajuste de frequências & - & - & X & X & - & - & - \\
+Estudar sobre a técnica DVFS & & & & & & & \\ 
+(Dynamic Voltage Frequency Scaling) & X & X & X & X & - & - & - \\
+Criação de um Programa Sintético & & & & & & \\ 
+de perfil completamente Memory-bound & - & - & X & X & - & - & - \\
+Aplicar DVFS sobre o Programa & & & & & & & \\
+Sintético & - & - & - & - & X & - & - \\
+Utilizar a técnica DVFS nas fases & & & & & & & \\
+ mais memory-bound & - & - & - & - & X & X & - \\
+Realizar experimento final para & & & & & & & \\
+verificar a técnica como um todo & - & - & - & - & - & X & - \\
 Analisar resultados  & - & - & - & - & - & X & - \\
-Realizar uma revisão sistemática da literatura aprofundada & - & - & - & X & X & - & - \\
+Realizar uma revisão sistemática & & & & & & & \\
+da literatura aprofundada & - & - & - & X & X & - & - \\
 Escrever dissertação & - & - & - & X & X & X & X \\
 \end{tabular}
 \end{table}
- \end{landscape}
 #+END_LaTeX
 
 

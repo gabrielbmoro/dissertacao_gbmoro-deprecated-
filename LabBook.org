@@ -4566,9 +4566,11 @@ The following object is masked from ‘package:base’:
  creating full factorial with 6 runs ...
 #+end_example
 
+- Script utilizado para executar o experimento com dois governors e
+  com o graph500.
 
 #+begin_src sh :results output :exports both :tangle dados/scriptGraph500exp1ComDVFS.bash
-#!bin/bash
+#!/bin/bash
 
 nameFile="/home/gabrielbmoro/dissertacao_gbmoro/dados/expGraph500Governors.csv"
 pathOfApps="/home/gabrielbmoro/Programs/graph500/omp-csr/omp-csr"
@@ -4583,37 +4585,89 @@ tmp=""
 i=0
 
 for row in ${ref[@]}; do
-   if [ $i -gt 0 ]; then		
+   if [ $i -gt 0 ]; then
          name=$(echo "$row" | cut -d ',' -f1)
-	   runId=$(echo "$row" | cut -d ',' -f2)
+         runId=$(echo "$row" | cut -d ',' -f2)
          runNumber=$(echo "$row" | cut -d ',' -f3)
-	   runStd=$(echo "$row" | cut -d ',' -f4)
-	   governors=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
-	   threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
+         runStd=$(echo "$row" | cut -d ',' -f4)
+         governors=$(echo "$row" | cut -d ',' -f5 | sed 's/"//g')
+         threads=$(echo "$row" | cut -d ',' -f6 | sed 's/"//g')
 
-	   while [ $c -lt $numberOfCpus ]; do 
-			sudo echo -n "$governors" > "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_governor"
-			let c=$c+1
-	   done
-	   c=0
-	   
+           while [ $c -lt $numberOfCpus ]; do 
+                sudo echo -n "$governors" > "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_governor"
+                let c=$c+1
+           done
+           c=0
+           
          #definindo o número de threads e pinando-as em um core específico
-	   export OMP_NUM_THREADS=$threads
-	   export GOMP_CPU_AFFINITY="0-$threadNumber"
+          export OMP_NUM_THREADS=$threads
+          export GOMP_CPU_AFFINITY="0-$threadNumber"
 
-	   sudo -E $pcm_path  --noJKTWA -r --external-program $pathOfApps -s 23 >> tmp.log
-	   cpuEnergy=$(cat tmp.log | awk ' { print $4 } ' | tail -n 1)
-		
-	   timeSeconds=$($pathOfApps -s 23 | grep -i mean_time: | awk ' { print $2 } ' )
-		
-	   echo "$name,$runId,$runNumber,$runStd,$governors,$threads,$cpuEnergy,$timeSeconds" >> $outputFile
-	else
-		echo $row >> $outputFile
-		let i=$i+1
-	fi
+          sudo -E $pcm_path  --noJKTWA -r --external-program $pathOfApps -s 23 >> tmp.log
+          cpuEnergy=$(cat tmp.log | awk ' { print $4 } ' | tail -n 1)
+          rm tmp.log
+          timeSeconds=$($pathOfApps -s 23 | grep -i mean_time: | awk ' { print $2 } ' )
+
+          echo "$name,$runId,$runNumber,$runStd,$governors,$threads,$cpuEnergy,$timeSeconds" >> $outputFile
+        else
+                echo $row >> $outputFile
+                let i=$i+1
+        fi
 done
-
 #+end_src
+
+#+begin_src R :results output :session *R* :exports both
+
+library(dplyr);
+df <- read.csv("ResultExpGraph500_diferentesGovernors.csv");
+k <- df %>% select(governors,threads,time,cpuenergy) %>%
+ group_by(governors,threads) %>%
+ summarize(N=n(), meantime=mean(time), meancpuenergy=mean(cpuenergy),
+setime=3*sd(time)/sqrt(n()), secpuEnergy=3*sd(cpuenergy)/sqrt(n())) %>%
+as.data.frame();
+k
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+    governors threads  N  meantime meancpuenergy    setime  secpuEnergy
+1 performance       1 20 21222.215    0.18691398  59.62230 0.0004126799
+2 performance      16 20  5016.233    0.02471138 122.38619 0.0011798598
+3 performance      32 20  4047.536    0.02559993  15.29077 0.0041681893
+4   powersave       1 20 21270.456    0.18716278  74.82532 0.0002876551
+5   powersave      16 20  4967.642    0.02678150 146.57268 0.0008617486
+6   powersave      32 20  4069.907    0.02719114  74.23149 0.0055967420
+#+end_example
+
+
+- Primeiro ponto é que não consegui na bali1 alternar para o modo ondemand,
+  o qual seria fundamental para ilustrar nossa abordagem no capítulo da
+  proposta. Nisso, acho melhor realizar o experimento em uma das
+  orions que são mais novas e possuem o suporte completo do cpufreq
+  até para que eu possa comparar os diferentes governors e enriquecer
+  a proposta. Como o prazo do PEP é até amanhã, penso que o melhor
+  seria tirar fora esse experimento, até mesmo para fazer uma análise
+  de melhor qualidade.
+
+- Quanto aos resultados obtidos no experimento, saliento uma
+  desconformidade nos resultados, para 16 threads, o powersave
+  apresenta um tempo de execuçao menor do que o performance. Outro
+  ponto interessante é com 32 threads, onde o powersave consume muito
+  mais energia do que o performance. Esses dois pontos, fazem com que
+  seja necessário reexecutar os experimentos, verificando se os
+  governors são alternados corretamente.
+
+
 
 * Dealing with ScoreP traces
 ** Fibonacci in OpenMP                                      :openmp:tracing:
