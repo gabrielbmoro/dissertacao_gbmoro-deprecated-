@@ -897,11 +897,10 @@ configuração para ambos requisitos.
 * Proposta
 
 O objetivo desse trabalho é obter a melhor configuração de frequência
-para um programa paralelo de acordo com seu comportamento, o qual
-pode ser mais memory-bound ou CPU-bound, de acordo com as regiões do
-programa. Com essas regiões identificadas, o trabalho utilizará a
+para um programa paralelo, de acordo com seu comportamento, o qual
+pode ser mais memory-bound ou CPU-bound. Com as regiões memory-bound identificadas, o trabalho utilizará a
 técnica DVFS (/Dynamic Voltage and Frequency Scaling/) para obter a
-frequência adequada para cada região do programa. Na Figura
+frequência adequada para cada parte do programa. Na Figura
 \ref{fig.proposta} é possível visualizar de forma detalhada a proposta
 do trabalho. 
 
