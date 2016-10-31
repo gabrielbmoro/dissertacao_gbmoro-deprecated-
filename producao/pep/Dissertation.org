@@ -284,8 +284,8 @@ Frequency Scaling/- DVFS), como também a nível de software, utilizando técnic
 balanceamento de carga, a fim de melhor distribuir a computação entre
 os recursos de processamento.
 
-A Mudança dinâmica de voltagem e frequência (DVFS) é uma técnica que permite controlar a
-frequência do processador, variando-a de acordo com as 
+A mudança dinâmica de voltagem e frequência (DVFS) é uma técnica que permite controlar a
+frequência do processador, alternando-a de acordo com as 
 políticas disponíveis no framework CPUfreq. Dentre as políticas de
 frequência, a /Powersave/ tem como objetivo principal reduzir o consumo
 de energia utilizando frequências menores. Já a política /Performance/
@@ -303,13 +303,13 @@ distintas. Por exemplo, em uma aplicação que simula a troca de calor
 através de uma placa de metal é possível definir duas regiões
 paralelas: a primeira determina uma condição inicial para a placa
 (matriz), outra realiza os cálculos de transferência de calor através
-dos diferentes pontos. Nesse exemplo é possível visualizar que, a segunda
+dos diferentes pontos. Nesse exemplo é possível visualizar que a segunda
 região é mais memory-bound do que a outra, pois é efetuado o mesmo
 cálculo sobre diferentes dados, dessa forma, o novo resultado do
 elemento é registrado e após isso é buscado novamente em memória antes
 do novo cálculo \cite{Morowsppd}. 
 
-Alguns trabalhos realizam investigações do ajuste de frequência para
+Alguns trabalhos investigam o ajuste de frequência para
 aplicações, levando em consideração fatores como comportamento,
 plataforma de execução e balanceamento de carga. Os principais
 trabalhos investigados apresentam as seguintes contribuições:
@@ -318,7 +318,7 @@ distribuídas (grão é o próprio nó de processamento),
 \citeonline{laurenzano2011reducing} apresentam uma técnica para
 aplicações sequenciais e paralelas (grão é o laço do programa),
 \citeonline{spiliopoulos2012power} criam uma ferramenta destinada para
-aplicações sequenciais (grão a nível de loop) e
+aplicações sequenciais (grão a nível de laço) e
 \citeonline{millani2016fr} utilizam como grão as regiões paralelas para
 o ajuste de frequência. A partir desses trabalhos foi possível
 compreender que para aplicações paralelas em OpenMP, não existe uma
@@ -897,13 +897,22 @@ configuração para ambos requisitos.
 * Proposta
 
 O objetivo desse trabalho é obter a melhor configuração de frequência
-para um programação paralelo de acordo com seu comportamento, o qual
-pode ser mais memory-bound ou CPU-bound para algumas das regiões do
+para um programa paralelo de acordo com seu comportamento, o qual
+pode ser mais memory-bound ou CPU-bound, de acordo com as regiões do
 programa. Com essas regiões identificadas, o trabalho utilizará a
 técnica DVFS (/Dynamic Voltage and Frequency Scaling/) para obter a
-frequência adequada para cada região. De forma mais detalhada, a
-proposta do trabalho pode ser dividida em três etapas, as quais são
-apresentadas a seguir. 
+frequência adequada para cada região do programa. Na Figura
+\ref{fig.proposta} é possível visualizar de forma detalhada a proposta
+do trabalho. 
+
+#+BEGIN_LaTeX
+\begin{figure}[!htb]
+\caption{Proposta da Dissertação.}
+\centering
+\includegraphics[width=.85\linewidth]{./img/proposta.pdf}
+\label{fig.proposta} 
+\end{figure}
+#+END_LaTeX
 
 A primeira etapa tem por objetivo identificar os trechos em que o
 programa é mais memory-bound, geralmente esses trechos são aqueles onde a
