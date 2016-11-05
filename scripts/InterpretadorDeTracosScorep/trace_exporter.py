@@ -10,7 +10,7 @@ class TraceExporter(object):
         sample = ''
         trace = ''
 
-        print("region, file, linha, contador, valor")
+        print("region,file,codeline,metric,value")
 
         for row in rows:
             if "ENTER" in row:
