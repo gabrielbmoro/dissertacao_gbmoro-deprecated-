@@ -141,3 +141,29 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 #+LaTeX:}
 #+LaTeX: \end{column}
 #+LaTeX: \end{columns}
+
+* Preliminary Results
+** 
+*** Trace's Format
+
+|---------------------+-------+-----------+--------------+-------|
+| =Region=              | =File=  | =Code Line= | =Metric=       | =Value= |
+|---------------------|-------|-----------|--------------|-------|
+| omp-parallel        | cg.f  |       736 | PAPIL2TCA    | 48282 |
+| omp-parallel        | ,cg.f |       736 | PAPIL2DCM    |  5288 |
+| omp-parallel        | cg.f  |       736 | PAPIL2ICM    |  8933 |
+| omp-do              | cg.f  |       736 | PAPIL2TCA    | 48841 |
+| omp-do              | cg.f  |       736 | PAPIL2DCM    |  5393 |
+| omp-do              | cg.f  |       736 | PAPIL2ICM    |  9092 |
+| omp-implicitbarrier | cg.f  |       739 | PAPIL2TCA    |  1321 |
+| omp-implicitbarrier | cg.f  |       739 | PAPIL2DCM156 |       |
+| omp-implicitbarrier | cg.f  |       739 | PAPIL2ICM    |   523 |
+| omp-parallel        | cg.f  |       736 | PAPIL2TCA    |  2048 |
+| omp-parallel        | cg.f  |       736 | PAPIL2DCM    |   196 |
+| omp-do              | cg.f  |       736 | PAPIL2TCA    |  2280 |
+| ...                 |       |           |              |       |
+
+** 
+*** Preliminary Results
+
+
