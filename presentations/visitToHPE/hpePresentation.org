@@ -115,6 +115,22 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 
 #+LaTeX: \begin{columns}\begin{column}{.45\linewidth}
 
+*Measures investigated*
+
+- Acesses to Cache L2
+- Amount of Misses in Cache L2
+
+*Trace Generated*
+
+|-----+------------------+---------------|
+| _App_ | _Trace's Size_     | _Trace's Size_  |
+|     | (without filter) | (with filter) |
+|-----+------------------+---------------|
+| CG  | 556M             | 202M          |
+| FT  | 11M              | 3.7M          |
+| LU  | 20G              | 6.5G          |
+|-----+------------------+---------------|
+
 #+LaTeX: \end{column}
 #+LaTeX: \begin{column}{.35\linewidth}
 #+LaTeX: {\small
