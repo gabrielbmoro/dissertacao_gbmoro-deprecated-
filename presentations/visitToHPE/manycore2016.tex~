@@ -1,0 +1,589 @@
+% Created 2016-07-12 Ter 23:01
+% Intended LaTeX compiler: pdflatex
+\documentclass[12pt,xcolor=dvipsnames,presentation]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\input{org-babel-style-preembule.tex}
+\institute[GPPD/INF/UFRGS, Porto Alegre, Brazil]{
+GPPD/INF/UFRGS, Porto Alegre, Brazil\\
+\includegraphics[width=.16\textwidth]{img/gppd.png}
+\hfill
+\includegraphics[width=.16\textwidth]{img/inf.pdf}
+\hfill
+\includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+\hfill
+\includegraphics[width=.16\textwidth]{img/hpeLogo.png}
+\hfill
+\includegraphics[width=.18\textwidth]{img/hpc4e.pdf}
+}
+\author{Gabriel Bronzatti Moro, Matheus da Silva Serpa \\ \{gabriel.bmoro,msserpa\}@inf.ufrgs.br}
+\date{Porto Alegre, July 2016 --- $2^{nd}$ HPC-ELO}
+\title{Impact on Intranode and Internode Communication}
+\hypersetup{
+ pdfauthor={Gabriel Bronzatti Moro, Matheus da Silva Serpa \\ \{gabriel.bmoro,msserpa\}@inf.ufrgs.br},
+ pdftitle={Impact on Intranode and Internode Communication},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 24.5.1 (Org mode 8.3.4)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\input{org-babel-document-preembule.tex}
+\newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+\section{Context: Saving Energy in HPC Applications}
+\label{sec:org20cc496}
+\subsection{}
+\label{sec:org543e9de}
+\subsubsection{Context on HPC and energy}
+\label{sec:orgacbb2e5}
+Performance has historically overshadowed energy efficiency in
+HPC. \medskip
+
+\begin{overlayarea}{\linewidth}{5cm}
+
+This scenario has changed\ldots{}
+\begin{itemize}
+\item Green500 list: current leader offers 7.0GFLOPS/Watt
+\item DARPA imposes a 20MW limit for \uline{Exascale}: \textbf{50GFLOPS/Watt}
+\end{itemize}
+
+\only<2>{\centering\vspace{-3.5cm}\includegraphics[width=\linewidth]{img/top500-green500.pdf}}
+\only<3>{\centering\vspace{-3.5cm}\includegraphics[width=\linewidth]{img/top500-green500-zoom.pdf}}
+
+\only<4->{
+\begin{center}\includegraphics[width=.25\linewidth]{img/top500-green500.pdf}\hspace{1cm}
+\includegraphics[width=.25\linewidth]{img/top500-green500-zoom.pdf}\end{center}
+
+Efforts are both in \textbf{hardware} and \textbf{software}.
+\begin{itemize}
+\item We study \uline{software} strategies for energy savings
+\begin{itemize}
+\item with hardware support (DVFS)
+\end{itemize}
+\end{itemize}
+
+}\end{overlayarea}
+
+\subsubsection{Software energy savings strategies}
+\label{sec:orgcb6cc97}
+
+\textbf{Common Strategy:} apply energy-saving techniques for code regions
+\begin{columns}\begin{column}{.5\linewidth}
+\begin{itemize}
+\item blocking communication
+\item memory intensive
+\item load imbalance
+\end{itemize}
+\end{column}\begin{column}{.5\linewidth}
+\begin{itemize}
+\item wait states
+\item communication phases
+\item slack time (static / \uline{dynamic})
+\end{itemize}
+\end{column}\end{columns}
+
+\bigskip
+
+\begin{overlayarea}{\linewidth}{5cm}
+\only<2->{
+Goal: energy savings with minimal (or no) performance losses
+\begin{itemize}
+\item Find the \uline{best processor frequency} to execute each code region
+\end{itemize}
+}
+
+\bigskip
+
+\only<3->{
+Straightforward technique
+\begin{itemize}
+\item Run the code region with each frequency
+\begin{itemize}
+\item Measure execution time and energy
+\end{itemize}
+\item Repeat for all code regions in the program
+\end{itemize}
+\hfill(and use replications to address variability)
+}
+\end{overlayarea}
+
+\subsubsection{Close related work: a detailed overview}
+\label{sec:orgd0415ea}
+
+\textbf{Freeh et al. (2005)} \cite{Freeh:2005:UME:1065944.1065967}: per-phase frequency scaling
+\begin{itemize}
+\item Test all possible frequencies \uline{one by one} for each phase
+\begin{itemize}
+\item Sequentially and in order
+\end{itemize}
+\end{itemize}
+
+\pause
+\bigskip
+
+\textbf{Laurenzano et al. (2011, 2013)} \cite{Laurenzano2011}: loop-based strategy
+\begin{itemize}
+\item Series of loops (with different CPU and memory behavior)
+\end{itemize}
+
+\pause
+
+\begin{enumerate}
+\item \textbf{System characterization}
+\begin{itemize}
+\item Each loop is executed with all available frequencies
+\item Defines which \uline{frequency is the best for that loop configuration}
+\end{itemize}
+
+\item \textbf{Real application loops are profiled}
+\begin{itemize}
+\item Signature (cache hits, flops, memory accesses, etc)
+\item Search the closest point in system characterization data
+\end{itemize}
+\end{enumerate}
+
+\pause
+
+\textbf{Koren et al. (2015)} \cite{xu2015ilp} (WA-DVFS): monitors ILP, periodic decision
+\begin{itemize}
+\item Offline profiling classifies applic. behavior in 4 categories
+\item At every time step, ILP level is classified as high or low
+\begin{itemize}
+\item Slack is updated, checks if okay for current parallelism
+\begin{itemize}
+\item Applies scaling to high or low depending on that
+\end{itemize}
+\end{itemize}
+\end{itemize}
+
+\subsubsection{Problem statement, motivation and objective}
+\label{sec:orgb65193e}
+Existing approaches test one code region at a time
+\begin{itemize}
+\item Simpler goal: looks for the best solution (minimal perf. loss)
+\item Ignore effect interaction between code regions
+\end{itemize}
+
+HPC applications have many parallel regions.
+\begin{itemize}
+\item Examples: the Graph500 benchmark has 17, MiniFE has 25
+\end{itemize}
+Several processor frequencies in current architectures.
+
+\pause
+\bigskip
+
+\uline{Hard to evaluate} all time-energy trade-offs, considering
+\begin{itemize}
+\item Many code regions with several processor frequencies
+\item Replications to account for experimental variability
+\end{itemize}
+\(\rightarrow\) This requires \textbf{large experimental time}, large designs
+
+\pause
+\bigskip
+
+\begin{enumerate}
+\item \textbf{Objective}
+\label{sec:org9d8eef7}
+Propose a sound and \uline{fast} DoE-based methodology to discover \textbf{all the
+time-energy trade-offs} when adopting per-region proc. freq.  scaling
+\end{enumerate}
+
+\section{Background on Design of Experiments (DoE)}
+\label{sec:org7929010}
+\subsection{}
+\label{sec:org5c231a7}
+\subsubsection{Design of Experiments (DoE) basics}
+\label{sec:orgdb0b1a2}
+\uline{Factors}, \uline{Levels} and measured \uline{Outcomes} (Fishbone plot)
+\begin{overlayarea}{\linewidth}{8cm}
+
+\begin{LaTeX}
+\only<1>\{
+  \vspace{1cm}
+  Example with a Fishbone plot: $\backslash$\\bigskip
+  \hfill\includegraphics<1>[width=.9\linewidth]\{img/fishbone\(_{\text{example.pdf}}\)\}
+  \vfill
+\}
+\end{LaTeX}
+
+\only<2->{
+
+\textbf{Full Factorial (FF) Designs}
+\begin{itemize}
+\item Effect of each factor to be estimated independently
+\item \uline{Exponential growth} of experimental time
+\begin{itemize}
+\item General: n factors, L levels \(\rightarrow\) L\(^{\text{n}}\) experiments\\
+FF Designs with L > 2 are rare in statistics
+\item With n factors with 2 levels \(\rightarrow\) 2\(^{\text{n}}\) experiments
+\end{itemize}
+\end{itemize}
+
+}\only<3->{
+
+\textbf{Fractional and Screening Designs}
+\begin{itemize}
+\item Sparsity of Effects Principle: lack of complex factors interaction
+\item Less experimental effort than FF: 2\(^{\text{n-p}}\) (p limits design size)
+\begin{itemize}
+\item Still give a good exploration of space configuration
+\end{itemize}
+\item \uline{Plackett-Burman (PB)}: only n experiments (plus replication)
+\begin{itemize}
+\item design size is multiple of four: 4, 8, 12, 16, 20, \ldots{}, 48
+\begin{itemize}
+\item works untils 100 except for 92 (see Wikipedia page)
+\end{itemize}
+\end{itemize}
+\end{itemize}
+}
+\end{overlayarea}
+
+\section{DoE-based Methodology to Find Time-Energy Trade-offs}
+\label{sec:orgc4c478a}
+\subsection{}
+\label{sec:org68fc3d5}
+\subsubsection{Our Proposal: a DoE-based methodology}
+\label{sec:orgd89e443}
+Code regions identified by letters (A, B, \ldots{}) -- \textbf{Factors} \\
+Only two processor frequencies: \texttt{LOW} (-) and \texttt{HIGH} (+) -- \textbf{Levels}
+
+\medskip
+
+\hfill\includegraphics[width=.9\linewidth]{../europar2016/img/three_phases.pdf}
+
+\pause
+\medskip
+
+\textbf{Screening phase}: code region selection \\
+\(\rightarrow\) How much each factor (code region) affects time and energy?
+\begin{itemize}
+\item ANOVA (Analysis of Variance) and Main Effects (ME) plots
+\end{itemize}
+
+\pause
+
+\textbf{Full Factorial phase}: final results analysis \\
+\(\rightarrow\) Define all Time-Energy trade-offs, with variability
+\begin{itemize}
+\item ANOVA, but mostly Pareto plots (Outcomes: \textbf{Time-Energy})
+\end{itemize}
+\section{Experimental Results with seven OpenMP Benchmarks}
+\label{sec:org72cdca9}
+\subsection{}
+\label{sec:orga9f4061}
+\subsubsection{Experiments: scenarios and platform configs.}
+\label{sec:org465f82d}
+
+\begin{LaTeX}
+\begin{tabular}{lllll}
+%               &                  &                  & \multicolumn{2}{c}{Frequency (GHz)} \\
+{\bf Benchmark}&{\bf Description} &{\bf Regions}&{\bf Low}&{\bf High}\\
+BFS \cite{Shun:2012:BAP:2312005.2312018}
+               & breadth-first search               &           7   &    1.5 & 2.3 \\
+
+Delaunay \cite{Shun:2012:BAP:2312005.2312018}
+               & triang. mesh gener.         &         16     &   1.5 & 2.3 \\
+
+Graph500 \cite{murphy2010introducing}
+               & data-intensive load                &         17   &     1.8 & 2.3 \\
+
+MiniFE \cite{heroux2009improving}
+         &  unstruct. finite elem.    &         25   &     1.5 & 2.3 \\
+
+HPCCG \cite{heroux2009improving}
+          &  synthetic linear system                &          7   &     1.5 & 2.3 \\
+
+CoMD \cite{heroux2009improving}
+           & molecular dynamics                     &         14   &     1.5 & 2.3 \\
+
+Pathfinder \cite{heroux2009improving}
+     &   signature search                           &          7   &     1.2 & 2.3 \\
+
+\end{tabular}
+\end{LaTeX}
+
+\bigskip
+
+All OpenMP benchmarks were manually instrumented
+\begin{itemize}
+\item \textbf{ReDFST}: \url{https://github.com/lfgmillani/redfst}
+\end{itemize}
+
+\pause
+\bigskip
+
+\uline{Platform:} \texttt{orion} (GPPD of INF/UFRGS)
+\begin{itemize}
+\item two Intel Xeon E5-2630 Sandy Bridge procs. (12 physical cores)
+\item 32GB of memory; twelve clock frequencies, from 1.2 to 2.3 GHz
+\item GCC 5.1.1, with the -O3 optimization flag
+\item Energy measurements through Intel's RAPL counters \cite{intel2013}.
+\end{itemize}
+\subsubsection{Graph500: Screening for \underline{Energy} (ANOVA, ME)}
+\label{sec:org6cc8720}
+
+\begin{overlayarea}{\linewidth}{9cm}
+\prettysmall{10}
+\begin{verbatim}
+     Sum Sq Mean Sq F value   Pr(>F)    
+A      115     115   0.008   0.9280    
+B     5617    5617   0.401   0.5283    
+C    16437   16437   1.174   0.2818    
+D     2247    2247   0.160   0.6898    
+E   237947  237947  16.991 8.94e-05 ***
+F    19742   19742   1.410   0.2385    
+G     7083    7083   0.506   0.4790    
+H     7466    7466   0.533   0.4674    
+I    76297   76297   5.448   0.0220 *  
+J  1464976 1464976 104.608 2.65e-16 ***
+K     2759    2759   0.197   0.6583    
+L   605970  605970  43.270 4.17e-09 ***
+M    33466   33466   2.390   0.1260    
+N    47191   47191   3.370   0.0700 .  
+O    10017   10017   0.715   0.4002    
+P    21971   21971   1.569   0.2139    
+Q    62503   62503   4.463   0.0377 *
+\end{verbatim}
+
+\only<2->{
+\vspace{-5cm}
+\colorbox{white}{\includegraphics<2->[width=\linewidth]{../europar2016/img/final/graph500_me_energy-crop.pdf}}
+}
+\end{overlayarea}
+
+\vspace{-2.5cm}
+\begin{itemize}
+\item ANOVA: E, I, J, L and Q
+\end{itemize}
+\pause
+\begin{itemize}
+\item Main Effect Plot: J, L and E
+\begin{itemize}
+\item Remaining regions \(\rightarrow\) kept in the highest proc. freq.
+\end{itemize}
+\end{itemize}
+
+\subsubsection{Graph500: Screening for \underline{Time} (ANOVA, ME)}
+\label{sec:org0ddf1c0}
+
+\begin{overlayarea}{\linewidth}{9cm}
+\prettysmall{10}
+\begin{verbatim}
+     Sum Sq Mean Sq F value   Pr(>F)    
+A     1.23    1.23   0.622   0.4326    
+B     2.15    2.15   1.087   0.3003    
+C     4.14    4.14   2.088   0.1523    
+D     0.26    0.26   0.129   0.7199    
+E    44.21   44.21  22.304 9.49e-06 ***
+F     1.49    1.49   0.750   0.3891    
+G     1.87    1.87   0.944   0.3340    
+H     0.58    0.58   0.292   0.5902    
+I   274.03  274.03 138.262  < 2e-16 ***
+J   109.77  109.77  55.383 8.80e-11 ***
+K     0.65    0.65   0.329   0.5681    
+L     5.70    5.70   2.876   0.0937 .  
+M     3.19    3.19   1.609   0.2082    
+N     1.01    1.01   0.507   0.4783    
+O     2.69    2.69   1.359   0.2471    
+P     2.05    2.05   1.037   0.3116    
+Q    10.68   10.68   5.388   0.0228 *
+\end{verbatim}
+
+\only<2->{
+\vspace{-5cm}
+\colorbox{white}{\includegraphics<2->[width=\linewidth]{../europar2016/img/final/graph500_me_time-crop.pdf}}
+}
+\end{overlayarea}
+
+\vspace{-2.7cm}
+\begin{columns}\begin{column}{.5\linewidth}
+\begin{itemize}
+\item ANOVA: E, I, J and Q\pause
+\item Main Effect Plot: I, J and E
+\begin{itemize}
+\item Promising code region: I\pause
+\end{itemize}
+\end{itemize}
+
+\end{column}\begin{column}{.5\linewidth}
+\begin{itemize}
+\item \uline{Final selection}:
+\begin{itemize}
+\item E, I, J, L, and Q
+\end{itemize}
+\end{itemize}
+\end{column}\end{columns}
+
+\subsubsection{Graph500: Full Factorial Results (Pareto)}
+\label{sec:org13d3e24}
+
+\begin{columns}\begin{column}{.28\linewidth}
+
+Ellipses indicate 95\% C. Region; \texttt{HIGH} and \texttt{LOW} points; Pareto points
+are labelled with \texttt{+} and \texttt{-} for the E, I, J, L and Q code regions.
+
+\bigskip
+
+Observations:
+\begin{itemize}
+\item Pareto: 7 pts.
+\item \texttt{-+-{}-+} \\ \(\rightarrow\) I,Q to high
+\end{itemize}
+\end{column}\begin{column}{.68\linewidth}
+
+\begin{overlayarea}{\linewidth}{9cm}
+\centering
+\includegraphics<1>[width=\linewidth]{../europar2016/img/final/graph500-pareto-crop}
+\includegraphics<2>[width=\linewidth]{../europar2016/img/final/graph500-pareto-zoom-crop}
+\end{overlayarea}
+
+\end{column}\end{columns}
+
+\subsubsection{Time-Energy Trade-offs for BFS and Delaunay}
+\label{sec:orgbff9f1b}
+
+\begin{columns}\begin{column}{.5\linewidth}
+BFS: 3 out of 7
+\smallskip
+
+\includegraphics[width=\linewidth]{../europar2016/img/final/bfs-pareto-zoom-crop}
+\smallskip
+
+No different trade-offs than those obtained by \texttt{HIGH} and \texttt{LOW}.
+\end{column}\begin{column}{.5\linewidth}
+\pause Delaunay: 2 out of 16
+\smallskip
+
+\includegraphics[width=\linewidth]{../europar2016/img/final/delaunay-pareto-zoom-crop}
+\smallskip
+
+\texttt{-+} vs \texttt{HIGH}: no significant difference in Time (variability).
+\end{column}\end{columns}
+
+\subsubsection{Time-Energy Trade-offs for MiniFE and HPCCG}
+\label{sec:orgb4efafc}
+
+\begin{columns}\begin{column}{.48\linewidth}
+MiniFE: 5 out of 25
+\smallskip
+
+\includegraphics[width=\linewidth]{../europar2016/img/final/minifeopt-pareto-zoom-crop}
+\smallskip
+
+Trade-off: 9.27\% less energy; minor time increase (agst. \texttt{HIGH})
+\end{column}\begin{column}{.48\linewidth}
+\pause HPCCG: 2 out of 7
+\smallskip
+
+\includegraphics[width=\linewidth]{../europar2016/img/final/hpccg-pareto-zoom-crop}
+\smallskip
+
+\texttt{-+} consumes 21.35\% less energy; only 2.04\% time penalty
+\end{column}\end{columns}
+
+\subsubsection{Time-Energy Trade-offs for CoMD and Pathfinder}
+\label{sec:org6d2c1de}
+
+\begin{columns}\begin{column}{.48\linewidth}
+CoMD: 2 out of 14
+
+\smallskip
+\includegraphics[width=\linewidth]{../europar2016/img/final/comd-pareto-zoom-crop}
+\smallskip
+
+Unsuited to energy gains with minor performance losses
+
+\end{column}\begin{column}{.48\linewidth}
+\pause Pathfinder: 1 out of 7
+
+\smallskip
+\includegraphics[width=\linewidth]{../europar2016/img/final/pathfinder-pareto-zoom-crop}
+\smallskip
+
+Pareto has one point: \texttt{HIGH}. Less energy and time than \texttt{LOW}.
+\end{column}\end{columns}
+
+\section{Conclusion and Future Work}
+\label{sec:org16d4af3}
+\subsection{}
+\label{sec:org6f960bd}
+\subsubsection{Conclusion and Future Work}
+\label{sec:org00cd5da}
+\uline{Fast} DoE-based evaluation to obtain time-energy trade-offs
+\begin{itemize}
+\item Screening + FF; plus ANOVA, ME Plots and Pareto
+\end{itemize}
+
+\pause
+MiniFE: 9\% less energy; no time increase
+
+HPCCG: 21\% less energy; 2\% time increase
+
+Graph500: 6\% less time; no energy increase
+
+\begin{center}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/minifeopt-pareto-zoom-crop}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/hpccg-pareto-zoom-crop}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/graph500-pareto-zoom-crop}
+\end{center}
+
+\pause
+
+Pareto plots provide interesting insights
+\begin{center}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/bfs-pareto-zoom-crop}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/delaunay-pareto-zoom-crop}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/comd-pareto-zoom-crop}
+\includegraphics[width=.12\linewidth]{../europar2016/img/final/pathfinder-pareto-zoom-crop}
+\end{center}
+
+\pause
+
+\uline{Future work}
+\begin{itemize}
+\item FF for all available frequencies; screening selection
+\end{itemize}
+
+\subsubsection{Thank you + Propaganda}
+\label{sec:org8a60df2}
+
+Thank you for your attention.
+
+\bigskip
+
+Download \textbf{ReDFST} at \url{https://github.com/lfgmillani/redfst}
+\begin{itemize}
+\item Region-based Dynamic Frequency Scaling Toolset
+\item Includes a tutorial on how to instrument your application
+\end{itemize}
+
+\bigskip
+
+The analysis of this investigation is \textbf{reproducible}
+\begin{itemize}
+\item Ask us for our Lab Book (plus all the data, R scripts)
+\end{itemize}
+
+\subsubsection{References}
+\label{sec:org3032f25}
+
+\tiny
+\bibliographystyle{plain}
+\bibliography{europar2016}
+\end{document}

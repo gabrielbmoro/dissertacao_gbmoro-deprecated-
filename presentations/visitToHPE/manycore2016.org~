@@ -1,0 +1,656 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer
+#+STARTUP: overview
+#+STARTUP: indent
+#+TAGS: noexport(n)
+
+#+Title: Finding Time-Energy Trade-offs in HPC Applications using Design of Experiments
+#+Author: Luis Felipe Garlet Millani, \textbf{Lucas Mello Schnorr} @@latex:\\@@ {lfgmillani,schnorr}@inf.ufrgs.br
+#+Date: Campinas, March 2016 --- @@latex:$2^{nd}$@@ Manycore Workshop
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [12pt,xcolor=dvipsnames,presentation]
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+STARTUP: beamer overview indent
+#+LATEX_HEADER: \input{org-babel-style-preembule.tex}
+#+LATEX_HEADER: \institute[GPPD/INF/UFRGS, Porto Alegre, Brazil]{
+#+LATEX_HEADER:   GPPD/INF/UFRGS, Porto Alegre, Brazil\\
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/gppd.png}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/inf.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/cnpq.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.18\textwidth]{img/hpc4e.pdf}
+#+LATEX_HEADER: }
+#+LaTeX: \input{org-babel-document-preembule.tex}
+#+LaTeX: \newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+* Plan                                                             :noexport:
+- outline                 :: 0 or 1
+  - do we really need an outline?
+- motivation              :: 2
+  - energy blablabla
+  - energy, green500, top500
+  - software approach
+- proposal                :: 7
+  - energy
+    - what wastes it, what we focus on
+  - dvfs
+    - wtf is it
+    - slide to answer the race to finish question
+    - caveats
+  - too many combinations
+  - code regions
+- doe                     :: 8
+  - usual approach: ad-hoc
+    - why it sucks
+  - doe
+    - how is it better than ad-hoc
+    - wtf is it
+  - plackett-burman
+    - quadrado
+  - tools
+    - the tables don't have to be built by hand
+- results                 :: 7
+  - wtf are the benchmarks
+  - screening: minife
+  - screening: graph500
+  - full: minife
+  - full: graph500
+  - best
+- conclusion              :: 1
+- repository/marketing    :: 1
+* Context: Saving Energy in HPC Applications
+** 
+*** Context on HPC and energy
+Performance has historically overshadowed energy efficiency in
+HPC. \medskip
+
+#+LaTeX: \begin{overlayarea}{\linewidth}{5cm}
+
+This scenario has changed...
+- Green500 list: current leader offers 7.0GFLOPS/Watt
+- DARPA imposes a 20MW limit for _Exascale_: *50GFLOPS/Watt*
+
+#+LaTeX: \only<2>{\centering\vspace{-3.5cm}\includegraphics[width=\linewidth]{img/top500-green500.pdf}}
+#+LaTeX: \only<3>{\centering\vspace{-3.5cm}\includegraphics[width=\linewidth]{img/top500-green500-zoom.pdf}}
+
+#+LaTeX: \only<4->{
+#+LaTeX: \begin{center}\includegraphics[width=.25\linewidth]{img/top500-green500.pdf}\hspace{1cm}
+#+LaTeX: \includegraphics[width=.25\linewidth]{img/top500-green500-zoom.pdf}\end{center}
+
+Efforts are both in *hardware* and *software*.
+- We study _software_ strategies for energy savings
+  - with hardware support (DVFS)
+
+#+LaTeX: }\end{overlayarea}
+
+**** Generate figures for this slide                            :noexport:
+
+#+BEGIN_SRC R :exports none :output results :results output silent graphics :file img/top500-green500.pdf :width 6 :height 3
+library(ggplot2)
+green500 = data.frame(
+  date = c(
+    2007.9166, 2008.1666, 2008.5, 2008.9166,
+    2009.5,    2009.9166, 2010.5, 2010.9166,
+    2011.5,    2011.9166, 2012.5, 2012.9166,
+    2013.5,    2013.9166, 2014.5, 2014.9166,
+    2015.5,    2015.9166
+  ), mfw = c(
+     357.23,  357.23,  488.09,  536.24,
+     536.24,  722.98,  773.38, 1684.20,
+    2097.19, 2026.48, 2100.88, 2499.44,
+    3208.83, 4503.17, 4389.82, 5271.81,
+    7031.58, 7031.58
+  )
+)
+green500$exa=1e18/(green500$mfw*1e6)/1e9
+green500$name = 'Green500'
+top500 = data.frame(
+  date = c(
+    2007.9166, 2008.1666, 2008.5, 2008.9166,
+    2009.5,    2009.9166, 2010.5, 2010.9166,
+    2011.5,    2011.9166, 2012.5, 2012.9166,
+    2013.5,    2013.9166, 2014.5, 2014.9166,
+    2015.5,    2015.9166
+  ), mfw = c(
+    205.27, 205.27, 437.43, 444.94,
+    444.94, 253.07, 253.07, 635.15,
+    824.5643810817, 830.18, 2069.0432192649, 2142.77013,
+    1901.54425, 1901.54425, 1901.54, 1901.54,
+    1901.54, 1901.54
+  )
+)
+top500$exa=1e18/(top500$mfw*1e6)/1e9
+top500$name = 'Top500'
+
+all = green500;
+all = rbind(all, top500);
+
+
+p = ggplot(all, mapping=aes(x=date,y=exa,colour=name))
+p = p + scale_color_manual(values=c("#00ba38", "#f8766d", "#619cff"))
+p = p + geom_line()
+p = p + geom_point()
+p = p + theme_bw()
+p = p + theme(legend.position=c(0.8,0.7), legend.background = element_rect(fill="gray95", size=.5, linetype="dotted"))
+p = p + theme(text=element_text(size=14))
+#p = p + theme(legend.key=element_blank())
+p = p + labs(colour='Leader of')
+p = p + xlab('Date')
+p = p + ylab('Extrapolated Power (GWatts)')
+p = p + scale_x_continuous(breaks=as.integer(min(all$date)):as.integer(max(all$date+1)))
+p = p + ggtitle('Linear power extrapolation for 1 Exaflop')
+
+box = all[all$date > 2012.7,]
+deltay = min(box$exa)
+box = data.frame(x=c(
+                 min(box$date)-.2, max(box$date)+.2, max(box$date)+.2,
+                 min(box$date)-.2, min(box$date)-.2),
+                 y = c(
+                 0, 0, max(box$exa)+deltay,
+                 max(box$exa)+deltay, 0))
+p = p + geom_path(aes(x=x,y=y),box, inherit.aes=F)
+p
+#+END_SRC
+
+#+BEGIN_SRC R :exports none :output results :results output silent graphics :file img/top500-green500-zoom.pdf :width 6 :height 3
+library(ggplot2)
+green500 = data.frame(
+  date = c(
+    2007.9166, 2008.1666, 2008.5, 2008.9166,
+    2009.5,    2009.9166, 2010.5, 2010.9166,
+    2011.5,    2011.9166, 2012.5, 2012.9166,
+    2013.5,    2013.9166, 2014.5, 2014.9166,
+    2015.5,    2015.9166
+  ), mfw = c(
+     357.23,  357.23,  488.09,  536.24,
+     536.24,  722.98,  773.38, 1684.20,
+    2097.19, 2026.48, 2100.88, 2499.44,
+    3208.83, 4503.17, 4389.82, 5271.81,
+    7031.58, 7031.58
+  )
+)
+green500$exa=1e18/(green500$mfw*1e6)/1e9
+green500$name = 'Green500'
+top500 = data.frame(
+  date = c(
+    2007.9166, 2008.1666, 2008.5, 2008.9166,
+    2009.5,    2009.9166, 2010.5, 2010.9166,
+    2011.5,    2011.9166, 2012.5, 2012.9166,
+    2013.5,    2013.9166, 2014.5, 2014.9166,
+    2015.5,    2015.9166
+  ), mfw = c(
+    205.27, 205.27, 437.43, 444.94,
+    444.94, 253.07, 253.07, 635.15,
+    824.5643810817, 830.18, 2069.0432192649, 2142.77013,
+    1901.54425, 1901.54425, 1901.54, 1901.54,
+    1901.54, 1901.54
+  )
+)
+top500$exa=1e18/(top500$mfw*1e6)/1e9
+top500$name = 'Top500'
+
+all = top500;
+all = rbind(all, green500);
+all = all[all$date > 2012.7,];
+
+p = ggplot(all, mapping=aes(x=date,y=exa,colour=name))
+p = p + scale_color_manual(breaks=c('Top500','Green500'), values=c("#00ba38", "#f8766d", "#619cff"))
+p = p + geom_line()
+p = p + geom_point()
+p = p + geom_hline(yintercept=.02,colour="#619cff")
+p = p + geom_text(aes(2013,.02,label='20 MW',vjust=-1,colour='z'),show.legend=F)
+p = p + theme_bw()
+p = p + theme(legend.position=c(0.8,0.7), legend.background = element_rect(fill="gray95", size=.5, linetype="dotted"))
+p = p + theme(text=element_text(size=14))
+p = p + labs(colour='Leader of')
+p = p + xlab('Date')
+p = p + ylab('Extrapolated Power (GWatts)')
+p = p + scale_x_continuous(breaks=as.integer(min(all$date)):as.integer(max(all$date+1)),limits=c(min(all$date),as.integer(max(all$date+1))))
+p = p + scale_y_continuous(limits=c(0,NA))
+p = p + ggtitle('Linear power extrapolation for 1 Exaflop (zoom)')
+p = p + guides(col = guide_legend(reverse = TRUE))
+p
+#+END_SRC
+
+*** Software energy savings strategies
+
+*Common Strategy:* apply energy-saving techniques for code regions
+#+LaTeX: \begin{columns}\begin{column}{.5\linewidth}
+- blocking communication
+- memory intensive
+- load imbalance
+#+LaTeX: \end{column}\begin{column}{.5\linewidth}
+- wait states
+- communication phases
+- slack time (static / _dynamic_)
+#+LaTeX: \end{column}\end{columns}
+
+\bigskip
+
+#+LaTeX: \begin{overlayarea}{\linewidth}{5cm}
+#+LaTeX: \only<2->{
+Goal: energy savings with minimal (or no) performance losses
+- Find the _best processor frequency_ to execute each code region
+#+LaTeX: }
+
+\bigskip
+
+#+LaTeX: \only<3->{
+Straightforward technique
+- Run the code region with each frequency
+  - Measure execution time and energy
+- Repeat for all code regions in the program
+\hfill(and use replications to address variability)
+#+LaTeX: }
+#+LaTeX: \end{overlayarea}
+
+*** Close related work: a detailed overview
+
+*Freeh et al. (2005)* \cite{Freeh:2005:UME:1065944.1065967}: per-phase frequency scaling
+- Test all possible frequencies _one by one_ for each phase
+  - Sequentially and in order
+# - _One-factor at a time design_ (phase is a factor)
+# is it clear what a factor is, at this point?
+
+\pause
+\bigskip
+
+*Laurenzano et al. (2011, 2013)* \cite{Laurenzano2011}: loop-based strategy
+- Series of loops (with different CPU and memory behavior)
+
+\pause
+
+1. *System characterization*
+  - Each loop is executed with all available frequencies
+  - Defines which _frequency is the best for that loop configuration_
+    
+2. *Real application loops are profiled*
+  - Signature (cache hits, flops, memory accesses, etc)
+  - Search the closest point in system characterization data
+# - Also a _one-factor at a time design_ (loop is a factor)
+
+\pause
+
+*Koren et al. (2015)* \cite{xu2015ilp} (WA-DVFS): monitors ILP, periodic decision
+- Offline profiling classifies applic. behavior in 4 categories
+- At every time step, ILP level is classified as high or low
+  - Slack is updated, checks if okay for current parallelism
+    - Applies scaling to high or low depending on that
+
+*** Problem statement, motivation and objective
+Existing approaches test one code region at a time
+- Simpler goal: looks for the best solution (minimal perf. loss)
+- Ignore effect interaction between code regions
+# the goal is not clear for me. there is more than a single tradeoff:
+# one for each frequency combination
+HPC applications have many parallel regions.
+- Examples: the Graph500 benchmark has 17, MiniFE has 25
+Several processor frequencies in current architectures.
+
+\pause
+\bigskip
+
+_Hard to evaluate_ all time-energy trade-offs, considering
+- Many code regions with several processor frequencies
+- Replications to account for experimental variability
+\rightarrow This requires *large experimental time*, large designs
+
+\pause
+\bigskip
+
+**** \textbf{Objective}
+Propose a sound and _fast_ DoE-based methodology to discover *all the
+time-energy trade-offs* when adopting per-region proc. freq.  scaling
+
+* Background on Design of Experiments (DoE)
+** 
+*** Design of Experiments (DoE) basics
+_Factors_, _Levels_ and measured _Outcomes_ (Fishbone plot)
+#+LaTeX: \begin{overlayarea}{\linewidth}{8cm}
+
+#+BEGIN_LaTeX
+\only<1>{
+  \vspace{1cm}
+  Example with a Fishbone plot: \\\bigskip
+  \hfill\includegraphics<1>[width=.9\linewidth]{img/fishbone_example.pdf}
+  \vfill
+}
+#+END_LaTeX
+
+#+LaTeX: \only<2->{
+
+*Full Factorial (FF) Designs*
+  - Effect of each factor to be estimated independently
+  - _Exponential growth_ of experimental time
+    - General: n factors, L levels \rightarrow L^n experiments\\
+      FF Designs with L > 2 are rare in statistics
+    - With n factors with 2 levels \rightarrow 2^n experiments
+
+#+LaTeX: }\only<3->{
+
+*Fractional and Screening Designs*
+  - Sparsity of Effects Principle: lack of complex factors interaction
+  - Less experimental effort than FF: 2^{n-p} (p limits design size)
+    - Still give a good exploration of space configuration
+  - _Plackett-Burman (PB)_: only n experiments (plus replication)
+    - design size is multiple of four: 4, 8, 12, 16, 20, ..., 48
+      - works untils 100 except for 92 (see Wikipedia page)
+#+LaTeX: }
+#+LaTeX: \end{overlayarea}
+
+* DoE-based Methodology to Find Time-Energy Trade-offs
+** 
+*** Our Proposal: a DoE-based methodology
+Code regions identified by letters (A, B, ...) -- *Factors* \\
+Only two processor frequencies: =LOW= (-) and =HIGH= (+) -- *Levels*
+
+\medskip
+
+#+LaTeX: \hfill\includegraphics[width=.9\linewidth]{../europar2016/img/three_phases.pdf}
+
+\pause
+\medskip
+
+*Screening phase*: code region selection \\
+\rightarrow How much each factor (code region) affects time and energy?
+- ANOVA (Analysis of Variance) and Main Effects (ME) plots
+
+\pause
+
+*Full Factorial phase*: final results analysis \\
+\rightarrow Define all Time-Energy trade-offs, with variability
+- ANOVA, but mostly Pareto plots (Outcomes: *Time-Energy*)
+* Experimental Results with seven OpenMP Benchmarks
+** 
+*** Experiments: scenarios and platform configs.
+
+#+BEGIN_LaTeX
+\begin{tabular}{lllll}
+%               &                  &                  & \multicolumn{2}{c}{Frequency (GHz)} \\
+{\bf Benchmark}&{\bf Description} &{\bf Regions}&{\bf Low}&{\bf High}\\
+BFS \cite{Shun:2012:BAP:2312005.2312018}
+               & breadth-first search               &           7   &    1.5 & 2.3 \\
+
+Delaunay \cite{Shun:2012:BAP:2312005.2312018}
+               & triang. mesh gener.         &         16     &   1.5 & 2.3 \\
+
+Graph500 \cite{murphy2010introducing}
+               & data-intensive load                &         17   &     1.8 & 2.3 \\
+
+MiniFE \cite{heroux2009improving}
+         &  unstruct. finite elem.    &         25   &     1.5 & 2.3 \\
+
+HPCCG \cite{heroux2009improving}
+          &  synthetic linear system                &          7   &     1.5 & 2.3 \\
+
+CoMD \cite{heroux2009improving}
+           & molecular dynamics                     &         14   &     1.5 & 2.3 \\
+
+Pathfinder \cite{heroux2009improving}
+     &   signature search                           &          7   &     1.2 & 2.3 \\
+
+\end{tabular}
+#+END_LaTeX
+
+\bigskip
+
+All OpenMP benchmarks were manually instrumented
+- *ReDFST*: https://github.com/lfgmillani/redfst
+
+\pause
+\bigskip
+
+_Platform:_ =orion= (GPPD of INF/UFRGS)
+- two Intel Xeon E5-2630 Sandy Bridge procs. (12 physical cores)
+- 32GB of memory; twelve clock frequencies, from 1.2 to 2.3 GHz
+- GCC 5.1.1, with the -O3 optimization flag
+- Energy measurements through Intel's RAPL counters \cite{intel2013}.
+*** Graph500: Screening for _Energy_ (ANOVA, ME)
+
+#+LaTeX: \begin{overlayarea}{\linewidth}{9cm}
+#+LaTeX: \prettysmall{10}
+#+BEGIN_EXAMPLE
+     Sum Sq Mean Sq F value   Pr(>F)    
+A      115     115   0.008   0.9280    
+B     5617    5617   0.401   0.5283    
+C    16437   16437   1.174   0.2818    
+D     2247    2247   0.160   0.6898    
+E   237947  237947  16.991 8.94e-05 ***
+F    19742   19742   1.410   0.2385    
+G     7083    7083   0.506   0.4790    
+H     7466    7466   0.533   0.4674    
+I    76297   76297   5.448   0.0220 *  
+J  1464976 1464976 104.608 2.65e-16 ***
+K     2759    2759   0.197   0.6583    
+L   605970  605970  43.270 4.17e-09 ***
+M    33466   33466   2.390   0.1260    
+N    47191   47191   3.370   0.0700 .  
+O    10017   10017   0.715   0.4002    
+P    21971   21971   1.569   0.2139    
+Q    62503   62503   4.463   0.0377 *  
+#+END_EXAMPLE
+
+#+LaTeX: \only<2->{
+#+LaTeX: \vspace{-5cm}
+#+LaTeX: \colorbox{white}{\includegraphics<2->[width=\linewidth]{../europar2016/img/final/graph500_me_energy-crop.pdf}}
+#+LaTeX: }
+#+LaTeX: \end{overlayarea}
+
+#+LaTeX: \vspace{-2.5cm}
+- ANOVA: E, I, J, L and Q
+\pause
+- Main Effect Plot: J, L and E
+  - Remaining regions \rightarrow kept in the highest proc. freq.
+# you could choose J, L and E by looking at the F value of the anova table as well. no need to put that on the slide though
+
+*** Graph500: Screening for _Time_ (ANOVA, ME)
+
+#+LaTeX: \begin{overlayarea}{\linewidth}{9cm}
+#+LaTeX: \prettysmall{10}
+#+BEGIN_EXAMPLE
+     Sum Sq Mean Sq F value   Pr(>F)    
+A     1.23    1.23   0.622   0.4326    
+B     2.15    2.15   1.087   0.3003    
+C     4.14    4.14   2.088   0.1523    
+D     0.26    0.26   0.129   0.7199    
+E    44.21   44.21  22.304 9.49e-06 ***
+F     1.49    1.49   0.750   0.3891    
+G     1.87    1.87   0.944   0.3340    
+H     0.58    0.58   0.292   0.5902    
+I   274.03  274.03 138.262  < 2e-16 ***
+J   109.77  109.77  55.383 8.80e-11 ***
+K     0.65    0.65   0.329   0.5681    
+L     5.70    5.70   2.876   0.0937 .  
+M     3.19    3.19   1.609   0.2082    
+N     1.01    1.01   0.507   0.4783    
+O     2.69    2.69   1.359   0.2471    
+P     2.05    2.05   1.037   0.3116    
+Q    10.68   10.68   5.388   0.0228 *  
+#+END_EXAMPLE
+
+#+LaTeX: \only<2->{
+#+LaTeX: \vspace{-5cm}
+#+LaTeX: \colorbox{white}{\includegraphics<2->[width=\linewidth]{../europar2016/img/final/graph500_me_time-crop.pdf}}
+#+LaTeX: }
+#+LaTeX: \end{overlayarea}
+
+#+LaTeX: \vspace{-2.7cm}
+#+LaTeX: \begin{columns}\begin{column}{.5\linewidth}
+- ANOVA: E, I, J and Q\pause
+- Main Effect Plot: I, J and E
+  - Promising code region: I\pause 
+# Why is I promising? it seems to have a big effect on time but small
+# on energy. Ideally, a promising region would have no effect on time
+# but huge effect on energy.
+#+LaTeX: \end{column}\begin{column}{.5\linewidth}
+- _Final selection_:
+  - E, I, J, L, and Q
+#+LaTeX: \end{column}\end{columns}
+
+*** Graph500: Full Factorial Results (Pareto)
+
+#+LaTeX: \begin{columns}\begin{column}{.28\linewidth}
+
+Ellipses indicate 95% C. Region; =HIGH= and =LOW= points; Pareto points
+are labelled with =+= and =-= for the E, I, J, L and Q code regions.
+
+\bigskip
+
+Observations:
+- Pareto: 7 pts.
+- =-+--+= @@latex:\\@@ \rightarrow I,Q to high
+#+LaTeX: \end{column}\begin{column}{.68\linewidth}
+
+#+LaTeX: \begin{overlayarea}{\linewidth}{9cm}
+#+LaTeX: \centering
+#+LaTeX: \includegraphics<1>[width=\linewidth]{../europar2016/img/final/graph500-pareto-crop} 
+#+LaTeX: \includegraphics<2>[width=\linewidth]{../europar2016/img/final/graph500-pareto-zoom-crop}
+#+LaTeX: \end{overlayarea}
+
+#+LaTeX: \end{column}\end{columns}
+
+*** Time-Energy Trade-offs for BFS and Delaunay
+
+#+LaTeX: \begin{columns}\begin{column}{.5\linewidth}
+BFS: 3 out of 7
+\smallskip
+
+#+LaTeX: \includegraphics[width=\linewidth]{../europar2016/img/final/bfs-pareto-zoom-crop}
+\smallskip
+
+No different trade-offs than those obtained by =HIGH= and =LOW=.
+#+LaTeX: \end{column}\begin{column}{.5\linewidth}
+\pause Delaunay: 2 out of 16
+\smallskip
+
+#+LaTeX: \includegraphics[width=\linewidth]{../europar2016/img/final/delaunay-pareto-zoom-crop}
+\smallskip
+
+=-+= vs =HIGH=: no significant difference in Time (variability).
+#+LaTeX: \end{column}\end{columns}
+
+*** Time-Energy Trade-offs for MiniFE and HPCCG
+
+#+LaTeX: \begin{columns}\begin{column}{.48\linewidth}
+MiniFE: 5 out of 25
+\smallskip
+
+#+LaTeX: \includegraphics[width=\linewidth]{../europar2016/img/final/minifeopt-pareto-zoom-crop}
+\smallskip
+
+Trade-off: 9.27% less energy; minor time increase (agst. =HIGH=)
+#+LaTeX: \end{column}\begin{column}{.48\linewidth}
+\pause HPCCG: 2 out of 7
+\smallskip
+
+#+LaTeX: \includegraphics[width=\linewidth]{../europar2016/img/final/hpccg-pareto-zoom-crop}
+\smallskip
+
+=-+= consumes 21.35% less energy; only 2.04% time penalty
+#+LaTeX: \end{column}\end{columns}
+
+*** Time-Energy Trade-offs for CoMD and Pathfinder
+
+#+LaTeX: \begin{columns}\begin{column}{.48\linewidth}
+CoMD: 2 out of 14
+
+\smallskip
+#+LaTeX: \includegraphics[width=\linewidth]{../europar2016/img/final/comd-pareto-zoom-crop}
+\smallskip
+
+Unsuited to energy gains with minor performance losses
+
+#+LaTeX: \end{column}\begin{column}{.48\linewidth}
+\pause Pathfinder: 1 out of 7
+
+\smallskip
+#+LaTeX: \includegraphics[width=\linewidth]{../europar2016/img/final/pathfinder-pareto-zoom-crop}
+\smallskip
+
+Pareto has one point: =HIGH=. Less energy and time than =LOW=.
+#+LaTeX: \end{column}\end{columns}
+
+* Conclusion and Future Work
+** 
+*** Conclusion and Future Work
+_Fast_ DoE-based evaluation to obtain time-energy trade-offs
+- Screening + FF; plus ANOVA, ME Plots and Pareto
+
+\pause
+MiniFE: 9% less energy; no time increase
+
+HPCCG: 21% less energy; 2% time increase
+
+Graph500: 6% less time; no energy increase
+
+#+BEGIN_CENTER
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/minifeopt-pareto-zoom-crop}
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/hpccg-pareto-zoom-crop}
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/graph500-pareto-zoom-crop}
+#+END_CENTER
+
+\pause
+
+Pareto plots provide interesting insights
+#+BEGIN_CENTER
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/bfs-pareto-zoom-crop}
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/delaunay-pareto-zoom-crop}
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/comd-pareto-zoom-crop}
+#+LaTeX: \includegraphics[width=.12\linewidth]{../europar2016/img/final/pathfinder-pareto-zoom-crop}
+#+END_CENTER
+
+\pause
+
+_Future work_
+- FF for all available frequencies; screening selection
+
+*** Thank you + Propaganda
+
+Thank you for your attention.
+
+\bigskip
+
+Download *ReDFST* at https://github.com/lfgmillani/redfst
+- Region-based Dynamic Frequency Scaling Toolset
+- Includes a tutorial on how to instrument your application
+
+\bigskip
+
+The analysis of this investigation is *reproducible*
+- Ask us for our Lab Book (plus all the data, R scripts)
+
+*** References
+
+#+LATEX: \tiny
+#+LATEX: \bibliographystyle{plain}
+#+LATEX: \bibliography{europar2016}
+* 2016-03-15 Comments and questions after the presentation         :noexport:
+
+Some ideas from *Lucas Francisco Wanner* (UNICAMP Professor, PhD from UCLA)
+
+1. Measure temperature during the experiment (see if it is stable)
+2. Re-run all the experiments considering high temperature
+   - Create a micro-benchmark to heat the processor (until it stabilizes)
+   - Run this benchmark immediately before each (randomized) experiment
+   - Compare all Pareto plots with our previous Europar2016 data
+
+Ideas from *Israel Koren* (UMASS Professor)
+
+1. Repeat the Freeh approach, show it in the Pareto plots
+   - That would be ideal to a follow-up, really easy to do
+   - See slides above where we explain the "Straightforward technique"
+
+General comments from the audience: 
+- Some people congratulated for making your work reproducible (UNESP Professor)
+- Also congratulate for doing this in a "master" level graduate course
+
+My comments:
+- I was surprised nobody questioned LOW and HIGH (the famous plot your diss)
+- We should be more precise and explain our definitions for LOW and HIGH
+- More information about the platform (i.e. OS configuration)

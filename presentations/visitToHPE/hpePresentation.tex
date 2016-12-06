@@ -1,0 +1,137 @@
+% Created 2016-12-06 ter 02:35
+% Intended LaTeX compiler: pdflatex
+\documentclass[12pt,xcolor=dvipsnames,presentation]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{perpage}
+\usetikzlibrary{arrows,shapes}
+\input{org-babel-style-preembule.tex}
+\institute[]{
+\includegraphics[width=.16\textwidth]{img/gppd.png}
+\hfill
+\includegraphics[width=.16\textwidth]{img/inf.pdf}
+\hfill
+\includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+\hfill
+\includegraphics[width=.26\textwidth]{img/hpe.jpg}
+}
+\usetheme{default}
+\author{Gabriel B. Moro \\ gabriel.bmoro@inf.ufrgs.br}
+\date{Porto Alegre, December 2016}
+\title{Retrospective: September to December}
+\hypersetup{
+ pdfauthor={Gabriel B. Moro \\ gabriel.bmoro@inf.ufrgs.br},
+ pdftitle={Retrospective: September to December},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 24.5.1 (Org mode 9.0)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\input{org-babel-document-preembule.tex}
+\newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+\tikzstyle{format} = [draw, thin, fill=blue!20]
+\tikzstyle{medium} = [ellipse, draw, thin, fill=green!20, minimum height=2.5em]
+
+
+\section{Methodology}
+\label{sec:orgc6d22b7}
+\subsection{}
+\label{sec:orgc6e988b}
+\begin{frame}[label={sec:orgc179854}]{Methodology}
+\begin{tikzpicture}
+
+\node at (0,17) [draw,rectangle,rectangle left angle=70,rectangle right angle=-70,minimum height=1cm, fill=orange!20] (App) {App};
+\node at (2.4,18) [draw,rectangle split, rectangle split horizontal,rectangle split parts=3,minimum height=1cm,fill=gray!10] (Lik) {\nodepart{two}\shortstack{Likwid\\}};
+\node at (2.4,16) [draw,rectangle split, rectangle split horizontal,rectangle split parts=3,minimum height=1cm,fill=gray!10] (Sc) {\nodepart{two}\shortstack{Score-p\\}};
+\node at (5.4,18) [draw,trapezium,trapezium left angle=70,trapezium right angle=-70,minimum height=1cm] (T1) {Trace};
+\node at (5.4,16) [draw,trapezium,trapezium left angle=70,trapezium right angle=-70,minimum height=1cm] (T2) {Trace};
+\node at (9.4,17) [draw,rectangle,rectangle left angle=70,rectangle right angle=-70,minimum height=1cm,rounded corners,fill=green!20] (Det){\shortstack{Detect Memory-Bound\\ Regions}};
+
+\draw[->] (App.east) + (-1,1.1) coordinate (a1) ++ (0.02,0.12) -- (Lik.west |- a1);
+\draw[->] (App.east) + (-1,-0.9) coordinate (a1) ++ (0.02,0.12) -- (Sc.west |- a1);
+\draw[->] (Lik.west) + (2.35,0.02) coordinate (a1) -- (T1.west |- a1);
+\draw[->] (Sc.west) + (2.52,0.02) coordinate (a1) -- (T2.west |- a1);
+\draw[->] (T1.east) + (-1,-0.3) coordinate (a1) ++ (0.02,0.12) -- (Det.west |- a1);
+\draw[->] (T2.east) + (-1,0.4) coordinate (a1) ++ (0.02,0.12) -- (Det.west |- a1);
+
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}[fragile,label={sec:org3d3b3e2}]{Use of the Likwid}
+ \begin{columns}\begin{column}{.45\linewidth}
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth]{../../producao/2016_wsppd/img/ft_L2_L3_100ms.pdf}
+\caption{Sampling interval - 100 milliseconds$^{[1]}$.}
+\label{figFT}
+\end{figure}
+
+\end{column}
+\begin{column}{.35\linewidth}
+{\small
+\texttt{Beagle1:}
+\begin{itemize}
+\item 2 x Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz
+\begin{itemize}
+\item 8 physical cores
+\item Hyper-Threading tecnology
+\end{itemize}
+\end{itemize}
+}
+\end{column}
+\end{columns}
+
+\vspace{2cm}
+\hline
+\vspace{0.2cm}
+\tiny \(^{[1]}\) \alert{Moro, Gabriel and Schnorr, Lucas}. \emph{Measuring Hardware Counters for
+HPC Application Phase Detection}. XIV Workshop de Processamento
+Paralelo e Distribuído. Porto Alegre, 2016.
+\end{frame}
+
+\begin{frame}[fragile,label={sec:orgd1f265d}]{Use of the Likwid}
+ \begin{columns}\begin{column}{.45\linewidth}
+\begin{figure}[!htb]
+\includegraphics[width=\linewidth]{../../producao/2016_wsppd/img/lu_L2_L3_100ms.pdf}
+\caption{Sampling interval - 100 milliseconds$^{[1]}$.}
+\label{figFT}
+\end{figure}
+
+\end{column}
+\begin{column}{.35\linewidth}
+{\small
+\texttt{Beagle1:}
+\begin{itemize}
+\item 2 x Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz
+\begin{itemize}
+\item 8 physical cores
+\item Hyper-Threading tecnology
+\end{itemize}
+\end{itemize}
+}
+\end{column}
+\end{columns}
+
+\vspace{2cm}
+\hline
+\vspace{0.2cm}
+\tiny \(^{[1]}\) \alert{Moro, Gabriel and Schnorr, Lucas}. \emph{Measuring Hardware Counters for
+HPC Application Phase Detection}. XIV Workshop de Processamento
+Paralelo e Distribuído. Porto Alegre, 2016.
+\end{frame}
+\end{document}

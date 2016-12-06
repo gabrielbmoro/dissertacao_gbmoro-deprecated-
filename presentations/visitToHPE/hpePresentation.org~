@@ -1,0 +1,255 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer
+#+STARTUP: overview
+#+STARTUP: indent
+#+TAGS: noexport(n)
+
+# Impact on Intranode and Internode Communication
+#+Title: The Impact of Intra-node Latency versus Inter-node Latency
+#+Author: Gabriel B. Moro and Matheus S. Serpa @@latex:\\@@ {gabriel.bmoro,msserpa}@inf.ufrgs.br
+#+Date: Porto Alegre, July 2016
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [12pt,xcolor=dvipsnames,presentation]
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+STARTUP: beamer overview indent
+#+LATEX_HEADER: \input{org-babel-style-preembule.tex}
+#+LATEX_HEADER: \institute[]{
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/gppd.png}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/inf.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.16\textwidth]{img/ufrgs.pdf}
+#+LATEX_HEADER:   \hfill
+#+LATEX_HEADER:   \includegraphics[width=.26\textwidth]{img/hpe.jpg}
+#+LATEX_HEADER: }
+#+LaTeX: \input{org-babel-document-preembule.tex}
+#+LaTeX: \newcommand{\prettysmall}[1]{\fontsize{#1}{#1}\selectfont}
+
+* Problem
+** 
+*** Problem
+
+#+LaTeX: \begin{columns}\begin{column}{.29\linewidth}
+#+LaTeX: {\centering\includegraphics[scale=.45]{img/comm.png}}
+#+LaTeX: \end{column}
+#+LaTeX: \begin{column}{.45\linewidth}
+# *Supercomputers*
+# - Set of nodes with multiple processors;
+# - Nodes conected via the interconnection network;
+# - Processors conected via bus.
+
+#+LaTeX: {\small
+*Typical HPC system architecture*
+- Multiple compute nodes
+- Connected together via the cluster interconnect
+#+LaTeX:}
+
+#+LaTeX: \end{column}
+#+LaTeX: \end{columns}
+
+*** Problem
+
+#+LaTeX: \begin{columns}\begin{column}{.29\linewidth}
+#+LaTeX: {\centering\includegraphics[scale=.45]{img/comm.png}}
+#+LaTeX: \end{column}
+#+LaTeX: \begin{column}{.45\linewidth}
+#+LaTeX: {\small
+*Intra-node Latency*
+- PCI-Express (PCIe)
+- CPU cores and memory within a NUMA node or between NUMA nodes
+#+LaTeX:}
+#+LaTeX: \end{column}
+#+LaTeX: \end{columns}
+
+*** Problem
+
+#+LaTeX: \begin{columns}\begin{column}{.29\linewidth}
+#+LaTeX: {\centering\includegraphics[scale=.45]{img/comm.png}}
+#+LaTeX: \end{column}
+#+LaTeX: \begin{column}{.45\linewidth}
+# *Intra-node Latency*
+# - Processors;
+# - Memory;
+# - NUMA (Non-Uniform Memory Access)
+
+# *Inter-node Latency*
+# - Processors;
+# - Memory;
+# - NUMA (Non-Uniform Memory Access)
+
+#+LaTeX: {\small
+*Intra-node Latency*
+- PCI-Express (PCIe)
+- CPU cores and memory within a NUMA node or between NUMA nodes
+
+*Inter-node Latency*
+- Across different compute nodes over a network
+#+LaTeX:}
+#+LaTeX: \end{column}
+#+LaTeX: \end{columns}
+
+*** Problem
+
+#+LaTeX: \begin{columns}\begin{column}{.29\linewidth}
+#+LaTeX: {\centering\includegraphics[scale=.45]{img/comm.png}}
+#+LaTeX: \end{column}
+#+LaTeX: \begin{column}{.45\linewidth}
+#+LaTeX: {\small
+*Hipothesis*
+- Latency_{inter} >> Latency_{intra}
+- $N \times \frac{Size}{N}$ > $1 \times Size$
+#+LaTeX:}
+#+LaTeX: \end{column}
+#+LaTeX: \end{columns}
+
+* Experimental Methodology
+** 
+*** Experimental Methodology
+# - Understanding the problem;
+# - Develop MPI program (use of *MPI_Send* and *MPI_Recv*);
+# - Do experiment inter and intra node (*bali1* with *bali2*);
+# - Collect and Analyse the results.
+
+- Evaluate intra and inter-node communication behavior
+- MPI program to measure communication time on *bali1* and *bali2*
+- 2 pairs of ranks:
+  - 1 pair within *bali1;*
+  - 1 pair within *bali1* and *bali2.*
+- Different sizes and number of repetitions
+
+*** Experimental Methodology
+# - Understanding the problem;
+# - Develop MPI program (use of *MPI_Send* and *MPI_Recv*);
+# - Do experiment inter and intra node (*bali1* with *bali2*);
+# - Collect and Analyse the results.
+
+- Evaluate intra and inter-node communication behavior
+- MPI program to measure communication time on *bali1* and *bali2*
+- 2 pairs of ranks:
+  - 1 pair within *bali1;*
+  - 1 pair within *bali1* and *bali2.*
+- Different sizes and number of repetitions
+
+- bali1 and bali2:
+  - 2 x Intel Xeon CPU E5-2650;
+  - 8 GT/s QPI;
+  - Gigabit Ethernet.
+
+*** Experimental Methodology                                     :noexport:
+
+#+begin_src R :noexport none :output results :results output silent graphics :file img/DoE.pdf :width 6 :height 7
+library(SixSigma)
+library(grid)
+
+effect<-"Latency "
+causes.gr<-c("Messages", "Total size (MB)", "Communication")
+causes<-vector(mode="list", length=length(causes.gr))
+
+causes[1]<-list(c(1, 1024))
+causes[2]<-list(c(2 ^ (0 : 10)))
+causes[3]<-list(c("Intra-node", "Inter-node"))
+
+ss.ceDiag(effect, causes.gr, causes, sub="Measuring communication time with MPI")
+#+end_src
+
+*** Experimental Methodology
+
+#+LaTeX: \begin{center}\includegraphics[width=7cm, height=8cm]{img/DoE.pdf}\end{center}
+
+* Results
+** 
+*** Results                                                      :noexport:
+
+#+begin_src R :exports none :output results :results output silent :session *R*
+library(dplyr);
+df <- read.csv("csv/bali1.csv");
+
+k <- df %>% select(Messages, Size, Comm, Latency) %>%
+    group_by(Messages, Size, Comm) %>%
+    summarize(N=n(), mean=mean(Latency), se=3*sd(Latency)/sqrt(n())) %>%
+    as.data.frame();
+k
+
+dg <- df[grep("inter", df$Comm, ignore.case=T),];
+g <- dg %>% select(Messages, Size,  Latency) %>%
+    group_by(Messages, Size) %>%
+    summarize(N=n(), mean=mean(Latency), se=3*sd(Latency)/sqrt(n())) %>%
+    as.data.frame();
+
+g
+
+
+#+end_src
+
+#+begin_src R :session *R* :exports none :output results :results output silent graphics :file img/Latency.pdf :height 4
+library(ggplot2);
+
+ggplot(k, aes(x=as.factor(Size), y=mean, color=Comm)) +
+    geom_point(position="dodge") +
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se, group=Size), width=.3, position="dodge") +
+    geom_line(aes(group=Comm)) +
+    theme_bw() +
+    facet_wrap(~Messages, labeller = label_both, ncol=1) +
+    labs(x = "Data transfer (Megabytes)", y = "Execution time (seconds)", colour = "Communication") +
+    coord_cartesian(ylim = c(0, 10));
+#+end_src
+
+*** Results
+
+#+LaTeX: \begin{center}\includegraphics[scale=0.7]{img/Latency.pdf}\end{center}
+
+*** Results                                                      :noexport:
+#+begin_src R :session *R* :exports none :output results :results output silent graphics :file img/Latency2.pdf :height 4
+library(ggplot2);
+
+ggplot(g, aes(x=as.factor(Size), y=mean, color=as.factor(Messages))) +
+    geom_point(position="dodge") +
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se, group=Size), width=.3, position="dodge") +
+    geom_line(aes(group=Messages)) +
+    theme_bw() +
+    facet_wrap(~"Inter-node Latency") +
+    labs(x = "Data transfer (Megabytes)", y = "Execution time (seconds)", colour = "Messages") +
+    coord_cartesian(ylim = c(0, 10));
+#+end_src
+
+*** Results
+#+LaTeX: \begin{center}\includegraphics[scale=0.7]{img/Latency2.pdf}\end{center}
+
+* Conclusion and Future Work
+** 
+*** Conclusion and Future Work
+
+_Conclusion:_
+
+- Use intra-node to low-latency penalty
+- Data larger than 32 MB should be sent in one message
+ 
+# - When possible to use *intranode communication*
+# - Size of message
+#  - Decrease sends 
+
+
+*** Conclusion and Future Work
+
+_Conclusion:_
+
+- Use intra-node to low-latency penalty
+- Data larger than 32 MB should be sent in one message
+ 
+# - When possible to use *intranode communication*
+# - Size of message
+#  - Decrease sends =internode=
+
+_Future work:_
+
+  - Different platform
+  - Asynchronous operations
+
+# * Questions
+# ** 
+# *** Questions
+
+# *Gabriel Bronzatti Moro, Matheus da Silva Serpa*
+# #+LaTeX: \textit{\{gabriel.bmoro,msserpa\}@inf.ufrgs.br}
