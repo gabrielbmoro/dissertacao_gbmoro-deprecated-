@@ -110,3 +110,18 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 \tiny $^{[1]}$ *Moro, Gabriel and Schnorr, Lucas*. /Measuring Hardware Counters for
 HPC Application Phase Detection/. XIV Workshop de Processamento
 Paralelo e Distribuído. Porto Alegre, 2016.
+
+*** Use of the Score-p
+
+#+LaTeX: \begin{columns}\begin{column}{.45\linewidth}
+
+#+LaTeX: \end{column}
+#+LaTeX: \begin{column}{.35\linewidth}
+#+LaTeX: {\small
+	=Hype2:=
+		- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.30 GHz
+		  - 20 physical cores
+		  - Hyper-Threading tecnology
+#+LaTeX:}
+#+LaTeX: \end{column}
+#+LaTeX: \end{columns}
