@@ -34,6 +34,27 @@
 #+LaTeX: \tikzstyle{medium} = [ellipse, draw, thin, fill=green!20, minimum height=2.5em]
 
 
+* Introduction
+
+** 
+*** Introduction
+
+*Motivation*
+
+- Memory-bound: programs with misses cache rate considerable
+  (e.g. Breadth-First Search) 
+
+- CPU-bound: programs limited by processing (e.g. Matrices
+  Multiplication) 
+
+- Programs can have fragments more Memory-bound than others more
+  CPU-bound (e.g. Fourier Transform) 
+
+*Objective*
+
+- Measure hardware counters at every given time interval to
+discover memory-bound regions
+
 * Methodology
 ** 
 *** Methodology
@@ -61,36 +82,13 @@
 
 #+LaTeX: \begin{columns}\begin{column}{.45\linewidth}
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth]{../../producao/2016_wsppd/img/ft_L2_L3_100ms.pdf}
-\caption{Sampling interval - 100 milliseconds$^{[1]}$.}
+\includegraphics[width=\linewidth,height=2.8cm]{../../producao/2016_wsppd/img/ft_L2_L3_100ms.pdf}
 \label{figFT}
 \end{figure}
-
-#+LaTeX: \end{column}
-#+LaTeX: \begin{column}{.35\linewidth}
-#+LaTeX: {\small
-	=Beagle1:=
-		- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz
-		  - 8 physical cores
-		  - Hyper-Threading tecnology
-#+LaTeX:}
-#+LaTeX: \end{column}
-#+LaTeX: \end{columns}
-
-\vspace{2cm}
-\hline
-\vspace{0.2cm}
-\tiny $^{[1]}$ *Moro, Gabriel and Schnorr, Lucas*. /Measuring Hardware Counters for
-HPC Application Phase Detection/. XIV Workshop de Processamento
-Paralelo e Distribuído. Porto Alegre, 2016.
-
-*** Use of the Likwid
-
-#+LaTeX: \begin{columns}\begin{column}{.45\linewidth}
+\vspace{-1.2cm}
 \begin{figure}[!htb]
-\includegraphics[width=\linewidth]{../../producao/2016_wsppd/img/lu_L2_L3_100ms.pdf}
-\caption{Sampling interval - 100 milliseconds$^{[1]}$.}
-\label{figFT}
+\includegraphics[width=\linewidth,height=2.8cm]{../../producao/2016_wsppd/img/lu_L2_L3_100ms.pdf}
+\label{figLu}
 \end{figure}
 
 #+LaTeX: \end{column}
@@ -100,13 +98,15 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 		- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.00 GHz
 		  - 8 physical cores
 		  - Hyper-Threading tecnology
+
+  =Experiment=:
+  	- Sampling interval - 100 milliseconds.
 #+LaTeX:}
 #+LaTeX: \end{column}
 #+LaTeX: \end{columns}
 
-\vspace{2cm}
+\vspace{0.5cm}
 \hline
-\vspace{0.2cm}
 \tiny $^{[1]}$ *Moro, Gabriel and Schnorr, Lucas*. /Measuring Hardware Counters for
 HPC Application Phase Detection/. XIV Workshop de Processamento
 Paralelo e Distribuído. Porto Alegre, 2016.
@@ -120,6 +120,19 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 - Acesses to Cache L2
 - Amount of Misses in Cache L2
 
+
+*Filter Script*
+
+- Use of the Score-p filter, selecting only OpenMP regions
+
+- Auxiliary script to remove the excess, selecting only hardware
+  counters of the parallel regions 
+
+#+LaTeX: \end{column}
+#+LaTeX: \begin{column}{.50\linewidth}
+#+LaTeX: {\small
+
+
 *Trace Generated*
 
 |-----+------------------+---------------|
@@ -131,13 +144,9 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 | LU  | 20G              | 6.5G          |
 |-----+------------------+---------------|
 
-#+LaTeX: \end{column}
-#+LaTeX: \begin{column}{.35\linewidth}
-#+LaTeX: {\small
 	=Hype2:=
 		- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.30 GHz
-		  - 20 physical cores
-		  - Hyper-Threading tecnology
+		  - 20 physical cores and Hyper-Threading tecnology
 #+LaTeX:}
 #+LaTeX: \end{column}
 #+LaTeX: \end{columns}
@@ -146,34 +155,56 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 ** 
 *** Trace's Format
 
-|---------------------+-------+-----------+-----------+-------|
-| =Region=              | =File=  | =Code Line= | =Metric=    | =Value= |
-|---------------------+-------+-----------+-----------+-------|
-| omp-parallel        | cg.f  |       736 | PAPIL2TCA | 48282 |
-| omp-parallel        | ,cg.f |       736 | PAPIL2DCM |  5288 |
-| omp-parallel        | cg.f  |       736 | PAPIL2ICM |  8933 |
-| omp-do              | cg.f  |       736 | PAPIL2TCA | 48841 |
-| omp-do              | cg.f  |       736 | PAPIL2DCM |  5393 |
-| omp-do              | cg.f  |       736 | PAPIL2ICM |  9092 |
-| omp-implicitbarrier | cg.f  |       739 | PAPIL2TCA |  1321 |
-| omp-implicitbarrier | cg.f  |       739 | PAPIL2DCM |   156 |
-| omp-implicitbarrier | cg.f  |       739 | PAPIL2ICM |   523 |
-| omp-parallel        | cg.f  |       736 | PAPIL2TCA |  2048 |
-| omp-parallel        | cg.f  |       736 | PAPIL2DCM |   196 |
-| omp-do              | cg.f  |       736 | PAPIL2TCA |  2280 |
-| ...                 |       |           |           |       |
+- *CG* (example)
+
+|---------------------+-----------+-----------+-------|
+| =Type of Region=      | =Code Line= | =Metric=    | =Value= |
+|---------------------+-----------+-----------+-------|
+| omp-parallel        |       736 | PAPIL2TCA | 48282 |
+| omp-parallel        |       736 | PAPIL2DCM |  5288 |
+| omp-parallel        |       736 | PAPIL2ICM |  8933 |
+| omp-do              |       736 | PAPIL2TCA | 48841 |
+| omp-do              |       736 | PAPIL2DCM |  5393 |
+| omp-do              |       736 | PAPIL2ICM |  9092 |
+| omp-implicitbarrier |       739 | PAPIL2TCA |  1321 |
+| omp-implicitbarrier |       739 | PAPIL2DCM |   156 |
+| omp-implicitbarrier |       739 | PAPIL2ICM |   523 |
+| omp-parallel        |       736 | PAPIL2TCA |  2048 |
+| omp-parallel        |       736 | PAPIL2DCM |   196 |
+| omp-do              |       736 | PAPIL2TCA |  2280 |
+| ...                 |           |           |       |
 
 ** 
 *** Preliminary Results
 
 
 #+LaTeX: \begin{columns}\begin{column}{.50\linewidth}
+- *FT*
 #+LaTeX: {\centering\includegraphics[scale=.25]{img/ftGraph.png}}
 #+LaTeX: \end{column}
 #+LaTeX: \begin{column}{.45\linewidth}
+- *CG*
 #+LaTeX: {\centering\includegraphics[scale=.25]{img/cgGraph.png}}
 #+LaTeX: \end{column}
 #+LaTeX: \end{columns}
+
+* Conclusion
+** 
+*** Conclusion
+
+*Contribution*
+
+- Automatically identify the memory-bound regions based on the
+hardware counters
+
+
+
+*Future Work*
+
+- Reducing the power consumption of parallel applications with DVFS
+  approach
+  
+  	-> Automatic instrumentation of memory-bound regions
 
 
 * Graphs                                                           :noexport:
