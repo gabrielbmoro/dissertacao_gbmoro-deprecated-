@@ -155,7 +155,7 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 ** 
 *** Trace's Format
 
-- *CG* (example)
+- *FT* (example)
 
 |---------------------+-----------+-----------+-------|
 | =Type of Region=      | =Code Line= | =Metric=    | =Value= |
@@ -177,16 +177,8 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 ** 
 *** Preliminary Results
 
-
-#+LaTeX: \begin{columns}\begin{column}{.50\linewidth}
 - *FT*
-#+LaTeX: {\centering\includegraphics[scale=.25]{img/ftGraph.png}}
-#+LaTeX: \end{column}
-#+LaTeX: \begin{column}{.45\linewidth}
-- *CG*
-#+LaTeX: {\centering\includegraphics[scale=.25]{img/cgGraph.png}}
-#+LaTeX: \end{column}
-#+LaTeX: \end{columns}
+#+LaTeX: {\centering\includegraphics[width=12cm,height=7cm]{img/ftGraph.png}}
 
 * Conclusion
 ** 
@@ -222,7 +214,7 @@ k_l2tca <- k[k$metric %in% "PAPI_L2_TCA",]
 k2 <- data.frame(k_l2dcm$file,k_l2dcm$region,k_l2dcm$codeline,k_l2dcm$value,k_l2icm$value,k_l2tca$value);
 k2$missesrate = k2$k_l2dcm.value / k2$k_l2tca.value
 
-k2 <- k2[k2$missesrate > 0.40,]
+k2 <- k2[k2$missesrate > 0.4076,]
 #+end_src
 
 #+RESULTS:
@@ -231,9 +223,9 @@ k2 <- k2[k2$missesrate > 0.40,]
 #+begin_src R :results output graphics :file /home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/ftGraph.png :exports both :width 600 :height 400 :session *ft* 
 library(ggplot2);
 
-ggplot(k2, aes(x=as.factor(k_l2dcm.region), y=missesrate, fill=as.factor(k_l2dcm.codeline))) +
-  geom_bar(stat="identity", position=position_dodge(), width=0.5) + labs(y = "Average Cache Misses - Cache L2" , x = "Regions") + 
-  theme_bw() + 
+ggplot(k2, aes(x=as.factor(k_l2dcm.codeline), y=missesrate, fill=as.factor(k_l2dcm.region))) +
+  geom_bar(stat="identity") +  labs(y = "Rate Cache Misses - Cache L2" , x = "Code Lines") + 
+  theme_bw() +
 theme(
     strip.text.x=element_text(size = 20),
     axis.title=element_text(size=18),
@@ -244,7 +236,7 @@ theme(
     legend.text = element_text(size=14),
     panel.grid.major = element_line(colour = "grey"),
     panel.grid.minor = element_blank()
-  );
+  ) + facet_grid(~k_l2dcm.file);
 #+end_src
 
 #+RESULTS:
@@ -262,31 +254,18 @@ k_l2tca <- k[k$metric %in% "PAPI_L2_TCA",]
 
 k2 <- data.frame(k_l2dcm$file,k_l2dcm$region,k_l2dcm$codeline,k_l2dcm$value,k_l2icm$value,k_l2tca$value);
 k2$missesrate = k2$k_l2dcm.value / k2$k_l2tca.value
-
-k2 <- k2[k2$missesrate > 0.40,]
+k2 <- k2[k2$missesrate > 0.80,]
 #+end_src
 
 #+RESULTS:
-#+begin_example
-
-Attaching package: ‘dplyr’
-
-The following objects are masked from ‘package:stats’:
-
-    filter, lag
-
-The following objects are masked from ‘package:base’:
-
-    intersect, setdiff, setequal, union
-#+end_example
 
 
 #+begin_src R :results output graphics :file /home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/cgGraph.png :exports both :width 600 :height 400 :session *cg* 
 library(ggplot2);
 
-ggplot(k2, aes(x=as.factor(k_l2dcm.region), y=missesrate, fill=as.factor(k_l2dcm.codeline))) +
-  geom_bar(stat="identity", position=position_dodge(), width=0.5) + labs(y = "Average Cache Misses - Cache L2" , x = "Regions") + 
-  theme_bw() + 
+ggplot(k2, aes(x=as.factor(k_l2dcm.codeline), y=missesrate, fill=as.factor(k_l2dcm.region))) +
+  geom_bar(stat="identity") +  labs(y = "Rate Cache Misses - Cache L2" , x = "Code Lines") + 
+  theme_bw() +
 theme(
     strip.text.x=element_text(size = 20),
     axis.title=element_text(size=18),
@@ -297,7 +276,8 @@ theme(
     legend.text = element_text(size=14),
     panel.grid.major = element_line(colour = "grey"),
     panel.grid.minor = element_blank()
-  );
+  ) + facet_grid(~k_l2dcm.file);
+
 #+end_src
 
 #+RESULTS:
