@@ -6,7 +6,7 @@
 #+TAGS: noexport(n)
 
 # Impact on Intranode and Internode Communication
-#+Title: Retrospective: September to December
+#+Title: Detecting Memory-Bound Regions in Parallel Applications
 #+Author: Gabriel B. Moro @@latex:\\@@ gabriel.bmoro@inf.ufrgs.br
 #+Date: Porto Alegre, December 2016
 
@@ -78,7 +78,7 @@ discover memory-bound regions
 
 \end{tikzpicture}
 
-*** Use of the Likwid
+*** Results - Likwid
 
 #+LaTeX: \begin{columns}\begin{column}{.45\linewidth}
 \begin{figure}[!htb]
@@ -111,14 +111,14 @@ discover memory-bound regions
 HPC Application Phase Detection/. XIV Workshop de Processamento
 Paralelo e Distribuído. Porto Alegre, 2016.
 
-*** Use of the Score-p
+*** Results - Score-P
 
 #+LaTeX: \begin{columns}\begin{column}{.45\linewidth}
 
-*Measures investigated*
+*Metrics*
 
-- Acesses to Cache L2
-- Amount of Misses in Cache L2
+- Cache L2 loads
+- Cache L2 misses
 
 
 *Filter Script*
@@ -136,7 +136,7 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 *Trace Generated*
 
 |-----+------------------+---------------|
-| _App_ | _Trace's Size_     | _Trace's Size_  |
+| _App_ | _Traces Size_      | _Traces Size_   |
 |     | (without filter) | (with filter) |
 |-----+------------------+---------------|
 | CG  | 556M             | 202M          |
@@ -145,8 +145,8 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 |-----+------------------+---------------|
 
 	=Hype2:=
-		- 2 x Intel (R) Xeon (R) E5-2650 CPU 2.30 GHz
-		  - 20 physical cores and Hyper-Threading tecnology
+		- 2 x Intel (R) Xeon (R) E5-2650 v3 CPU 2.30 GHz
+		  - 2 * 8 cores + HT technology
 #+LaTeX:}
 #+LaTeX: \end{column}
 #+LaTeX: \end{columns}
@@ -190,7 +190,6 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 hardware counters
 
 
-
 *Future Work*
 
 - Reducing the power consumption of parallel applications with DVFS
@@ -218,13 +217,25 @@ k2 <- k2[k2$missesrate > 0.4076,]
 #+end_src
 
 #+RESULTS:
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+#+end_example
 
 
 #+begin_src R :results output graphics :file /home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/ftGraph.png :exports both :width 600 :height 400 :session *ft* 
 library(ggplot2);
 
 ggplot(k2, aes(x=as.factor(k_l2dcm.codeline), y=missesrate, fill=as.factor(k_l2dcm.region))) +
-  geom_bar(stat="identity") +  labs(y = "Rate Cache Misses - Cache L2" , x = "Code Lines") + 
+  geom_bar(stat="identity") +  labs(y = "Cache Misses Rate - Cache L2" , x = "Code Lines") + 
   theme_bw() +
 theme(
     strip.text.x=element_text(size = 20),
