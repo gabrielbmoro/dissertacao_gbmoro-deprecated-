@@ -125,60 +125,30 @@ Paralelo e Distribuído. Porto Alegre, 2016.
 
 - Use of the Score-p filter, selecting only OpenMP regions
 
-- Auxiliary script to remove the excess, selecting only hardware
-  counters of the parallel regions 
+- Auxiliary scripts: =otf2ompprint2paje= and =pj_dump=
 
 #+LaTeX: \end{column}
 #+LaTeX: \begin{column}{.50\linewidth}
 #+LaTeX: {\small
 
 
-*Trace Generated*
-
-|-----+------------------+---------------|
-| _App_ | _Traces Size_      | _Traces Size_   |
-|     | (without filter) | (with filter) |
-|-----+------------------+---------------|
-| CG  | 556M             | 202M          |
-| FT  | 11M              | 3.7M          |
-| LU  | 20G              | 6.5G          |
-|-----+------------------+---------------|
-
 	=Hype2:=
 		- 2 x Intel (R) Xeon (R) E5-2650 v3 CPU 2.30 GHz
-		  - 2 * 8 cores + HT technology
+		  - 2 * 20 cores + HT technology
+		- L1/L2/L3: 32/256/25600K
+
 #+LaTeX:}
 #+LaTeX: \end{column}
 #+LaTeX: \end{columns}
 
 * Preliminary Results
-** 
-*** Trace's Format
-
-- *FT* (example)
-
-|---------------------+-----------+-----------+-------|
-| =Type of Region=      | =Code Line= | =Metric=    | =Value= |
-|---------------------+-----------+-----------+-------|
-| omp-parallel        |       736 | PAPIL2TCA | 48282 |
-| omp-parallel        |       736 | PAPIL2DCM |  5288 |
-| omp-parallel        |       736 | PAPIL2ICM |  8933 |
-| omp-do              |       736 | PAPIL2TCA | 48841 |
-| omp-do              |       736 | PAPIL2DCM |  5393 |
-| omp-do              |       736 | PAPIL2ICM |  9092 |
-| omp-implicitbarrier |       739 | PAPIL2TCA |  1321 |
-| omp-implicitbarrier |       739 | PAPIL2DCM |   156 |
-| omp-implicitbarrier |       739 | PAPIL2ICM |   523 |
-| omp-parallel        |       736 | PAPIL2TCA |  2048 |
-| omp-parallel        |       736 | PAPIL2DCM |   196 |
-| omp-do              |       736 | PAPIL2TCA |  2280 |
-| ...                 |           |           |       |
-
+ 
 ** 
 *** Preliminary Results
 
 - *FT*
-#+LaTeX: {\centering\includegraphics[width=12cm,height=7cm]{img/ftGraph.png}}
+
+#+LaTeX: {\centering\includegraphics[width=\textwidth,height=4.5cm]{img/gandhiFt.png}}
 
 * Conclusion
 ** 
@@ -197,23 +167,76 @@ hardware counters
   
   	-> Automatic instrumentation of memory-bound regions
 
-
 * Graphs                                                           :noexport:
 
-#+begin_src R :results output :session *ft* :exports both
+#+name: pjdumprastro
+#+begin_src shell :results output
+ls -1 $HOME/Downloads/trace_ft.csv
+#+end_src
+
+
+#+RESULTS: pjdumprastro
+: /home/gabrielbmoro/Downloads/trace_ft.csv
+
+
+#+begin_src shell :results output :var filename=pjdumprastro
+head $filename
+#+end_src
+
+#+RESULTS:
+#+begin_example
+State, zero, S, 0.000000, 0.139180, 0.139180, 0.000000, main, 18296, 2123, 4692, 24000, 8000, 21495, 2588, 5381, 24000, 8000
+State, zero, S, 0.139180, 0.148488, 0.009308, 1.000000, MAIN__, 21495, 2588, 5381, 24000, 8000, 22044, 2632, 5437, 24000, 8000
+State, zero, S, 0.148488, 0.656688, 0.508200, 2.000000, setup_, 22044, 2632, 5437, 24000, 8000, 34173, 3838, 7858, 24000, 8000
+State, zero, S, 0.656688, 0.674748, 0.018060, 1.000000, MAIN__, 34173, 3838, 7858, 24000, 8000, 35097, 3946, 8200, 24000, 8000
+State, zero, S, 0.674748, 47.819882, 47.145134, 2.000000, init_ui_, 35097, 3946, 8200, 24000, 8000, 45675, 4845, 9316, 24000, 12000
+State, zero, S, 47.819882, 47.840838, 0.020956, 3.000000, !$omp parallel @ft.f:190, 45675, 4845, 9316, 24000, 12000, 46337, 4920, 9531, 24000, 12000
+State, zero, S, 47.840838, 275.543612, 227.702774, 4.000000, !$omp do @ft.f:190, 46337, 4920, 9531, 24000, 12000, 134653, 34283, 9894, 36000, 96000
+State, zero, S, 275.543612, 388.417224, 112.873612, 5.000000, !$omp implicit barrier @ft.f:200, 134653, 34283, 9894, 36000, 96000, 136316, 34513, 10537, 36000, 100000
+State, zero, S, 388.417224, 388.441912, 0.024688, 4.000000, !$omp do @ft.f:190, 136316, 34513, 10537, 36000, 100000, 137123, 34585, 10793, 36000, 100000
+State, zero, S, 388.441912, 388.445996, 0.004084, 3.000000, !$omp parallel @ft.f:190, 137123, 34585, 10793, 36000, 100000, 137210, 34592, 10807, 36000, 100000
+#+end_example
+
+#+begin_src R :results output :session :exports both :var filename=pjdumprastro
 library(dplyr);
-
-df <- read.csv("traceF.csv");
-k <- df %>% select(region, file,codeline,metric,value) %>% group_by(file,region,codeline) %>% as.data.frame();
-
-k_l2dcm <- k[k$metric %in% "PAPI_L2_DCM",] 
-k_l2icm <- k[k$metric %in% "PAPI_L2_ICM",] 
-k_l2tca <- k[k$metric %in% "PAPI_L2_TCA",] 
-
-k2 <- data.frame(k_l2dcm$file,k_l2dcm$region,k_l2dcm$codeline,k_l2dcm$value,k_l2icm$value,k_l2tca$value);
-k2$missesrate = k2$k_l2dcm.value / k2$k_l2tca.value
-
-k2 <- k2[k2$missesrate > 0.4076,]
+df <- read.csv(gsub("\n", "", filename), header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Value=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_PAPI_L2_ICM=V11,
+        Push_ru_utime=V12,
+        Push_ru_stime=V13,
+        Pop_PAPI_L2_TCA=V14,
+        Pop_PAPI_L2_DCM=V15,
+        Pop_PAPI_L2_ICM=V16,
+        Pop_ru_utime=V17,
+        Pop_ru_stime=V18) %>%
+    mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA-Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM-Push_PAPI_L2_DCM,
+        PAPI_L2_ICM = Pop_PAPI_L2_ICM-Push_PAPI_L2_ICM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>%
+    select(
+        -Type, -StateType, -Imbrication) %>%
+    select(-Push_PAPI_L2_TCA,
+        -Push_PAPI_L2_DCM,
+        -Push_PAPI_L2_ICM,
+        -Push_ru_utime,
+        -Push_ru_stime,
+        -Pop_PAPI_L2_TCA,
+        -Pop_PAPI_L2_DCM,
+        -Pop_PAPI_L2_ICM,
+        -Pop_ru_utime,
+        -Pop_ru_stime) %>% as.data.frame();
+#Renomear os identificadores das threads
+tids = unique(df$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
+df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+head(df);
 #+end_src
 
 #+RESULTS:
@@ -228,68 +251,46 @@ The following objects are masked from ‘package:stats’:
 The following objects are masked from ‘package:base’:
 
     intersect, setdiff, setequal, union
+     Start      End   Duration                            Value PAPI_L2_TCA
+1 118.6302 118.6579   0.027724         !$omp parallel @ft.f:190         648
+2 118.6579 371.7982 253.140292               !$omp do @ft.f:190      247956
+3 371.7982 388.5097  16.711421 !$omp implicit barrier @ft.f:200        1219
+4 388.5097 388.5326   0.022956               !$omp do @ft.f:190         265
+5 388.5326 388.5401   0.007444         !$omp parallel @ft.f:190          95
+6 388.6433 388.6504   0.007100         !$omp parallel @ft.f:431         299
+  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
+1          44         189        0        0     24
+2       63924         324    12000    92000     24
+3         199         415     4000     4000     24
+4          47          70        0        0     24
+5          10           1        0        0     24
+6          12          53        0        0     24
 #+end_example
 
-
-#+begin_src R :results output graphics :file /home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/ftGraph.png :exports both :width 600 :height 400 :session *ft* 
+#+begin_src R :results output graphics :file img/gandhiFt.png :exports both :width 1600 :height 400 :session
 library(ggplot2);
-
-ggplot(k2, aes(x=as.factor(k_l2dcm.codeline), y=missesrate, fill=as.factor(k_l2dcm.region))) +
-  geom_bar(stat="identity") +  labs(y = "Cache Misses Rate - Cache L2" , x = "Code Lines") + 
-  theme_bw() +
-theme(
-    strip.text.x=element_text(size = 20),
-    axis.title=element_text(size=18),
-    axis.text = element_text(size = 10),
-    legend.key = element_rect(),
-    legend.background = element_rect(fill = "white"),
-    legend.title = element_text(size=18),
-    legend.text = element_text(size=14),
-    panel.grid.major = element_line(colour = "grey"),
-    panel.grid.minor = element_blank()
-  ) + facet_grid(~k_l2dcm.file);
+df1 <- df;
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 4)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+   # scale_fill_brewer(palette = "Set1");
 #+end_src
 
 #+RESULTS:
-[[file:/home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/ftGraph.png]]
-
-#+begin_src R :results output :session *cg* :exports both
-library(dplyr);
-
-df <- read.csv("traceF.csv");
-k <- df %>% select(region, file,codeline,metric,value) %>% group_by(file,region,codeline) %>% as.data.frame();
-
-k_l2dcm <- k[k$metric %in% "PAPI_L2_DCM",] 
-k_l2icm <- k[k$metric %in% "PAPI_L2_ICM",] 
-k_l2tca <- k[k$metric %in% "PAPI_L2_TCA",] 
-
-k2 <- data.frame(k_l2dcm$file,k_l2dcm$region,k_l2dcm$codeline,k_l2dcm$value,k_l2icm$value,k_l2tca$value);
-k2$missesrate = k2$k_l2dcm.value / k2$k_l2tca.value
-k2 <- k2[k2$missesrate > 0.80,]
-#+end_src
-
-#+RESULTS:
-
-
-#+begin_src R :results output graphics :file /home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/cgGraph.png :exports both :width 600 :height 400 :session *cg* 
-library(ggplot2);
-
-ggplot(k2, aes(x=as.factor(k_l2dcm.codeline), y=missesrate, fill=as.factor(k_l2dcm.region))) +
-  geom_bar(stat="identity") +  labs(y = "Rate Cache Misses - Cache L2" , x = "Code Lines") + 
-  theme_bw() +
-theme(
-    strip.text.x=element_text(size = 20),
-    axis.title=element_text(size=18),
-    axis.text = element_text(size = 10),
-    legend.key = element_rect(),
-    legend.background = element_rect(fill = "white"),
-    legend.title = element_text(size=18),
-    legend.text = element_text(size=14),
-    panel.grid.major = element_line(colour = "grey"),
-    panel.grid.minor = element_blank()
-  ) + facet_grid(~k_l2dcm.file);
-
-#+end_src
-
-#+RESULTS:
-[[file:/home/gabrielbmoro/Dropbox/MasterStudy/works/dissertacao_gbmoro/presentations/visitToHPE/img/cgGraph.png]]
+[[file:img/gandhiFt.png]]
