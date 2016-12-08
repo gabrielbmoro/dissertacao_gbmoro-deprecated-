@@ -157,7 +157,7 @@ head(df);
 
 Okay, parece estar funcionando.
 
-Vamos plotar para uma thread somente.
+Vamos plotar a visão geral, somente dos estados.
 
 #+begin_src R :results output graphics :file img/gantt-chart_v1.png :exports both :width 1600 :height 400 :session
 library(ggplot2);
