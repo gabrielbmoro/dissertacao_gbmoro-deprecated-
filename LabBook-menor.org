@@ -1,0 +1,192 @@
+#+TITLE: LabBook
+#+AUTHOR: Gabriel Bronzatti Moro and Lucas M. Schnorr
+#+LATEX_HEADER: \usepackage[margin=2cm,a4paper]{geometry}
+#+STARTUP: overview indent
+#+TAGS: Gabriel(G) Lucas(L) noexport(n) deprecated(d)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+mode: org
+#+coding: utf-8
+
+Esse documento está em pt-br
+
+* 2016-12-08 ScoreP com métricas de HW :ATTACH:
+:PROPERTIES:
+:Attachments: trace-by-lucas.csv
+:ID:       14a5541a-0c60-45c7-9342-f33ee6e6e2d6
+:END:
+Gabriel rastreou FT com métricas de HW. Os dados da saída de
+=otf2-print= estão aqui:
+#+name: rastro
+#+begin_src shell :results output
+find dados/exp_05-11-2016_ft/ | grep trace.csv
+#+end_src
+
+#+RESULTS: rastro
+: dados/exp_05-11-2016_ft/trace.csv
+
+O arquivo em si não é um CSV, veja:
+
+#+begin_src shell :results output :var RASTRO=rastro
+head $RASTRO
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+=== OTF2-PRINT ===
+=== Events =====================================================================
+Event                               Location            Timestamp  Attributes
+--------------------------------------------------------------------------------
+THREAD_FORK                                0     1960307801126418  Model: "OpenMP" <3>, # Requested Threads: 24
+THREAD_TEAM_BEGIN                          0     1960307821884732  Thread Team: "" <0>
+THREAD_TEAM_BEGIN                 4294967296     1960307821886487  Thread Team: "" <0>
+THREAD_TEAM_BEGIN                12884901888     1960307821887389  Thread Team: "" <0>
+THREAD_TEAM_BEGIN                 8589934592     1960307821887441  Thread Team: "" <0>
+#+end_example
+
+Bom, para converter, usamos o script que está aqui:
+https://github.com/schnorr/akypuera/tree/master/src/otf2-omp-print
+
+Em específico, a versão em PERL.
+
+#+begin_src shell :results output
+cd dados/exp_05-11-2016_ft/
+~/dev/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl trace.csv | ~/dev/pajeng/b/pj_dump --user-defined --no-imbrication | grep ^State > trace-by-lucas.csv
+ls -lh trace-by-lucas.csv
+#+end_src
+
+#+RESULTS:
+: -rw-r--r-- 1 schnorr schnorr 2.4M Dec  8 15:43 trace-by-lucas.csv
+
+Estou anexando o arquivo a esta entrada.
+
+Se digitares C-c C-a o poderá abrí-lo. Ou consultar diretamente aqui:
+
+#+name: pjdumprastro
+#+begin_src shell :results output
+ls -1 ./data/14/a5541a*/trace-by-lucas.csv
+#+end_src
+
+#+RESULTS: pjdumprastro
+: ./data/14/a5541a-0c60-45c7-9342-f33ee6e6e2d6/trace-by-lucas.csv
+
+Verificando o início.
+
+#+begin_src shell :results output :var filename=pjdumprastro
+head $filename
+#+end_src
+
+#+RESULTS:
+#+begin_example
+State, zero, S, 0.039640, 2.209130, 2.169490, 0.000000, !$omp parallel @ft.f:188, 26598, 4994, 4876, 121387, 20231, 27566, 5246, 5198, 121464, 20244
+State, zero, S, 2.209130, 257.736214, 255.527084, 1.000000, !$omp do @ft.f:188, 27566, 5246, 5198, 121464, 20244, 923791, 409598, 5471, 169889, 48539
+State, zero, S, 257.736214, 345.137454, 87.401240, 2.000000, !$omp implicit barrier @ft.f:198, 923791, 409598, 5471, 169889, 48539, 924329, 409773, 5735, 175453, 48963
+State, zero, S, 345.137454, 345.167150, 0.029696, 1.000000, !$omp do @ft.f:188, 924329, 409773, 5735, 175453, 48963, 924548, 409827, 5822, 175453, 48963
+State, zero, S, 345.167150, 345.175402, 0.008252, 0.000000, !$omp parallel @ft.f:188, 924548, 409827, 5822, 175453, 48963, 924618, 409837, 5830, 175453, 48963
+State, zero, S, 355.680184, 355.712329, 0.032145, 0.000000, !$omp parallel @ft.f:430, 926370, 410395, 6308, 178126, 48963, 926610, 410429, 6376, 178126, 48963
+State, zero, S, 355.712329, 512.841126, 157.128797, 1.000000, !$omp do @ft.f:430, 926610, 410429, 6376, 178126, 48963, 1117445, 419258, 6589, 246155, 48963
+State, zero, S, 512.841126, 519.507683, 6.666557, 2.000000, !$omp implicit barrier @ft.f:443, 1117445, 419258, 6589, 246155, 48963, 1117960, 419440, 6835, 250803, 48963
+State, zero, S, 519.507683, 519.532299, 0.024616, 1.000000, !$omp do @ft.f:430, 1117960, 419440, 6835, 250803, 48963, 1118225, 419497, 6944, 250803, 48963
+State, zero, S, 519.532299, 519.540851, 0.008552, 0.000000, !$omp parallel @ft.f:430, 1118225, 419497, 6944, 250803, 48963, 1118317, 419508, 6954, 250803, 48963
+#+end_example
+
+Vamos lê-lo em R, renomear e remover as colunas que não nos
+interessam, e, enfim, ter uma melhor numeração para as threads.
+
+#+begin_src R :results output :session :exports both :var filename=pjdumprastro
+library(dplyr);
+df <- read.csv(gsub("\n", "", filename), header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Value=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_PAPI_L2_ICM=V11,
+        Push_ru_utime=V12,
+        Push_ru_stime=V13,
+        Pop_PAPI_L2_TCA=V14,
+        Pop_PAPI_L2_DCM=V15,
+        Pop_PAPI_L2_ICM=V16,
+        Pop_ru_utime=V17,
+        Pop_ru_stime=V18) %>%
+    mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA-Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM-Push_PAPI_L2_DCM,
+        PAPI_L2_ICM = Pop_PAPI_L2_ICM-Push_PAPI_L2_ICM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>%
+    select(
+        -Type, -StateType, -Imbrication) %>%
+    select(-Push_PAPI_L2_TCA,
+        -Push_PAPI_L2_DCM,
+        -Push_PAPI_L2_ICM,
+        -Push_ru_utime,
+        -Push_ru_stime,
+        -Pop_PAPI_L2_TCA,
+        -Pop_PAPI_L2_DCM,
+        -Pop_PAPI_L2_ICM,
+        -Pop_ru_utime,
+        -Pop_ru_stime) %>% as.data.frame();
+#Renomear os identificadores das threads
+tids = unique(df$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
+df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+head(df);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      Start       End   Duration                            Value PAPI_L2_TCA
+1  19.41803  19.43686   0.018828         !$omp parallel @ft.f:188         310
+2  19.43686 192.85894 173.422084               !$omp do @ft.f:188      903905
+3 192.85894 345.05055 152.191609 !$omp implicit barrier @ft.f:198         588
+4 345.05055 345.13632   0.085768               !$omp do @ft.f:188         369
+5 345.13632 345.14311   0.006788         !$omp parallel @ft.f:188          79
+6 355.68586 355.71648   0.030613         !$omp parallel @ft.f:430         211
+  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
+1          26         121        0        0     24
+2      356861         207    36297    35513     24
+3         182         293     4937      811     24
+4          64         163        0        0     24
+5          13           7        0        0     24
+6          34          43        0        0     24
+#+end_example
+
+Okay, parece estar funcionando.
+
+Vamos plotar para uma thread somente.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v1.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df;
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            axis.title.x = element_blank(),
+            axis.text.x = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 4)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+   # scale_fill_brewer(palette = "Set1");
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v1.png]]
+
+Okay. Parece estar funcionando.
