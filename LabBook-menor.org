@@ -644,3 +644,80 @@ ggplot() +
 [[file:img/gantt-chart_v6.png]]
 
 Great, now it looks much better: we have 8 regions.
+
+Let's merge all that again.
+
+#+begin_src R :results output graphics :file img/t1_tudojunto_v2.png :exports both :width 1600 :height 400 :session
+gantt_plot <- function (dfa, thread, tstart, tend)
+{
+    df1 <- dfa %>% filter(Thread == thread) %>%  filter(End >= tstart, Start <= tend) %>% as.data.frame();
+    k <- ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "top",
+            legend.title = element_blank()
+        ) +
+    scale_y_continuous(breaks=unique(df1$Thread)) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 1)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Region,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+    k;
+}
+
+hw_counter_plot <- function (dfa, thread, counter, tstart, tend)
+{
+    df1 <- dfa %>% filter(Thread == thread) %>% filter(End >= tstart, Start <= tend) %>% as.data.frame();
+    df2 <- df1
+    k <- ggplot() +
+        theme_bw(base_size = 16) +
+        xlab("Time [s]") + ylab(counter) +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "none",
+            legend.title = element_blank()
+        ) +
+        ylim(0,NA) +
+        coord_cartesian(xlim=c(tstart,tend)) +
+        geom_line(data=df2, alpha=.3, aes_string(x="Start+(End-Start)/2", y=counter)) +
+        geom_point(data=df2, aes_string(x="Start+(End-Start)/2", y=counter));
+    k;
+}
+
+library(gridExtra);
+library(grid);
+tstart = min(df$Start);
+tend = max(df$End);
+thread = 1;
+gantt <- gantt_plot(df1, thread, tstart, tend) + theme(legend.position="top", axis.text.x=element_blank(), axis.title.x=element_blank());
+l2_icm <- hw_counter_plot (df1, thread, "PAPI_L2_ICM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_dcm <- hw_counter_plot (df1, thread, "PAPI_L2_DCM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_tca <- hw_counter_plot (df1, thread, "PAPI_L2_TCA", tstart, tend) + theme(axis.title.y=element_text(angle=80));
+
+ gA <- ggplotGrob(gantt);
+ gB <- ggplotGrob(l2_icm);
+ gC <- ggplotGrob(l2_dcm);
+ gD <- ggplotGrob(l2_tca);
+
+maxWidth = grid::unit.pmax(gA$widths[2:5], gB$widths[2:5], gC$widths[2:5], gD$widths[2:5]);
+gA$widths[2:5] <- as.list(maxWidth)
+gB$widths[2:5] <- as.list(maxWidth)
+gC$widths[2:5] <- as.list(maxWidth)
+gD$widths[2:5] <- as.list(maxWidth)
+
+grid.arrange(gA, gB, gC, gD, ncol=1, heights=c(10,10,10,10));
+#+end_src
+
+#+RESULTS:
+[[file:img/t1_tudojunto_v2.png]]
+
+Ainda não está certo. Precisamos agrupar os contadores de hardware por região.
