@@ -134,25 +134,26 @@ tids = unique(df$Thread)
 tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
 df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
 df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+df$Value <- as.factor(gsub('!.omp .+ @', "", df$Value));
 head(df);
 #+end_src
 
 #+RESULTS:
 #+begin_example
-      Start       End   Duration                            Value PAPI_L2_TCA
-1  19.41803  19.43686   0.018828         !$omp parallel @ft.f:188         310
-2  19.43686 192.85894 173.422084               !$omp do @ft.f:188      903905
-3 192.85894 345.05055 152.191609 !$omp implicit barrier @ft.f:198         588
-4 345.05055 345.13632   0.085768               !$omp do @ft.f:188         369
-5 345.13632 345.14311   0.006788         !$omp parallel @ft.f:188          79
-6 355.68586 355.71648   0.030613         !$omp parallel @ft.f:430         211
-  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
-1          26         121        0        0     24
-2      356861         207    36297    35513     24
-3         182         293     4937      811     24
-4          64         163        0        0     24
-5          13           7        0        0     24
-6          34          43        0        0     24
+      Start       End   Duration    Value PAPI_L2_TCA PAPI_L2_DCM PAPI_L2_ICM
+1  19.41803  19.43686   0.018828 ft.f:188         310          26         121
+2  19.43686 192.85894 173.422084 ft.f:188      903905      356861         207
+3 192.85894 345.05055 152.191609 ft.f:198         588         182         293
+4 345.05055 345.13632   0.085768 ft.f:188         369          64         163
+5 345.13632 345.14311   0.006788 ft.f:188          79          13           7
+6 355.68586 355.71648   0.030613 ft.f:430         211          34          43
+  ru_utime ru_stime Thread
+1        0        0     24
+2    36297    35513     24
+3     4937      811     24
+4        0        0     24
+5        0        0     24
+6        0        0     24
 #+end_example
 
 Okay, parece estar funcionando.
@@ -161,7 +162,8 @@ Vamos plotar a visão geral, somente dos estados.
 
 #+begin_src R :results output graphics :file img/gantt-chart_v1.png :exports both :width 1600 :height 400 :session
 library(ggplot2);
-df1 <- df;
+df1 <- df %>% filter(!grepl("^print",Value)) %>% as.data.frame();
+#df1 <- df;
 tstart = min(df1$Start);
 tend = max(df1$End);
 ggplot() +
@@ -175,7 +177,7 @@ ggplot() +
             legend.title = element_blank()
         ) +
     coord_cartesian(xlim=c(tstart,tend)) +
-    guides(fill = guide_legend(nrow = 4)) +
+    guides(fill = guide_legend(nrow = 2)) +
     geom_rect(data=df1, alpha=1, aes(fill=Value,
                                   xmin=Start,
                                   xmax=End,
@@ -195,6 +197,7 @@ Gabriel um exemplo inicial a partir do qual ele poderá trabalhar.
 Somente para uma thread.
 
 #+begin_src R :results output graphics :file img/t1_gantt.png :exports both :width 1600 :height 200 :session
+library(ggplot2);
 gantt_plot <- function (dfa, thread, tstart, tend)
 {
     df1 <- dfa %>% filter(Thread == thread) %>%  filter(End >= tstart, Start <= tend) %>% as.data.frame();
@@ -210,7 +213,7 @@ gantt_plot <- function (dfa, thread, tstart, tend)
         ) +
     scale_y_continuous(breaks=unique(df1$Thread)) +
     coord_cartesian(xlim=c(tstart,tend)) +
-    guides(fill = guide_legend(nrow = 4)) +
+    guides(fill = guide_legend(nrow = 2)) +
     geom_rect(data=df1, alpha=1, aes(fill=Value,
                                   xmin=Start,
                                   xmax=End,
@@ -229,6 +232,7 @@ k;
 Somente para uma thread, por contador.
 
 #+begin_src R :results output graphics :file img/t1_hw.png :exports both :width 1600 :height 200 :session
+library(ggplot2);
 hw_counter_plot <- function (dfa, thread, counter, tstart, tend)
 {
     df1 <- dfa %>% filter(Thread == thread) %>% filter(End >= tstart, Start <= tend) %>% as.data.frame();
@@ -264,10 +268,11 @@ library(gridExtra);
 library(grid);
 tstart = min(df$Start);
 tend = max(df$End);
-gantt <- gantt_plot(df, 1, tstart, tend) + theme(legend.position="top", axis.text.x=element_blank(), axis.title.x=element_blank());
-l2_icm <- hw_counter_plot (df, 1, "PAPI_L2_ICM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank());
-l2_dcm <- hw_counter_plot (df, 1, "PAPI_L2_DCM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank());
-l2_tca <- hw_counter_plot (df, 1, "PAPI_L2_TCA", tstart, tend);
+thread = 1;
+gantt <- gantt_plot(df, thread, tstart, tend) + theme(legend.position="top", axis.text.x=element_blank(), axis.title.x=element_blank());
+l2_icm <- hw_counter_plot (df, thread, "PAPI_L2_ICM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_dcm <- hw_counter_plot (df, thread, "PAPI_L2_DCM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_tca <- hw_counter_plot (df, thread, "PAPI_L2_TCA", tstart, tend) + theme(axis.title.y=element_text(angle=80));
 
  gA <- ggplotGrob(gantt);
  gB <- ggplotGrob(l2_icm);
@@ -286,4 +291,6 @@ grid.arrange(gA, gB, gC, gD, ncol=1, heights=c(10,10,10,10));
 #+RESULTS:
 [[file:img/t1_tudojunto.png]]
 
-Os eixos X não estão sincronizados, mas deveriam.
+
+Os eixos X estão sincronizados. Podes mudar o valor da variável thread
+para analisar a relação nas outras threads.
