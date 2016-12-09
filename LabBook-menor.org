@@ -134,26 +134,26 @@ tids = unique(df$Thread)
 tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
 df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
 df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
-df$Value <- as.factor(gsub('!.omp .+ @', "", df$Value));
+df$Value <- as.factor(gsub('!.omp ', "", df$Value));
 head(df);
 #+end_src
 
 #+RESULTS:
 #+begin_example
-      Start       End   Duration    Value PAPI_L2_TCA PAPI_L2_DCM PAPI_L2_ICM
-1  19.41803  19.43686   0.018828 ft.f:188         310          26         121
-2  19.43686 192.85894 173.422084 ft.f:188      903905      356861         207
-3 192.85894 345.05055 152.191609 ft.f:198         588         182         293
-4 345.05055 345.13632   0.085768 ft.f:188         369          64         163
-5 345.13632 345.14311   0.006788 ft.f:188          79          13           7
-6 355.68586 355.71648   0.030613 ft.f:430         211          34          43
-  ru_utime ru_stime Thread
-1        0        0     24
-2    36297    35513     24
-3     4937      811     24
-4        0        0     24
-5        0        0     24
-6        0        0     24
+      Start       End   Duration                      Value PAPI_L2_TCA
+1  19.41803  19.43686   0.018828         parallel @ft.f:188         310
+2  19.43686 192.85894 173.422084               do @ft.f:188      903905
+3 192.85894 345.05055 152.191609 implicit barrier @ft.f:198         588
+4 345.05055 345.13632   0.085768               do @ft.f:188         369
+5 345.13632 345.14311   0.006788         parallel @ft.f:188          79
+6 355.68586 355.71648   0.030613         parallel @ft.f:430         211
+  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
+1          26         121        0        0     24
+2      356861         207    36297    35513     24
+3         182         293     4937      811     24
+4          64         163        0        0     24
+5          13           7        0        0     24
+6          34          43        0        0     24
 #+end_example
 
 Okay, parece estar funcionando.
@@ -163,6 +163,15 @@ Vamos plotar a visão geral, somente dos estados.
 #+begin_src R :results output graphics :file img/gantt-chart_v1.png :exports both :width 1600 :height 400 :session
 library(ggplot2);
 df1 <- df %>% filter(!grepl("^print",Value)) %>% as.data.frame();
+x <- c(188, 198);
+x <- c(222, 231);
+x <- c(273, 280);
+x <- c(430, 443);
+x <- c(540, 559);
+x <- c(586, 604);
+x <- c(631, 649);
+#x <- c(862, 869);
+df1 <- df %>% filter(grepl(x[1], Value) | grepl(x[2], Value)) %>% as.data.frame();
 #df1 <- df;
 tstart = min(df1$Start);
 tend = max(df1$End);
@@ -294,3 +303,344 @@ grid.arrange(gA, gB, gC, gD, ncol=1, heights=c(10,10,10,10));
 
 Os eixos X estão sincronizados. Podes mudar o valor da variável thread
 para analisar a relação nas outras threads.
+* 2016-12-09 Correlacionando com o código :ATTACH:
+:PROPERTIES:
+:Attachments: ft.f
+:ID:       ee6ddb5f-9d37-46c7-b311-f36797fce1a0
+:END:
+
+Não tenho certeza se o código =ft.f= em anexo é o mesmo utilizado no
+experimento. Seria bom confirmar. O anexo oriunda da versão
+NPB3.3.1/NPB3.3-OMP/ disponível aqui:
+https://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
+
+Quero entender como o Score-P rastreou o programa.
+
+#+name: pjdumprastro
+#+begin_src shell :results output
+ls -1 ./data/14/a5541a*/trace-by-lucas.csv
+#+end_src
+
+#+begin_src R :results output :session :exports both :var filename=pjdumprastro
+library(dplyr);
+df <- read.csv(gsub("\n", "", filename), header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Value=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_PAPI_L2_ICM=V11,
+        Push_ru_utime=V12,
+        Push_ru_stime=V13,
+        Pop_PAPI_L2_TCA=V14,
+        Pop_PAPI_L2_DCM=V15,
+        Pop_PAPI_L2_ICM=V16,
+        Pop_ru_utime=V17,
+        Pop_ru_stime=V18) %>%
+    mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA-Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM-Push_PAPI_L2_DCM,
+        PAPI_L2_ICM = Pop_PAPI_L2_ICM-Push_PAPI_L2_ICM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>%
+    select(
+        -Type, -StateType, -Imbrication) %>%
+    select(-Push_PAPI_L2_TCA,
+        -Push_PAPI_L2_DCM,
+        -Push_PAPI_L2_ICM,
+        -Push_ru_utime,
+        -Push_ru_stime,
+        -Pop_PAPI_L2_TCA,
+        -Pop_PAPI_L2_DCM,
+        -Pop_PAPI_L2_ICM,
+        -Pop_ru_utime,
+        -Pop_ru_stime) %>% as.data.frame();
+#Renomear os identificadores das threads
+tids = unique(df$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
+df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+df$Value <- as.factor(gsub('!.omp ', "", df$Value));
+head(df);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      Start       End   Duration                      Value PAPI_L2_TCA
+1  19.41803  19.43686   0.018828         parallel @ft.f:188         310
+2  19.43686 192.85894 173.422084               do @ft.f:188      903905
+3 192.85894 345.05055 152.191609 implicit barrier @ft.f:198         588
+4 345.05055 345.13632   0.085768               do @ft.f:188         369
+5 345.13632 345.14311   0.006788         parallel @ft.f:188          79
+6 355.68586 355.71648   0.030613         parallel @ft.f:430         211
+  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
+1          26         121        0        0     24
+2      356861         207    36297    35513     24
+3         182         293     4937      811     24
+4          64         163        0        0     24
+5          13           7        0        0     24
+6          34          43        0        0     24
+#+end_example
+
+Abra o arquivo =ft.f= em anexo, C-c C-a o
+
+Removo os rastros do arquivo =print_results.f=, menos importantes.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v2.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("print",Value)) %>% as.data.frame();
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v2.png]]
+
+
+Estranho de ver a relação entre do, parallel, e implicit
+barrier. Vamos investigar as combinações possíveis (pelos números das
+linhas). Entre as linhas 540 e 559.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v3.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("print",Value)) %>% as.data.frame();
+#x <- c(188, 198);
+#x <- c(222, 231);
+#x <- c(273, 280);
+#x <- c(430, 443);
+x <- c(540, 559);
+#x <- c(586, 604);
+#x <- c(631, 649);
+#x <- c(862, 869);
+df1 <- df %>% filter(grepl(x[1], Value) | grepl(x[2], Value)) %>% as.data.frame();
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v3.png]]
+
+This is the corresponding Fortran source code (line 540 to 559):
+
+#+begin_src fortran :results output :session :exports both
+!$omp parallel do default(shared) private(i,j,k,jj,y1,y2)
+!$omp&  shared(is,logd1,d1)
+      do k = 1, d3
+         do jj = 0, d2 - fftblock, fftblock
+            do j = 1, fftblock
+               do i = 1, d1
+                  y1(j,i) = x(i,j+jj,k)
+               enddo
+            enddo
+            
+            call cfftz (is, logd1, d1, y1, y2)
+
+
+            do j = 1, fftblock
+               do i = 1, d1
+                  xout(i,j+jj,k) = y1(j,i)
+               enddo
+            enddo
+         enddo
+      enddo
+#+end_src
+
+Let's try out another one:
+
+#+begin_src R :results output graphics :file img/gantt-chart_v4.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("print",Value)) %>% as.data.frame();
+#x <- c(188, 198);
+x <- c(222, 231);
+#x <- c(273, 280);
+#x <- c(430, 443);
+#x <- c(540, 559);
+#x <- c(586, 604);
+#x <- c(631, 649);
+#x <- c(862, 869);
+df1 <- df1 %>% filter(grepl(x[1], Value) | grepl(x[2], Value)) %>% as.data.frame();
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v4.png]]
+
+From line 222 and 231.
+
+#+begin_src fortran :results output :session :exports both
+!$omp parallel do default(shared) private(i,j,k)
+      do k = 1, d3
+         do j = 1, d2
+            do i = 1, d1
+               u0(i,j,k) = u0(i,j,k) * twiddle(i,j,k)
+               u1(i,j,k) = u0(i,j,k)
+            end do
+         end do
+      end do
+#+end_src
+
+So, we should merge these in a single state. Let's try out.
+
+#+begin_src R :results output :session :exports both
+library(reshape);
+#prepare the new code regions identification
+df1 <- df %>% filter(grepl("ft.f", Value));
+x <- df1 %>% filter(grepl("do ", Value) | grepl("implicit barrier ", Value)) %>% select(Value);
+lines <- as.integer(gsub(".* @ft.f:", "", unique(x)$Value));
+newpairs <- as.data.frame(matrix(lines, ncol=2, byrow=TRUE)) %>% arrange(V1);
+newpairs$Region = paste0(1:nrow(newpairs), "@ft.f:", newpairs$V1, "-", newpairs$V2);
+newpairs <- melt(newpairs, id.vars=("Region")) %>% select(-variable) %>% as.data.frame();
+newpairs;
+df1$Value <- as.integer(gsub("^.*@ft.f:", "", df1$Value));
+#merge the code regions in the trace
+df1 <- merge (df1, newpairs, by.x="Value", by.y="value");
+head(df1);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+           Region value
+1  1@ft.f:188-198   188
+2  2@ft.f:222-231   222
+3  3@ft.f:273-280   273
+4  4@ft.f:430-443   430
+5  5@ft.f:540-559   540
+6  6@ft.f:586-604   586
+7  7@ft.f:631-649   631
+8  8@ft.f:862-869   862
+9  1@ft.f:188-198   198
+10 2@ft.f:222-231   231
+11 3@ft.f:273-280   280
+12 4@ft.f:430-443   443
+13 5@ft.f:540-559   559
+14 6@ft.f:586-604   604
+15 7@ft.f:631-649   649
+16 8@ft.f:862-869   869
+  Value     Start       End   Duration PAPI_L2_TCA PAPI_L2_DCM PAPI_L2_ICM
+1   188  19.41803  19.43686   0.018828         310          26         121
+2   188  19.43686 192.85894 173.422084      903905      356861         207
+3   188 344.99815 345.01645   0.018293         114          36           8
+4   188 345.05055 345.13632   0.085768         369          64         163
+5   188 345.13632 345.14311   0.006788          79          13           7
+6   188  18.87762 199.26224 180.384616      904850      373880         223
+  ru_utime ru_stime Thread         Region
+1        0        0     24 1@ft.f:188-198
+2    36297    35513     24 1@ft.f:188-198
+3        0        0     17 1@ft.f:188-198
+4        0        0     24 1@ft.f:188-198
+5        0        0     24 1@ft.f:188-198
+6    53211    23457     14 1@ft.f:188-198
+#+end_example
+
+Let's plot again:
+
+
+#+begin_src R :results output graphics :file img/gantt-chart_v5.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df2 <- df1 %>% filter(grepl("2@", Region)) %>% as.data.frame();
+tstart = min(df$Start);
+tend = max(df$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df2, alpha=1, aes(fill=Region,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v5.png]]
+Now they have been merged.
+
+Let's plot them all.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v6.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+tstart = min(df$Start);
+tend = max(df$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Region,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v6.png]]
+
+Great, now it looks much better: we have 8 regions.
