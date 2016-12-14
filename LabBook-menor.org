@@ -721,3 +721,59 @@ grid.arrange(gA, gB, gC, gD, ncol=1, heights=c(10,10,10,10));
 [[file:img/t1_tudojunto_v2.png]]
 
 Ainda não está certo. Precisamos agrupar os contadores de hardware por região.
+* 2016-12-14 Problemas relacionados aos rastros hype2 (CG, LU, FT)
+#+name: rastro-ft_40threads_exp4
+#+begin_src shell :results output
+find dados/cg_lu_ft | grep traces.otf2$ | grep ft\-
+#+end_src
+
+#+RESULTS: rastro-ft_40threads_exp4
+: dados/cg_lu_ft/ft-40threads_exp4/traces.otf2
+
+#+begin_src shell :results output :var filename=rastro-ft_40threads_exp4
+BIN=~/dev/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl
+SDIR=`pwd`
+for dir in $(find dados/cg_lu_ft/ | grep exp4$); do
+    cd $dir
+    $BIN traces.otf2 > traces.paje
+    cd $SDIR
+done
+#+end_src
+
+#+RESULTS:
+
+Let's see the size of these traces.
+
+#+begin_src shell :results output
+ls -lh $(find dados/cg_lu_ft | grep paje$)
+#+end_src
+
+#+RESULTS:
+: -rw-r--r-- 1 schnorr schnorr 346M Dec 14 09:47 dados/cg_lu_ft/cg-40threads_exp4/traces.paje
+: -rw-r--r-- 1 schnorr schnorr 294M Dec 14 09:49 dados/cg_lu_ft/ft-40threads_exp4/traces.paje
+: -rw-r--r-- 1 schnorr schnorr 6.6G Dec 14 10:26 dados/cg_lu_ft/lu-40threads_exp4/traces.paje
+
+Quite large, let's =pj_dump= then, as before.
+
+#+begin_src shell :results output
+BIN=~/dev/pajeng/b/pj_dump
+SDIR=`pwd`
+for file in $(find dados/cg_lu_ft/ | grep traces.paje$); do
+    cd $(dirname $file)
+    $BIN --user-defined --no-imbrication traces.paje > traces.csv
+    cd $SDIR
+done
+#+end_src
+
+#+RESULTS:
+: dados/cg_lu_ft/cg-40threads_exp4
+: dados/cg_lu_ft/ft-40threads_exp4
+: dados/cg_lu_ft/lu-40threads_exp4
+
+Well, traces are very large, that didn't work, but I just realized
+Gabriel has traced everything. I should tell him that he should launch
+scorep with the following parameters.
+
+#+BEGIN_SRC sh
+scorep --nocompiler --nocuda --noonline-access --nopdt --nouser  --noopencl
+#+END_SRC
