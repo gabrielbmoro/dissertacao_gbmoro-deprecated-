@@ -53771,3 +53771,97 @@ omp_implicit_barrier_,print_results.f,29,PAPI_L2_DCM,52433980
 omp_implicit_barrier_,print_results.f,29,PAPI_L2_ICM,86287
 #+end_example
 
+* [12:44:43; 17.01.2017] Gerando trace localmente - NAS             :Gabriel:
+- Como as máquinas do inf estão desligadas, vou gerar traços score-p
+  na minha máquina local para as aplicações ft, mg e cg. Para isso,
+  vou utilizar o seguinte script de execução. 
+
+#+begin_src sh :results output :exports both :tangle scripts/execLocal1/scriptDeExecucao.bash
+	#!/bin/bash
+
+	pathOfNAS="/home/gabrielbmoro/Programas/NPB3.3.1/NPB3.3-OMP/bin"
+
+	apps=("ft.B.x" "cg.B.x" "mg.B.x")
+
+	export OMP_NUM_THREADS=4
+	export GOMP_CPU_AFFINITY=0-4
+
+	for i in ${apps[@]}; do
+
+		export SCOREP_ENABLE_PROFILING=true 
+		export SCOREP_ENABLE_TRACING=true 
+		export SCOREP_TOTAL_MEMORY=3G 
+		export SCOREP_METRIC_PAPI=PAPI_L2_TCA,PAPI_L2_DCM 
+		export SCOREP_METRIC_RUSAGE=ru_utime,ru_stime
+		export SCOREP_EXPERIMENT_DIRECTORY=$i-4threads_exp5
+		
+		sudo -E $pathOfNAS/$i
+
+	done
+
+#+end_src
+
+- Para que eu possa tratar os rastros, vou ter que dar permissão
+  escrita nas pastas geradas pelo Score-p.
+
+#+begin_src sh :results output :exports both
+cd scripts/execLocal1/
+sudo chmod 777 -R cg.B.x-4threads_exp5
+sudo chmod 777 -R ft.B.x-4threads_exp5
+sudo chmod 777 -R mg.B.x-4threads_exp5
+#+end_src
+
+- Com as execuções realizadas, vamos transformar os rastros gerados em
+  otf2 para o formato paje.
+
+#+begin_src sh :results output :exports both
+cd scripts/execLocal1/
+cd cg.B.x-4threads_exp5/
+otf2-print traces.otf2 > otf2.trace
+cd ft.B.x-4threads_exp5/
+otf2-print traces.otf2 > otf2.trace
+cd mg.B.x-4threads_exp5/
+otf2-print traces.otf2 > otf2.trace
+#+end_src
+
+#+RESULTS:
+
+- O tamanho do rastro gerado pela execução das aplicações:
+
+#+begin_src sh :session foo :results output :exports both 
+echo "CG - $(ls -larth scripts/execLocal1/cg.B.x-4threads_exp5/ | grep -i otf2.trace | awk ' { print $5 } ')"
+echo "FT - $(ls -larth scripts/execLocal1/ft.B.x-4threads_exp5/ | grep -i otf2.trace | awk ' { print $5 } ')"
+echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i otf2.trace | awk ' { print $5 } ')"
+#+end_src
+
+#+RESULTS:
+: CG - 56M
+: FT - 1,1M
+: MG - 16M
+
+- Utilizando a ferramenta =otf2-paje= do akypuera, o rastro gerado pelo
+  Score-p será convertido para o formato paje.
+
+#+begin_src sh :results output :exports both
+cd scripts/execLocal1/
+cd cg.B.x-4threads_exp5/
+sudo $HOME/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 > trace.paje
+cd ../ft.B.x-4threads_exp5/
+sudo $HOME/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 > trace.paje
+cd ../mg.B.x-4threads_exp5/
+sudo $HOME/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 > trace.paje
+#+end_src
+
+#+RESULTS:
+
+#+begin_src sh :session foo :results output :exports both 
+echo "CG - $(ls -larth scripts/execLocal1/cg.B.x-4threads_exp5/ | grep -i paje | awk ' { print $5 } ')"
+echo "FT - $(ls -larth scripts/execLocal1/ft.B.x-4threads_exp5/ | grep -i paje | awk ' { print $5 } ')"
+echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i paje | awk ' { print $5 } ')"
+#+end_src
+
+#+RESULTS:
+: CG - 1,6G
+: FT - 289M
+: MG - 34M
+
