@@ -53865,3 +53865,31 @@ echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i paje |
 : FT - 289M
 : MG - 34M
 
+- A partir do trace.paje para cada aplicação será gerado o csv pela ferramenta
+  =pj_dump=.
+
+#+begin_src sh :results output :exports both
+cd scripts/execLocal1/
+cd cg.B.x-4threads_exp5/
+/home/gabrielbmoro/Programas/pajeng/b/pj_dump traces.paje > trace.csv
+cd ..
+cd ft.B.x-4threads_exp5/
+/home/gabrielbmoro/Programas/pajeng/b/pj_dump traces.paje > trace.csv
+cd ..
+cd mg.B.x-4threads_exp5/
+/home/gabrielbmoro/Programas/pajeng/b/pj_dump traces.paje > trace.csv
+cd ..
+echo "CG - $(ls -larth cg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+echo "FT - $(ls -larth ft.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+#+end_src
+
+#+RESULTS:
+: CG - 962M
+: FT - 159M
+: MG - 21M
+
+- Visualizamos que do formato paje para csv, utilizando =pj_dump=
+  ocorreu uma diminuição de tamanho. O próximo passo é tratar esse
+  .csv, retirando apenas desse traço, o comportamento das regiões
+  paralelas.
