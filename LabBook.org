@@ -53893,3 +53893,28 @@ echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } 
   ocorreu uma diminuição de tamanho. O próximo passo é tratar esse
   .csv, retirando apenas desse traço, o comportamento das regiões
   paralelas.
+
+- Para diminuir ainda mais o rastro gerado pelas aplicações, vou
+  filtrar apenas as regiões paralelas, as quais são necessárias em
+  nosso trabalho.
+
+#+begin_src sh :results output :exports both
+cd scripts/execLocal1/
+cd cg.B.x-4threads_exp5/
+cat trace.csv | grep -i omp > traceWithParallelRegions.csv
+cd ..
+cd ft.B.x-4threads_exp5/
+cat trace.csv | grep -i omp > traceWithParallelRegions.csv
+cd ..
+cd mg.B.x-4threads_exp5/
+cat trace.csv | grep -i omp > traceWithParallelRegions.csv
+cd ..
+echo "CG - $(ls -larth cg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
+echo "FT - $(ls -larth ft.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
+echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
+#+end_src
+
+#+RESULTS:
+: CG - 6,8M
+: FT - 126K
+: MG - 1,8M
