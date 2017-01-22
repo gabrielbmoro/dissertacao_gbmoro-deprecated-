@@ -53904,7 +53904,7 @@ gerarRastro()
 {
    cd $1
    str="$(echo $1 | sed 's/.B.x-4threads_exp5//g').f"
-   cat trace.csv | sed 's/[!$@]//g' | sed 's/:/,\ /g' | grep -i omp | grep -v barrier | sed 's/'\ "$str"'//g' | awk ' { print $4,$5,$6,$7,$8,$9,$10,$11 } ' > traceWithParallelRegions.csv
+   cat trace.csv | sed 's/[!$@]//g' | sed 's/:/,\ /g' | grep -i omp | grep -v barrier | sed 's/'\ "$str"'//g' > traceWithParallelRegions.csv
    cd ..
 }
 
@@ -53920,6 +53920,98 @@ echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions 
 #+end_src
 
 #+RESULTS:
-: CG - 2,1M
-: FT - 58K
-: MG - 762K
+: CG - 2,8M
+: FT - 75K
+: MG - 1002K
+
+
+- Vamos verificar quais pontos das aplicações estão acima de 30% e se
+  instrumentando esses trechos é possível reduzir o consumo de
+  frequência do processador, a fim de reduzir o consumo de energia.
+
+** Analisando o comportamento da aplicação CG
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("scripts/execLocal1/cg.B.x-4threads_exp5/traceWithParallelRegions.csv");
+names(df)[1] <- "state"
+names(df)[2] <- "container"
+names(df)[3] <- "s"
+names(df)[4] <- "timestamp"
+names(df)[5] <- "papi_l2_access"
+names(df)[6] <- "papi_l2_misses"
+names(df)[7] <- "thread"
+names(df)[8] <- "region"
+names(df)[9] <- "code_line"
+
+df$misses_rate <- df$papi_l2_misses/df$papi_l2_access
+
+k <- df %>% select(timestamp,region,code_line,misses_rate) %>% group_by(region,code_line) %>% 
+summarize(mean_misses_rate=mean(misses_rate)) %>% as.data.frame();
+
+k <- filter(k, mean_misses_rate > 0.30);
+k
+#+end_src
+
+#+RESULTS:
+:          region code_line mean_misses_rate
+: 1  omp parallel       185        0.9999345
+
+** Analisando o comportamento da aplicação MG
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("scripts/execLocal1/mg.B.x-4threads_exp5/traceWithParallelRegions.csv");
+names(df)[1] <- "state"
+names(df)[2] <- "container"
+names(df)[3] <- "s"
+names(df)[4] <- "timestamp"
+names(df)[5] <- "papi_l2_access"
+names(df)[6] <- "papi_l2_misses"
+names(df)[7] <- "thread"
+names(df)[8] <- "region"
+names(df)[9] <- "code_line"
+
+df$misses_rate <- df$papi_l2_misses/df$papi_l2_access
+
+k <- df %>% select(timestamp,region,code_line,misses_rate) %>% group_by(region,code_line) %>% 
+summarize(mean_misses_rate=mean(misses_rate)) %>% as.data.frame();
+
+k <- filter(k, mean_misses_rate > 0.30);
+k
+#+end_src
+
+#+RESULTS:
+:          region code_line mean_misses_rate
+: 1        omp do      1118        0.3763369
+: 2  omp parallel      1118        0.3763488
+
+
+** Analisando o comportamento da aplicação FT
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+df <- read.csv("scripts/execLocal1/ft.B.x-4threads_exp5/traceWithParallelRegions.csv");
+names(df)[1] <- "state"
+names(df)[2] <- "container"
+names(df)[3] <- "s"
+names(df)[4] <- "timestamp"
+names(df)[5] <- "papi_l2_access"
+names(df)[6] <- "papi_l2_misses"
+names(df)[7] <- "thread"
+names(df)[8] <- "region"
+names(df)[9] <- "code_line"
+
+df$misses_rate <- df$papi_l2_misses/df$papi_l2_access
+
+k <- df %>% select(timestamp,region,code_line,misses_rate) %>% group_by(region,code_line) %>% 
+summarize(mean_misses_rate=mean(misses_rate)) %>% as.data.frame();
+
+k <- filter(k, mean_misses_rate > 0.30);
+k
+#+end_src
+
+#+RESULTS:
+:          region code_line mean_misses_rate
+: 1        omp do       188        0.9970735
+: 2  omp parallel       188        0.9966544
