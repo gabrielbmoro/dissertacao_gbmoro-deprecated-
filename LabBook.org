@@ -53904,7 +53904,7 @@ gerarRastro()
 {
    cd $1
    str="$(echo $1 | sed 's/.B.x-4threads_exp5//g').f"
-   cat trace.csv | sed 's/[!$@]//g' | sed 's/:/,\ /g' | grep -i omp | grep -v barrier | sed 's/'\ "$str"'//g' | awk ' { print $3,$4,$5,$6,$7,$8,$9,$10,$11 } ' > traceWithParallelRegions.csv
+   cat trace.csv | sed 's/[!$@]//g' | sed 's/:/,\ /g' | grep -i omp | grep -v barrier | sed 's/'\ "$str"'//g' | awk ' { print $4,$5,$6,$7,$8,$9,$10,$11 } ' > traceWithParallelRegions.csv
    cd ..
 }
 
@@ -53920,6 +53920,6 @@ echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions 
 #+end_src
 
 #+RESULTS:
-: CG - 2,2M
-: FT - 60K
-: MG - 798K
+: CG - 2,1M
+: FT - 58K
+: MG - 762K
