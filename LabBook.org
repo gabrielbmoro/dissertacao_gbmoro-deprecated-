@@ -53899,22 +53899,27 @@ echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } 
   nosso trabalho.
 
 #+begin_src sh :results output :exports both
+
+gerarRastro()
+{
+   cd $1
+   str="$(echo $1 | sed 's/.B.x-4threads_exp5//g').f"
+   cat trace.csv | sed 's/[!$@]//g' | sed 's/:/,\ /g' | grep -i omp | grep -v barrier | sed 's/'\ "$str"'//g' | awk ' { print $3,$4,$5,$6,$7,$8,$9,$10,$11 } ' > traceWithParallelRegions.csv
+   cd ..
+}
+
 cd scripts/execLocal1/
-cd cg.B.x-4threads_exp5/
-cat trace.csv | grep -i omp > traceWithParallelRegions.csv
-cd ..
-cd ft.B.x-4threads_exp5/
-cat trace.csv | grep -i omp > traceWithParallelRegions.csv
-cd ..
-cd mg.B.x-4threads_exp5/
-cat trace.csv | grep -i omp > traceWithParallelRegions.csv
-cd ..
+gerarRastro "cg.B.x-4threads_exp5"
+gerarRastro "ft.B.x-4threads_exp5"
+gerarRastro "mg.B.x-4threads_exp5"
+
 echo "CG - $(ls -larth cg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
 echo "FT - $(ls -larth ft.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
 echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
+
 #+end_src
 
 #+RESULTS:
-: CG - 6,8M
-: FT - 126K
-: MG - 1,8M
+: CG - 2,2M
+: FT - 60K
+: MG - 798K
