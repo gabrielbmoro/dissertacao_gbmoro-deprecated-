@@ -53815,41 +53815,19 @@ sudo chmod 777 -R mg.B.x-4threads_exp5
   otf2 para o formato paje.
 
 #+begin_src sh :results output :exports both
-cd scripts/execLocal1/
-cd cg.B.x-4threads_exp5/
-otf2-print traces.otf2 > otf2.trace
-cd ft.B.x-4threads_exp5/
-otf2-print traces.otf2 > otf2.trace
-cd mg.B.x-4threads_exp5/
-otf2-print traces.otf2 > otf2.trace
-#+end_src
+#!/bin/bash
 
-#+RESULTS:
+BIN=/home/gabrielbmoro/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl
+SDIR=scripts/execLocal1/
 
-- O tamanho do rastro gerado pela execução das aplicações:
+cd $SDIR
 
-#+begin_src sh :session foo :results output :exports both 
-echo "CG - $(ls -larth scripts/execLocal1/cg.B.x-4threads_exp5/ | grep -i otf2.trace | awk ' { print $5 } ')"
-echo "FT - $(ls -larth scripts/execLocal1/ft.B.x-4threads_exp5/ | grep -i otf2.trace | awk ' { print $5 } ')"
-echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i otf2.trace | awk ' { print $5 } ')"
-#+end_src
+for folder in $(ls -la | grep -i .B.x-4threads | awk ' { print $9 } '); do
+	cd $folder
+	$BIN traces.otf2 > traces.paje
+	cd ..
+done
 
-#+RESULTS:
-: CG - 56M
-: FT - 1,1M
-: MG - 16M
-
-- Utilizando a ferramenta =otf2-paje= do akypuera, o rastro gerado pelo
-  Score-p será convertido para o formato paje.
-
-#+begin_src sh :results output :exports both
-cd scripts/execLocal1/
-cd cg.B.x-4threads_exp5/
-sudo $HOME/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 > trace.paje
-cd ../ft.B.x-4threads_exp5/
-sudo $HOME/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 > trace.paje
-cd ../mg.B.x-4threads_exp5/
-sudo $HOME/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 > trace.paje
 #+end_src
 
 #+RESULTS:
@@ -53861,157 +53839,65 @@ echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i paje |
 #+end_src
 
 #+RESULTS:
+: 
 : CG - 1,6G
 : FT - 289M
 : MG - 34M
 
-- A partir do trace.paje para cada aplicação será gerado o csv pela ferramenta
-  =pj_dump=.
+- Agora vou converter os arquivos de formato paje para csv, utilizando
+  a ferramenta =pj_dump=
 
 #+begin_src sh :results output :exports both
-cd scripts/execLocal1/
-cd cg.B.x-4threads_exp5/
-/home/gabrielbmoro/Programas/pajeng/b/pj_dump traces.paje > trace.csv
-cd ..
-cd ft.B.x-4threads_exp5/
-/home/gabrielbmoro/Programas/pajeng/b/pj_dump traces.paje > trace.csv
-cd ..
-cd mg.B.x-4threads_exp5/
-/home/gabrielbmoro/Programas/pajeng/b/pj_dump traces.paje > trace.csv
-cd ..
-echo "CG - $(ls -larth cg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
-echo "FT - $(ls -larth ft.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
-echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+BIN=/home/gabrielbmoro/Programas/pajeng/b/pj_dump
+
+SDIR=scripts/execLocal1/
+
+cd $SDIR
+
+for folder in $(ls -la | grep -i .B.x-4threads | awk ' { print $9 } '); do
+	cd $folder
+	$BIN --user-defined --no-imbrication traces.paje > traces.csv
+	cd ..
+done 
 #+end_src
 
 #+RESULTS:
-: CG - 962M
-: FT - 159M
-: MG - 21M
 
-- Visualizamos que do formato paje para csv, utilizando =pj_dump=
-  ocorreu uma diminuição de tamanho. O próximo passo é tratar esse
-  .csv, retirando apenas desse traço, o comportamento das regiões
-  paralelas.
+#+begin_src sh :session foo :results output :exports both 
+echo "CG - $(ls -larth scripts/execLocal1/cg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+echo "FT - $(ls -larth scripts/execLocal1/ft.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
+#+end_src
 
-- Para diminuir ainda mais o rastro gerado pelas aplicações, vou
-  filtrar apenas as regiões paralelas, as quais são necessárias em
-  nosso trabalho.
+#+RESULTS:
+: CG - 3,7G
+: FT - 664M
+: MG - 80M
+
+- Compreendendo o rastro gerado:
 
 #+begin_src sh :results output :exports both
-
-gerarRastro()
-{
-   cd $1
-   str="$(echo $1 | sed 's/.B.x-4threads_exp5//g').f"
-   cat trace.csv | sed 's/[!$@]//g' | sed 's/:/,\ /g' | grep -i omp | grep -v barrier | sed 's/'\ "$str"'//g' > traceWithParallelRegions.csv
-   cd ..
-}
-
-cd scripts/execLocal1/
-gerarRastro "cg.B.x-4threads_exp5"
-gerarRastro "ft.B.x-4threads_exp5"
-gerarRastro "mg.B.x-4threads_exp5"
-
-echo "CG - $(ls -larth cg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
-echo "FT - $(ls -larth ft.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
-echo "MG - $(ls -larth mg.B.x-4threads_exp5/ | grep -i traceWithParallelRegions | awk ' { print $5 } ')"
-
+cd scripts/execLocal1/cg.B.x-4threads_exp5/
+cat traces.csv | head -10
 #+end_src
 
 #+RESULTS:
-: CG - 2,8M
-: FT - 75K
-: MG - 1002K
+#+begin_example
+Container, 0, 0, 0, 117902, 117902, 0
+Container, 0, T, 0, 117902, 117902, zero
+State, zero, S, 0.000000, 0.075760, 0.075760, 0.000000, main, 17277, 2177, 12000, 4000, 19790, 2660, 12000, 4000
+State, zero, S, 0.075760, 0.082532, 0.006772, 1.000000, MAIN__, 19790, 2660, 12000, 4000, 20349, 2696, 12000, 4000
+State, zero, S, 0.082532, 0.084624, 0.002092, 2.000000, timer_clear_, 20349, 2696, 12000, 4000, 20459, 2706, 12000, 4000
+State, zero, S, 0.084624, 0.087688, 0.003064, 1.000000, MAIN__, 20459, 2706, 12000, 4000, 20671, 2707, 12000, 4000
+State, zero, S, 0.087688, 0.089448, 0.001760, 2.000000, timer_clear_, 20671, 2707, 12000, 4000, 20751, 2710, 12000, 4000
+State, zero, S, 0.089448, 0.091084, 0.001636, 1.000000, MAIN__, 20751, 2710, 12000, 4000, 20784, 2710, 12000, 4000
+State, zero, S, 0.091084, 0.092606, 0.001522, 2.000000, timer_clear_, 20784, 2710, 12000, 4000, 20814, 2711, 12000, 4000
+State, zero, S, 0.092606, 0.130198, 0.037592, 1.000000, MAIN__, 20814, 2711, 12000, 4000, 23368, 2998, 12000, 4000
+#+end_example
 
+- A partir da explicação do professor Lucas, consegui compreender que
+  as sete primeiras colunas correspondem respectivamente: State,
+  estado, tipo de estado, tempo inicial, tempo final, diferença entre
+  esses tempos para representar o custo temporal, thread e região de
+  código executada.
 
-- Vamos verificar quais pontos das aplicações estão acima de 30% e se
-  instrumentando esses trechos é possível reduzir o consumo de
-  frequência do processador, a fim de reduzir o consumo de energia.
-
-** Analisando o comportamento da aplicação CG
-
-#+begin_src R :results output :session *R* :exports both
-library(dplyr);
-df <- read.csv("scripts/execLocal1/cg.B.x-4threads_exp5/traceWithParallelRegions.csv");
-names(df)[1] <- "state"
-names(df)[2] <- "container"
-names(df)[3] <- "s"
-names(df)[4] <- "timestamp"
-names(df)[5] <- "papi_l2_access"
-names(df)[6] <- "papi_l2_misses"
-names(df)[7] <- "thread"
-names(df)[8] <- "region"
-names(df)[9] <- "code_line"
-
-df$misses_rate <- df$papi_l2_misses/df$papi_l2_access
-
-k <- df %>% select(timestamp,region,code_line,misses_rate) %>% group_by(region,code_line) %>% 
-summarize(mean_misses_rate=mean(misses_rate)) %>% as.data.frame();
-
-k <- filter(k, mean_misses_rate > 0.30);
-k
-#+end_src
-
-#+RESULTS:
-:          region code_line mean_misses_rate
-: 1  omp parallel       185        0.9999345
-
-** Analisando o comportamento da aplicação MG
-
-#+begin_src R :results output :session *R* :exports both
-library(dplyr);
-df <- read.csv("scripts/execLocal1/mg.B.x-4threads_exp5/traceWithParallelRegions.csv");
-names(df)[1] <- "state"
-names(df)[2] <- "container"
-names(df)[3] <- "s"
-names(df)[4] <- "timestamp"
-names(df)[5] <- "papi_l2_access"
-names(df)[6] <- "papi_l2_misses"
-names(df)[7] <- "thread"
-names(df)[8] <- "region"
-names(df)[9] <- "code_line"
-
-df$misses_rate <- df$papi_l2_misses/df$papi_l2_access
-
-k <- df %>% select(timestamp,region,code_line,misses_rate) %>% group_by(region,code_line) %>% 
-summarize(mean_misses_rate=mean(misses_rate)) %>% as.data.frame();
-
-k <- filter(k, mean_misses_rate > 0.30);
-k
-#+end_src
-
-#+RESULTS:
-:          region code_line mean_misses_rate
-: 1        omp do      1118        0.3763369
-: 2  omp parallel      1118        0.3763488
-
-
-** Analisando o comportamento da aplicação FT
-
-#+begin_src R :results output :session *R* :exports both
-library(dplyr);
-df <- read.csv("scripts/execLocal1/ft.B.x-4threads_exp5/traceWithParallelRegions.csv");
-names(df)[1] <- "state"
-names(df)[2] <- "container"
-names(df)[3] <- "s"
-names(df)[4] <- "timestamp"
-names(df)[5] <- "papi_l2_access"
-names(df)[6] <- "papi_l2_misses"
-names(df)[7] <- "thread"
-names(df)[8] <- "region"
-names(df)[9] <- "code_line"
-
-df$misses_rate <- df$papi_l2_misses/df$papi_l2_access
-
-k <- df %>% select(timestamp,region,code_line,misses_rate) %>% group_by(region,code_line) %>% 
-summarize(mean_misses_rate=mean(misses_rate)) %>% as.data.frame();
-
-k <- filter(k, mean_misses_rate > 0.30);
-k
-#+end_src
-
-#+RESULTS:
-:          region code_line mean_misses_rate
-: 1        omp do       188        0.9970735
-: 2  omp parallel       188        0.9966544
