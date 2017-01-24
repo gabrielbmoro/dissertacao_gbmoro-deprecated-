@@ -53857,42 +53857,32 @@ cd $SDIR
 for folder in $(ls -la | grep -i .B.x-4threads | awk ' { print $9 } '); do
 	cd $folder
 	$BIN --user-defined --no-imbrication traces.paje > traces.csv
+	cat traces.csv | grep -i omp > traces_parallelregions.csv
 	cd ..
 done 
 #+end_src
 
 #+RESULTS:
 
-#+begin_src sh :session foo :results output :exports both 
-echo "CG - $(ls -larth scripts/execLocal1/cg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
-echo "FT - $(ls -larth scripts/execLocal1/ft.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
-echo "MG - $(ls -larth scripts/execLocal1/mg.B.x-4threads_exp5/ | grep -i csv | awk ' { print $5 } ')"
-#+end_src
-
-#+RESULTS:
-: CG - 3,7G
-: FT - 664M
-: MG - 80M
-
 - Compreendendo o rastro gerado:
 
 #+begin_src sh :results output :exports both
 cd scripts/execLocal1/cg.B.x-4threads_exp5/
-cat traces.csv | head -10
+cat traces_parallelregions.csv | head -10
 #+end_src
 
 #+RESULTS:
 #+begin_example
-Container, 0, 0, 0, 117902, 117902, 0
-Container, 0, T, 0, 117902, 117902, zero
-State, zero, S, 0.000000, 0.075760, 0.075760, 0.000000, main, 17277, 2177, 12000, 4000, 19790, 2660, 12000, 4000
-State, zero, S, 0.075760, 0.082532, 0.006772, 1.000000, MAIN__, 19790, 2660, 12000, 4000, 20349, 2696, 12000, 4000
-State, zero, S, 0.082532, 0.084624, 0.002092, 2.000000, timer_clear_, 20349, 2696, 12000, 4000, 20459, 2706, 12000, 4000
-State, zero, S, 0.084624, 0.087688, 0.003064, 1.000000, MAIN__, 20459, 2706, 12000, 4000, 20671, 2707, 12000, 4000
-State, zero, S, 0.087688, 0.089448, 0.001760, 2.000000, timer_clear_, 20671, 2707, 12000, 4000, 20751, 2710, 12000, 4000
-State, zero, S, 0.089448, 0.091084, 0.001636, 1.000000, MAIN__, 20751, 2710, 12000, 4000, 20784, 2710, 12000, 4000
-State, zero, S, 0.091084, 0.092606, 0.001522, 2.000000, timer_clear_, 20784, 2710, 12000, 4000, 20814, 2711, 12000, 4000
-State, zero, S, 0.092606, 0.130198, 0.037592, 1.000000, MAIN__, 20814, 2711, 12000, 4000, 23368, 2998, 12000, 4000
+State, zero, S, 1.040083, 1.053624, 0.013541, 2.000000, !$omp parallel @cg.f:185, 33575, 4214, 12000, 4000, 34408, 4302, 12000, 4000
+State, zero, S, 1.057177, 1.063913, 0.006736, 2.000000, !$omp parallel @cg.f:185, 34650, 4303, 12000, 4000, 35096, 4324, 12000, 4000
+State, zero, S, 8345.835045, 25213.400111, 16867.565066, 4.000000, !$omp barrier @cg.f:805, 113718173, 374753, 2016000, 2748000, 113718763, 374938, 2020000, 2748000
+State, zero, S, 25227.942463, 25235.141154, 7.198691, 5.000000, !$omp barrier @cg.f:883, 113921313, 402654, 2028000, 2748000, 113921962, 402804, 2028000, 2752000
+State, zero, S, 25235.153436, 25235.189693, 0.036257, 5.000000, !$omp barrier @cg.f:896, 113922417, 402861, 2028000, 2752000, 113922668, 402892, 2028000, 2752000
+State, zero, S, 28591.264528, 28591.299142, 0.034614, 5.000000, !$omp barrier @cg.f:984, 117127138, 9304536, 3860000, 2792000, 117128106, 9304637, 3860000, 2792000
+State, zero, S, 28591.438597, 28591.484499, 0.045902, 5.000000, !$omp barrier @cg.f:994, 117128599, 9304826, 3860000, 2792000, 117128854, 9304877, 3860000, 2792000
+State, zero, S, 28591.488709, 28591.544375, 0.055666, 5.000000, !$omp barrier @cg.f:1007, 117128912, 9304884, 3860000, 2792000, 117129026, 9304900, 3860000, 2792000
+State, zero, S, 28591.548929, 28738.871958, 147.323029, 5.000000, !$omp do @cg.f:1009, 117129085, 9304910, 3860000, 2792000, 117727595, 9954517, 3880000, 2856000
+State, zero, S, 28738.871958, 28748.106292, 9.234334, 6.000000, !$omp implicit barrier @cg.f:1024, 117727595, 9954517, 3880000, 2856000, 117728696, 9954761, 3888000, 2856000
 #+end_example
 
 - A partir da explicação do professor Lucas, consegui compreender que
@@ -53900,4 +53890,53 @@ State, zero, S, 0.092606, 0.130198, 0.037592, 1.000000, MAIN__, 20814, 2711, 120
   estado, tipo de estado, tempo inicial, tempo final, diferença entre
   esses tempos para representar o custo temporal, thread e região de
   código executada.
+
+
+#+begin_src R :results output :session :exports both 
+library(dplyr);
+df <- read.csv(gsub("\n", "", "scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv"), 
+header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(
+        Type=V1, Container=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Thread=V7, Region=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_ru_utime=V11,
+        Push_ru_stime=V12,
+        Pop_PAPI_L2_TCA=V13,
+        Pop_PAPI_L2_DCM=V14,
+        Pop_ru_utime=V15,
+        Pop_ru_stime=V16) %>% 
+mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA - Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM - Push_PAPI_L2_DCM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>% 
+    select(
+        -Type, -Container, -StateType, -Push_PAPI_L2_TCA, 
+-Push_PAPI_L2_DCM, -Push_ru_utime, -Push_ru_stime, -Pop_PAPI_L2_TCA, 
+-Pop_PAPI_L2_DCM, -Pop_ru_utime, -Pop_ru_stime) %>%
+	mutate(
+		MISSES_L2 = PAPI_L2_DCM / PAPI_L2_TCA) %>%  
+    select(-PAPI_L2_TCA, -PAPI_L2_DCM, -ru_utime, -ru_stime)  %>% 
+as.data.frame();
+
+#Renomear os identificadores das threads
+tids = unique(df$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+
+df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
+df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+head(df);
+#tidsdf
+#+end_src
+
+#+RESULTS:
+:      Start      End Duration                   Region  MISSES_L2 Thread
+: 1 49647.31 49647.32 0.003071 !$omp parallel @cg.f:339 0.12500000      6
+: 2 87089.10 87089.10 0.003311 !$omp parallel @cg.f:513 0.01351351      6
+: 3 90968.93 90968.93 0.003224 !$omp parallel @cg.f:513 0.12962963      6
+: 4 28857.83 28857.83 0.003134 !$omp parallel @cg.f:513 0.04761905      6
+: 5 52226.58 52226.58 0.003086 !$omp parallel @cg.f:513 0.19230769      6
+: 6 97002.63 97002.64 0.003143 !$omp parallel @cg.f:339 0.11666667      6
 
