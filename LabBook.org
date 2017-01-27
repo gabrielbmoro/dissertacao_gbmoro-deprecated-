@@ -53782,9 +53782,8 @@ omp_implicit_barrier_,print_results.f,29,PAPI_L2_ICM,86287
 	pathOfNAS="/home/gabrielbmoro/Programas/NPB3.3.1/NPB3.3-OMP/bin"
 
 	apps=("ft.B.x" "cg.B.x" "mg.B.x")
-
-	export OMP_NUM_THREADS=4
-	export GOMP_CPU_AFFINITY=0-4
+	export OMP_NUM_THREADS=6
+	export GOMP_CPU_AFFINITY=0-6
 
 	for i in ${apps[@]}; do
 
@@ -53892,8 +53891,12 @@ State, zero, S, 28738.871958, 28748.106292, 9.234334, 6.000000, !$omp implicit b
   código executada.
 
 
+
+** Analisando a Taxa de Misses da Aplicação CG
+
 #+begin_src R :results output :session :exports both 
 library(dplyr);
+
 df <- read.csv(gsub("\n", "", "scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv"), 
 header=FALSE, strip.white=TRUE);
 df <- df %>%
@@ -53928,31 +53931,51 @@ df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
 df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% group_by(Thread,Region) %>% as.data.frame();
 
 df <- filter(df, MISSES_L2 > 0.30);
+
+
 dfSubset <- df[grep("barrier", df$Region),];
 df1 <- anti_join(df,dfSubset);
 
-#mtcars[grep("Merc", rownames(mtcars)), ]
-head(df1);
-#tidsdf
+df1$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df1$Region))
+df1$Region <- gsub("*[0-9]*|@[a-z]|!\\$|[a-z]\\.[a-z]|:","",df1$Region)
+df1$Region <- gsub("\\ ", "_",df1$Region);
+
+head(df1)
+
 #+end_src
 
 #+RESULTS:
 : Joining, by = c("Start", "End", "Duration", "Region", "MISSES_L2", "Thread")
-:      Start       End  Duration                 Region MISSES_L2 Thread
-: 1 110365.8 110365.83  0.004344 !$omp master @cg.f:546 0.4929577      2
-: 2 111077.4 111077.52  0.119266     !$omp do @cg.f:656 1.4808168      2
-: 3  70646.5  70646.63  0.120836     !$omp do @cg.f:656 1.4634761      2
-: 4 100444.3 100444.40  0.120005     !$omp do @cg.f:656 1.4877261      2
-: 5 115396.2 115437.58 41.412308     !$omp do @cg.f:568 0.8110392      2
-: 6 110365.3 110365.37  0.083634     !$omp do @cg.f:617 8.6798780      2
+:      Start       End  Duration      Region MISSES_L2 Thread line
+: 1 110365.8 110365.83  0.004344 omp_master_ 0.4929577      2  546
+: 2 111077.4 111077.52  0.119266     omp_do_ 1.4808168      2  656
+: 3  70646.5  70646.63  0.120836     omp_do_ 1.4634761      2  656
+: 4 100444.3 100444.40  0.120005     omp_do_ 1.4877261      2  656
+: 5 115396.2 115437.58 41.412308     omp_do_ 0.8110392      2  568
+: 6 110365.3 110365.37  0.083634     omp_do_ 8.6798780      2  617
 
 
-#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 600 :height 400 :session *R* 
-
+#+begin_src R :results output graphics :file img/misses_cg6threads.png :exports both :width 600 :height 400 :session *R* 
 library(ggplot2);
-
-ggplot(df1, aes(x=End, y=MISSES_L2,colour=Region), group=Thread) +scale_x_log10() +  geom_point() + facet_grid(~Thread);
+ggplot(df1, aes(x=End, y=MISSES_L2,colour=Region), group=Thread) + 
+scale_x_log10() +  
+geom_point() + 
+facet_grid(~Thread);
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-36257YK/figure3625u_A.png]]
+[[file:img/misses_cg6threads.png]]
+
+
+- A aplicação CG possui um comportamento heterogêneo nos diferentes
+  núcleos de processamento. É possível visualizar que na thread 7 e na
+  thread 2, existe um comportamento maior na taxa de cache misses
+  (L2). Na descrição do artigo que define o benchmark, essa aplicação
+  utiliza um método matemático para processar uma aproximação do menor
+  valor próprio de uma matriz desestruturada, esparsa e grande. A
+  matriz utilizada pela aplicação possui localizações randômicas para
+  aonde a computação será realizada, isso pode explicar o porquê as
+  threads possuem um comportamento diferente na taxa de cache
+  misses. Como trabalhamos com apenas uma execução, não podemos
+  verificar se esse comportamento ocorre sempre na mesma quantidade de
+  threads.
