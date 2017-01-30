@@ -53945,27 +53945,38 @@ head(df1)
 #+end_src
 
 #+RESULTS:
-: Joining, by = c("Start", "End", "Duration", "Region", "MISSES_L2", "Thread")
-:      Start       End  Duration      Region MISSES_L2 Thread line
-: 1 110365.8 110365.83  0.004344 omp_master_ 0.4929577      2  546
-: 2 111077.4 111077.52  0.119266     omp_do_ 1.4808168      2  656
-: 3  70646.5  70646.63  0.120836     omp_do_ 1.4634761      2  656
-: 4 100444.3 100444.40  0.120005     omp_do_ 1.4877261      2  656
-: 5 115396.2 115437.58 41.412308     omp_do_ 0.8110392      2  568
-: 6 110365.3 110365.37  0.083634     omp_do_ 8.6798780      2  617
+#+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+Joining, by = c("Start", "End", "Duration", "Region", "MISSES_L2", "Thread")
+     Start       End  Duration      Region MISSES_L2 Thread line
+1 110365.8 110365.83  0.004344 omp_master_ 0.4929577      2  546
+2 111077.4 111077.52  0.119266     omp_do_ 1.4808168      2  656
+3  70646.5  70646.63  0.120836     omp_do_ 1.4634761      2  656
+4 100444.3 100444.40  0.120005     omp_do_ 1.4877261      2  656
+5 115396.2 115437.58 41.412308     omp_do_ 0.8110392      2  568
+6 110365.3 110365.37  0.083634     omp_do_ 8.6798780      2  617
+#+end_example
 
 
 #+begin_src R :results output graphics :file img/misses_cg6threads.png :exports both :width 600 :height 400 :session *R* 
 library(ggplot2);
 ggplot(df1, aes(x=End, y=MISSES_L2,colour=Region), group=Thread) + 
 scale_x_log10() +  
-geom_point() + 
+geom_point() + xlab("time_end") + ylab("L2_misses_rate") + 
 facet_grid(~Thread);
 #+end_src
 
 #+RESULTS:
 [[file:img/misses_cg6threads.png]]
-
 
 - A aplicação CG possui um comportamento heterogêneo nos diferentes
   núcleos de processamento. É possível visualizar que na thread 7 e na
@@ -53979,3 +53990,128 @@ facet_grid(~Thread);
   misses. Como trabalhamos com apenas uma execução, não podemos
   verificar se esse comportamento ocorre sempre na mesma quantidade de
   threads.
+
+- Vou reexecutar a aplicação CG, mas agora vou utilizar 4 contadores
+  de hardware, além de monitorar as regiões memory-bound da aplicação,
+  quero saber também em quais regiões ocorre um comportamento mais
+  CPU-Bound. Para isso, será necessário utilizar os contadores os
+  seguintes eventos PAPI: =PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM,
+  PAPI_L2_TCA=. A disponibilidade desses contadores pode variar de
+  acordo com a plataforma utilizada, por exemplo, ao invés de
+  utilizarmos os eventos =PAPI_L2_TCM= e o =PAPI_L2_TCA=, para calcular a
+  taxa de misses para cache L2, poderíamos utilizar apenas =PAPI_L2_DCH=
+  para sabermos a taxa de hit, com esse valor a taxa de misses poderia
+  ser estimada. Mas como nessa plataforma esse evento não está
+  disponível, temos que utilizar dois eventos PAPI para medir a taxa
+  de misses.
+
+- A seguir está o script para que possamos obter um rastro mais
+  completo, para que seja possível compreender melhor o comportamento
+  dessa aplicação.
+
+
+#+begin_src sh :results output :exports both :tangle scripts/execLocal1/scriptCG_4eventosPAPI.bash
+	#!/bin/bash
+
+	pathOfNAS="/home/gabrielbmoro/Programas/NPB3.3.1/NPB3.3-OMP/bin"
+
+	apps="cg.B.x"
+
+	export OMP_NUM_THREADS=4
+	export GOMP_CPU_AFFINITY=0-4
+
+	export SCOREP_ENABLE_PROFILING=true 
+	export SCOREP_ENABLE_TRACING=true 
+	export SCOREP_TOTAL_MEMORY=3G 
+	export SCOREP_METRIC_PAPI=PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM,PAPI_L2_TCA
+	export SCOREP_METRIC_RUSAGE=ru_utime,ru_stime
+	export SCOREP_EXPERIMENT_DIRECTORY=$apps-4threads_exp6
+		
+	sudo -E $pathOfNAS/$apps
+
+#+end_src
+
+
+#+begin_src sh :results output :exports both
+#!/bin/bash
+
+BIN=/home/gabrielbmoro/Programas/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl
+BIN_2=/home/gabrielbmoro/Programas/pajeng/b/pj_dump
+
+SDIR=scripts/execLocal1/cg.B.x-4threads_exp6/
+
+cd $SDIR
+$BIN traces.otf2 > traces.paje
+$BIN_2 --user-defined --no-imbrication traces.paje > traces.csv
+cat traces.csv | grep -i omp > traces_parallelregions.csv
+#+end_src
+
+#+RESULTS:
+
+#+begin_src sh :results output :exports both
+cd scripts/execLocal1/cg.B.x-4threads_exp6
+#+end_src
+
+#+RESULTS:
+: 148942
+
+#+begin_src R :results output :session :exports both 
+library(dplyr);
+ #=PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM,
+ # PAPI_L2_TCA
+df <- read.csv(gsub("\n", "", "scripts/execLocal1/cg.B.x-4threads_exp6/traces_parallelregions.csv"), 
+header=FALSE, strip.white=TRUE);
+
+df <- df %>%
+    rename(
+        Type=V1, Container=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Thread=V7, Region=V8,
+        Push_PAPI_TOT_INS=V9,
+        Push_PAPI_REF_CYC=V10,
+	    Push_PAPI_L2_TCM=V11,
+	    Push_PAPI_L2_TCA=V12,
+        Push_ru_utime=V13,
+        Push_ru_stime=V14,
+        Pop_PAPI_TOT_INS=V15,
+        Pop_PAPI_REF_CYC=V16,
+        Pop_PAPI_L2_TCM=V17,
+	    Pop_PAPI_L2_TCA=V18,
+	    Pop_ru_utime=V19,
+        Pop_ru_stime=V20) %>% 
+mutate(
+        PAPI_TOT_INS = Pop_PAPI_TOT_INS - Push_PAPI_TOT_INS,
+        PAPI_REF_CYC = Pop_PAPI_REF_CYC - Push_PAPI_REF_CYC,
+        PAPI_L2_TCM = Pop_PAPI_L2_TCM - Push_PAPI_L2_TCM,
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA - Push_PAPI_L2_TCA,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>% 
+    select(
+        -Type, -Container, -StateType, -Push_PAPI_TOT_INS,-Push_PAPI_REF_CYC,
+-Push_PAPI_L2_TCM, -Push_PAPI_L2_TCA, -Push_ru_utime, -Push_ru_stime,
+-Pop_PAPI_TOT_INS, -Pop_PAPI_REF_CYC, -Pop_PAPI_L2_TCM, -Pop_PAPI_L2_TCA, -Pop_ru_utime, -Pop_ru_stime) %>%
+	mutate(
+		MISSES_L2 = PAPI_L2_TCM / PAPI_L2_TCA,
+		IPC = PAPI_TOT_INS / PAPI_REF_CYC) %>%  
+    select(-PAPI_TOT_INS,-PAPI_REF_CYC,-PAPI_L2_TCM,-PAPI_L2_TCA,-ru_utime,-ru_stime)  %>% 
+as.data.frame();
+
+head(df)
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+         Start          End     Duration Thread                   Region
+1     0.835110     0.848922     0.013812      2 !$omp parallel @cg.f:185
+2     0.852505     0.859664     0.007159      2 !$omp parallel @cg.f:185
+3  8500.969127 25775.061685 17274.092558      4  !$omp barrier @cg.f:805
+4 25789.013540 25796.054908     7.041368      5  !$omp barrier @cg.f:883
+5 25796.066532 25796.110256     0.043724      5  !$omp barrier @cg.f:896
+6 28973.577585 29034.832155    61.254570      5  !$omp barrier @cg.f:984
+  MISSES_L2       IPC
+1 0.3983740 13.643701
+2 0.2103896 18.432507
+3 0.6320939  8.801126
+4 0.5432099  8.283823
+5 0.1630901  9.269558
+6 0.7966292  8.196530
+#+end_example
