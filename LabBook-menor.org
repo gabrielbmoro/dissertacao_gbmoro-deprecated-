@@ -777,3 +777,102 @@ scorep with the following parameters.
 #+BEGIN_SRC sh
 scorep --nocompiler --nocuda --noonline-access --nopdt --nouser  --noopencl
 #+END_SRC
+* 2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente
+
+Gabriel fornece um CSV registrado aqui:
+
+#+begin_src shell :results output
+head scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv
+#+end_src
+
+#+RESULTS:
+#+begin_example
+State, zero, S, 1.040083, 1.053624, 0.013541, 2.000000, !$omp parallel @cg.f:185, 33575, 4214, 12000, 4000, 34408, 4302, 12000, 4000
+State, zero, S, 1.057177, 1.063913, 0.006736, 2.000000, !$omp parallel @cg.f:185, 34650, 4303, 12000, 4000, 35096, 4324, 12000, 4000
+State, zero, S, 8345.835045, 25213.400111, 16867.565066, 4.000000, !$omp barrier @cg.f:805, 113718173, 374753, 2016000, 2748000, 113718763, 374938, 2020000, 2748000
+State, zero, S, 25227.942463, 25235.141154, 7.198691, 5.000000, !$omp barrier @cg.f:883, 113921313, 402654, 2028000, 2748000, 113921962, 402804, 2028000, 2752000
+State, zero, S, 25235.153436, 25235.189693, 0.036257, 5.000000, !$omp barrier @cg.f:896, 113922417, 402861, 2028000, 2752000, 113922668, 402892, 2028000, 2752000
+State, zero, S, 28591.264528, 28591.299142, 0.034614, 5.000000, !$omp barrier @cg.f:984, 117127138, 9304536, 3860000, 2792000, 117128106, 9304637, 3860000, 2792000
+State, zero, S, 28591.438597, 28591.484499, 0.045902, 5.000000, !$omp barrier @cg.f:994, 117128599, 9304826, 3860000, 2792000, 117128854, 9304877, 3860000, 2792000
+State, zero, S, 28591.488709, 28591.544375, 0.055666, 5.000000, !$omp barrier @cg.f:1007, 117128912, 9304884, 3860000, 2792000, 117129026, 9304900, 3860000, 2792000
+State, zero, S, 28591.548929, 28738.871958, 147.323029, 5.000000, !$omp do @cg.f:1009, 117129085, 9304910, 3860000, 2792000, 117727595, 9954517, 3880000, 2856000
+State, zero, S, 28738.871958, 28748.106292, 9.234334, 6.000000, !$omp implicit barrier @cg.f:1024, 117727595, 9954517, 3880000, 2856000, 117728696, 9954761, 3888000, 2856000
+#+end_example
+
+Uma vez que não tem o nome das colunas, vou acreditar que os nomes
+localizados no script R do LabBook do Gabriel para ler um arquivo
+similar estão corretos.
+
+Lendo os dados.
+
+#+begin_src R :results output :session :exports both
+df <- read.csv("scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv", header=FALSE, strip.white=TRUE);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+     V1   V2 V3           V4           V5           V6 V7
+1 State zero  S     1.040083     1.053624     0.013541  2
+2 State zero  S     1.057177     1.063913     0.006736  2
+3 State zero  S  8345.835045 25213.400111 16867.565066  4
+4 State zero  S 25227.942463 25235.141154     7.198691  5
+5 State zero  S 25235.153436 25235.189693     0.036257  5
+6 State zero  S 28591.264528 28591.299142     0.034614  5
+                        V8        V9     V10     V11     V12       V13     V14
+1 !$omp parallel @cg.f:185     33575    4214   12000    4000     34408    4302
+2 !$omp parallel @cg.f:185     34650    4303   12000    4000     35096    4324
+3  !$omp barrier @cg.f:805 113718173  374753 2016000 2748000 113718763  374938
+4  !$omp barrier @cg.f:883 113921313  402654 2028000 2748000 113921962  402804
+5  !$omp barrier @cg.f:896 113922417  402861 2028000 2752000 113922668  402892
+6  !$omp barrier @cg.f:984 117127138 9304536 3860000 2792000 117128106 9304637
+      V15     V16
+1   12000    4000
+2   12000    4000
+3 2020000 2748000
+4 2028000 2752000
+5 2028000 2752000
+6 3860000 2792000
+#+end_example
+
+Renomeando as colunas.
+
+#+begin_src R :results output :session :exports both
+df1 <- df %>%
+    rename(
+        Type=V1, Container=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Thread=V7, Region=V8,
+        Push_PAPI_TOT_INS=V9,
+        Push_PAPI_REF_CYC=V10,
+	    Push_PAPI_L2_TCM=V11,
+	    Push_PAPI_L2_TCA=V12,
+        Push_ru_utime=V13,
+        Push_ru_stime=V14,
+        Pop_PAPI_TOT_INS=V15,
+        Pop_PAPI_REF_CYC=V16,
+        Pop_PAPI_L2_TCM=V17,
+	    Pop_PAPI_L2_TCA=V18,
+	    Pop_ru_utime=V19,
+        Pop_ru_stime=V20);
+head(df1);
+#+end_src
+
+#+RESULTS:
+: Error: Unknown variables: V17, V18, V19, V20.
+:      Start       End  Duration      Region MISSES_L2 Thread line
+: 1 110365.8 110365.83  0.004344 omp_master_ 0.4929577      2  546
+: 2 111077.4 111077.52  0.119266     omp_do_ 1.4808168      2  656
+: 3  70646.5  70646.63  0.120836     omp_do_ 1.4634761      2  656
+: 4 100444.3 100444.40  0.120005     omp_do_ 1.4877261      2  656
+: 5 115396.2 115437.58 41.412308     omp_do_ 0.8110392      2  568
+: 6 110365.3 110365.37  0.083634     omp_do_ 8.6798780      2  617
+
+Como podemos ver, temos um erro:
+
+#+BEGIN_EXAMPLE
+: Error: Unknown variables: V17, V18, V19, V20.
+#+END_EXAMPLE
+
+Isso quer dizer que os dados registrados neste arquivo:
+- =scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv=
+são diferentes dos dados registrados no experimento do LabBook do Gabriel:
+- =scripts/execLocal1/cg.B.x-4threads_exp6/traces_parallelregions.csv=
+mas eu não tenho acesso a esse arquivo.
