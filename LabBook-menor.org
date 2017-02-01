@@ -1017,57 +1017,57 @@ df5 %>%
 
 #+RESULTS:
 #+begin_example
-          Operation File Line
-1          parallel cg.f  185
-2           barrier cg.f  196
-3                do cg.f  207
-4                do cg.f  218
-5                do cg.f  223
-6  implicit barrier cg.f  231
-7          parallel cg.f  263
-8                do cg.f  263
-9  implicit barrier cg.f  269
-10         parallel cg.f  277
-11               do cg.f  277
-12 implicit barrier cg.f  281
-13         parallel cg.f  293
-14               do cg.f  293
-15 implicit barrier cg.f  297
-16         parallel cg.f  339
-17               do cg.f  339
-18 implicit barrier cg.f  345
-19         parallel cg.f  361
-20               do cg.f  361
-21 implicit barrier cg.f  365
-22         parallel cg.f  513
-23               do cg.f  519
-24 implicit barrier cg.f  526
-25               do cg.f  533
-26 implicit barrier cg.f  537
-27           master cg.f  546
-28          barrier cg.f  554
-29               do cg.f  568
-30 implicit barrier cg.f  576
-31               do cg.f  617
-32 implicit barrier cg.f  621
-33               do cg.f  633
-34 implicit barrier cg.f  646
-35               do cg.f  656
-36 implicit barrier cg.f  660
-37               do cg.f  671
-38 implicit barrier cg.f  679
-39               do cg.f  685
-40 implicit barrier cg.f  691
-41          barrier cg.f  805
-42          barrier cg.f  883
-43          barrier cg.f  896
-44          barrier cg.f  984
-45          barrier cg.f  994
-46          barrier cg.f 1007
-47               do cg.f 1009
-48 implicit barrier cg.f 1024
-49               do cg.f 1025
-50 implicit barrier cg.f 1029
+                        Region        Operation File Line
+1           parallel @cg.f:185         parallel cg.f  185
+2            barrier @cg.f:196          barrier cg.f  196
+3                 do @cg.f:207               do cg.f  207
+4                 do @cg.f:218               do cg.f  218
+5                 do @cg.f:223               do cg.f  223
+6   implicit barrier @cg.f:231 implicit barrier cg.f  231
+7           parallel @cg.f:263         parallel cg.f  263
+8                 do @cg.f:263               do cg.f  263
+9   implicit barrier @cg.f:269 implicit barrier cg.f  269
+10          parallel @cg.f:277         parallel cg.f  277
+11                do @cg.f:277               do cg.f  277
+12  implicit barrier @cg.f:281 implicit barrier cg.f  281
+13          parallel @cg.f:293         parallel cg.f  293
+14                do @cg.f:293               do cg.f  293
+15  implicit barrier @cg.f:297 implicit barrier cg.f  297
+16          parallel @cg.f:339         parallel cg.f  339
+17                do @cg.f:339               do cg.f  339
+18  implicit barrier @cg.f:345 implicit barrier cg.f  345
+19          parallel @cg.f:361         parallel cg.f  361
+20                do @cg.f:361               do cg.f  361
+21  implicit barrier @cg.f:365 implicit barrier cg.f  365
+22          parallel @cg.f:513         parallel cg.f  513
+23                do @cg.f:519               do cg.f  519
+24  implicit barrier @cg.f:526 implicit barrier cg.f  526
+25                do @cg.f:533               do cg.f  533
+26  implicit barrier @cg.f:537 implicit barrier cg.f  537
+27            master @cg.f:546           master cg.f  546
+28           barrier @cg.f:554          barrier cg.f  554
+29                do @cg.f:568               do cg.f  568
+30  implicit barrier @cg.f:576 implicit barrier cg.f  576
+31                do @cg.f:617               do cg.f  617
+32  implicit barrier @cg.f:621 implicit barrier cg.f  621
+33                do @cg.f:633               do cg.f  633
+34  implicit barrier @cg.f:646 implicit barrier cg.f  646
+35                do @cg.f:656               do cg.f  656
+36  implicit barrier @cg.f:660 implicit barrier cg.f  660
+37                do @cg.f:671               do cg.f  671
+38  implicit barrier @cg.f:679 implicit barrier cg.f  679
+39                do @cg.f:685               do cg.f  685
+40  implicit barrier @cg.f:691 implicit barrier cg.f  691
+41           barrier @cg.f:805          barrier cg.f  805
+42           barrier @cg.f:883          barrier cg.f  883
+43           barrier @cg.f:896          barrier cg.f  896
+44           barrier @cg.f:984          barrier cg.f  984
+45           barrier @cg.f:994          barrier cg.f  994
+46          barrier @cg.f:1007          barrier cg.f 1007
+47               do @cg.f:1009               do cg.f 1009
+48 implicit barrier @cg.f:1024 implicit barrier cg.f 1024
+49               do @cg.f:1025               do cg.f 1025
+50 implicit barrier @cg.f:1029 implicit barrier cg.f 1029
 #+end_example
 
 Olhando o código podemos ver regiões de código entre:
