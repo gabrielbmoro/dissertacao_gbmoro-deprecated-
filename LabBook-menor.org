@@ -838,6 +838,7 @@ head(df0);
 Renomeando as colunas.
 
 #+begin_src R :results output :session :exports both
+library(dplyr);
 df1 <- df0 %>%
     rename(
         Type=V1, Container=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Thread=V7, Region=V8,
