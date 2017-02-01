@@ -998,6 +998,26 @@ head(df5);
 5 0.1235060
 6 0.1043388
 #+end_example
+
+Renomear o nome das Threads:
+
+#+begin_src R :results output :session :exports both
+tids = unique(df5$Thread);
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids)) %>% arrange(Thread);
+df6 <- merge (df5, tidsdf, by.x="Thread", by.y="Thread");
+df6 <- df6 %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+df6 %>% arrange(Start) %>% head;
+#+end_src
+
+#+RESULTS:
+:      Start      End Duration                   Region  MISSES_L2 Thread
+: 1 1.040083 1.053624 0.013541 !$omp parallel @cg.f:185 0.10564226      1
+: 2 1.057177 1.063913 0.006736 !$omp parallel @cg.f:185 0.04708520      1
+: 3 1.674345 1.684685 0.010340 !$omp parallel @cg.f:185 0.07833333      3
+: 4 1.690057 1.694647 0.004590 !$omp parallel @cg.f:185 0.05415162      3
+: 5 1.974331 1.980759 0.006428 !$omp parallel @cg.f:185 0.05389222      4
+: 6 1.984382 1.988035 0.003653 !$omp parallel @cg.f:185 0.06086957      4
+
 ** Agrupando as regiões de código :ATTACH:
 :PROPERTIES:
 :Attachments: cg.f
