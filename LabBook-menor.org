@@ -1242,30 +1242,103 @@ df7 %>% filter(Line >= 207, Line <= 231) %>% arrange(Start) %>% filter(Thread ==
 3               do cg.f  223
 4 implicit barrier cg.f  231
 #+end_example
-
-#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
-library(ggplot2);
-df7 %>% filter(Line >= 207, Line <= 231) %>%
-   ggplot() + #filter(Start >= 30000, End <= 30500) %>% ggplot() + #%filter(Thread == 0) %>% ggplot() +
-    theme_bw(base_size = 16) +
-    xlab("Time [s]") + ylab("Thread") +
-    theme (
-        plot.margin = unit(c(0,0,0,0), "cm"),
-        legend.margin = unit(.1, "line"),
-        panel.grid = element_blank(),
-        legend.position = "bottom",
-        legend.title = element_blank()
-    ) +
-    ylim(0,7) +
-    guides(fill = guide_legend(nrow = 2)) +
-    geom_rect(alpha=.8, color="black", aes(fill=Region,
-                           xmin=Start,
-                           xmax=End,
-                           ymin=Thread,
-                           ymax=Thread + 0.9)) 
+*** Função que plota o gantt-chart
+#+begin_src R :results output :session :exports both
+ourganttline <- function(df, ls, le) {
+    df %>% filter(Line >= ls, Line <= le) %>% ggplot() +
+            theme_bw(base_size = 16) +
+            xlab("Time [s]") + ylab("Thread") +
+            theme (
+                plot.margin = unit(c(0,0,0,0), "cm"),
+                legend.margin = unit(.1, "line"),
+                panel.grid = element_blank(),
+                legend.position = "bottom",
+                legend.title = element_blank()
+            ) +
+            ylim(0,7) +
+            guides(fill = guide_legend(nrow = 2)) +
+            geom_rect(alpha=.8, color="black", aes(fill=Region,
+                                                   xmin=Start,
+                                                   xmax=End,
+                                                   ymin=Thread,
+                                                   ymax=Thread + 0.9));
+}
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-29526wPb/figure29526jDP.png]]
 
+*** Região 207 a 231
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 207, 231);
+#+end_src
 
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526Lc0.png]]
+*** Região 185 a 196
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 185, 196);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure295269lD.png]]
+*** Região 263 a 269
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 263, 269);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526KwJ.png]]
+
+*** 277 a 281
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 277, 281);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526X6P.png]]
+
+*** 293 a 297
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 293, 297);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526kEW.png]]
+
+*** 339 a 345
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 339, 345);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526xOc.png]]
+
+*** 361 a 365
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 361, 365);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526-Yi.png]]
+*** 519 a 526
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 519, 526);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526Ljo.png]]
+*** 533 e 537
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 533, 537);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526Ytu.png]]
+*** 546 e 554
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 546, 554);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526-fW.png]]
+*** 
