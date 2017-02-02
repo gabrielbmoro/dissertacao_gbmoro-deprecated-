@@ -1025,7 +1025,7 @@ df6 %>% arrange(Start) %>% head;
 :END:
 
 #+begin_src R :results output :session :exports both
-df5 %>%
+df6 %>%
     select(Region) %>%
     unique %>%
     filter(grepl("cg.f", Region)) %>%
