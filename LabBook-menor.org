@@ -1137,6 +1137,133 @@ De uma maneira geral, as relações entre do e implicit barrier são
 claras, elas sempre representam uma região paralela (só podem aparecer
 dentro de uma região marcada =parallel=). Já a presença de =barrier= é
 mais complexa de ser tratada.
+** Olhando alguns estados para entender melhor a estrutura do programa
+#+begin_src R :results output :session :exports both
+df7 <- df6 %>%
+    filter(grepl("cg.f", Region)) %>%
+    mutate(Region=gsub("\\!\\$omp ", "", Region)) %>%
+    mutate(Operation = as.factor(gsub(" [^ ]*$", "", Region))) %>%
+    mutate(File = as.factor(gsub(":.*$", "", gsub(".* @", "", Region)))) %>%
+    mutate(Line = as.integer(gsub(".*:", "", Region))) %>%
+    arrange(Line);
+df7 %>% arrange(Start) %>% head;
+#+end_src
 
+#+RESULTS:
+#+begin_example
+     Start      End Duration             Region  MISSES_L2 Thread Operation
+1 1.040083 1.053624 0.013541 parallel @cg.f:185 0.10564226      1  parallel
+2 1.057177 1.063913 0.006736 parallel @cg.f:185 0.04708520      1  parallel
+3 1.674345 1.684685 0.010340 parallel @cg.f:185 0.07833333      3  parallel
+4 1.690057 1.694647 0.004590 parallel @cg.f:185 0.05415162      3  parallel
+5 1.974331 1.980759 0.006428 parallel @cg.f:185 0.05389222      4  parallel
+6 1.984382 1.988035 0.003653 parallel @cg.f:185 0.06086957      4  parallel
+  File Line
+1 cg.f  185
+2 cg.f  185
+3 cg.f  185
+4 cg.f  185
+5 cg.f  185
+6 cg.f  185
+#+end_example
+
+#+begin_src R :results output :session :exports both
+df7 %>% select(Operation) %>% group_by(Operation) %>% summarize(Count=n()) %>% as.data.frame();
+#+end_src
+
+#+RESULTS:
+:          Operation Count
+: 1          barrier  7628
+: 2               do 64180
+: 3 implicit barrier 32240
+: 4           master  1900
+: 5         parallel 42980
+
+#+begin_src R :results output :session :exports both
+df7 %>% select(Region) %>% .$Region %>% unique %>% length;
+#+end_src
+
+#+RESULTS:
+: [1] 50
+
+#+begin_src R :results output :session :exports both
+df7 %>% filter(Thread == 1) %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+         Start          End Duration             Region MISSES_L2 Thread
+1     1.040083     1.053624 0.013541 parallel @cg.f:185 0.1056423      1
+2     1.057177     1.063913 0.006736 parallel @cg.f:185 0.0470852      1
+3 28748.270331 28748.274207 0.003876 parallel @cg.f:185 0.3529412      1
+4 28748.278517 28748.281768 0.003251 parallel @cg.f:185 0.1333333      1
+5 28765.734916 28765.789951 0.055035 parallel @cg.f:185 0.2422535      1
+6 28768.899077 28768.924942 0.025865 parallel @cg.f:185 0.1828194      1
+  Operation File Line
+1  parallel cg.f  185
+2  parallel cg.f  185
+3  parallel cg.f  185
+4  parallel cg.f  185
+5  parallel cg.f  185
+6  parallel cg.f  185
+#+end_example
+
+#+begin_src R :results output :session :exports both
+df7 %>% group_by(Thread) %>% count (N=n());
+#+end_src
+
+#+RESULTS:
+: Source: local data frame [4 x 3]
+: Groups: Thread [?]
+: 
+:   Thread     N     n
+:    <int> <int> <int>
+: 1      1 40082 40082
+: 2      2 36282 36282
+: 3      3 36282 36282
+: 4      4 36282 36282
+
+#+begin_src R :results output :session :exports both
+df7 %>% filter(Line >= 207, Line <= 231) %>% arrange(Start) %>% filter(Thread == 1); # %>% group_by(Thread) %>% summarize(N=n());
+#+end_src
+
+#+RESULTS:
+#+begin_example
+     Start      End  Duration                     Region MISSES_L2 Thread
+1 28748.28 28765.73 17.453148               do @cg.f:207 5.5071467      1
+2 28765.79 28768.90  3.109126               do @cg.f:218 0.9183767      1
+3 28768.92 28769.60  0.673462               do @cg.f:223 0.3513710      1
+4 28769.61 28772.21  2.601060 implicit barrier @cg.f:231 0.2886297      1
+         Operation File Line
+1               do cg.f  207
+2               do cg.f  218
+3               do cg.f  223
+4 implicit barrier cg.f  231
+#+end_example
+
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+library(ggplot2);
+df7 %>% filter(Line >= 207, Line <= 231) %>%
+   ggplot() + #filter(Start >= 30000, End <= 30500) %>% ggplot() + #%filter(Thread == 0) %>% ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+    theme (
+        plot.margin = unit(c(0,0,0,0), "cm"),
+        legend.margin = unit(.1, "line"),
+        panel.grid = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank()
+    ) +
+    ylim(0,7) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(alpha=.8, color="black", aes(fill=Region,
+                           xmin=Start,
+                           xmax=End,
+                           ymin=Thread,
+                           ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526jDP.png]]
 
 
