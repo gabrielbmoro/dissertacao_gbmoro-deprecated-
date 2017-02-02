@@ -1094,6 +1094,7 @@ df6 %>%
 Olhando o código podemos ver regiões de código entre:
 - 185 e 231 (entre o primeiro parallel e o primeiro implicit) - chamada a =makea=
 Aqui a função =conj_grad= é chamada pela thread principal.
+- 207 a 231
 - 263 e 269 (entre um parallel e o próximo implicit)
 - 277 e 281
 - 293 e 297
