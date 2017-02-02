@@ -1106,7 +1106,7 @@ Em seguida, uma grande região paralela (função =conj_grad=) entre linhas
 seguinte forma:
 - 519 e 526 (do e implicit)
 - 533 e 537
-- 546 e 554 (entre master e barrier - única thread)
+- 546 e 554 (entre master e barrier - única thread) - DENIED
 - 568 e 576
 - 617 e 621
 - ... (entre cada do e implicit)
