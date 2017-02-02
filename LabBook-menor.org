@@ -1139,6 +1139,7 @@ claras, elas sempre representam uma região paralela (só podem aparecer
 dentro de uma região marcada =parallel=). Já a presença de =barrier= é
 mais complexa de ser tratada.
 ** Olhando alguns estados para entender melhor a estrutura do programa
+*** Quebrando as informações sobre a localização dos estados
 #+begin_src R :results output :session :exports both
 df7 <- df6 %>%
     filter(grepl("cg.f", Region)) %>%
@@ -1167,7 +1168,7 @@ df7 %>% arrange(Start) %>% head;
 5 cg.f  185
 6 cg.f  185
 #+end_example
-
+*** Algumas constatações
 #+begin_src R :results output :session :exports both
 df7 %>% select(Operation) %>% group_by(Operation) %>% summarize(Count=n()) %>% as.data.frame();
 #+end_src
