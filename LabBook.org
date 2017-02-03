@@ -54115,3 +54115,35 @@ head(df)
 5 0.1630901  9.269558
 6 0.7966292  8.196530
 #+end_example
+* [10:47:50; 03.02.2017] Gerando trace Hype2 - Aplicação CG - NAS   :Gabriel:
+
+- Como o ambiente está configurado já na máquina, vou gerar o rastro
+  da aplicação CG utilizando 4 contadores de hardware, para melhor
+  compreender o comportamento da aplicação CG.
+
+#+begin_src sh :results output :exports both :tangle scripts/execLocal1/scriptDeExecucao_exp7.bash
+	#!/bin/bash
+
+	pathOfNAS="/home/gabrielbmoro/benchs/NPB3.0/NPB3.0-OMP/bin"
+
+	apps=("ft.B-scorep" "cg.B-scorep" "mg.B-scorep")
+	export OMP_NUM_THREADS=40
+	export GOMP_CPU_AFFINITY=0-40
+
+	for i in ${apps[@]}; do
+
+		export SCOREP_ENABLE_PROFILING=true 
+		export SCOREP_ENABLE_TRACING=true 
+		export SCOREP_TOTAL_MEMORY=3G 
+              export SCOREP_METRIC_PAPI=PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM,PAPI_L2_TCA
+		export SCOREP_METRIC_RUSAGE=ru_utime,ru_stime
+		export SCOREP_EXPERIMENT_DIRECTORY=/home/gabrielbmoro/rastros/exp7-NAS-cg_mg_ft-40threads/$i-40threads_exp7
+		
+		sudo -E LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/tbb/lib/intel64/gcc4.7:/opt/intel/debugger_2017/iga/lib:/opt/intel/debugger_2017/libipt/intel64/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/daal/../tbb/lib/intel64_lin/gcc4.4 $pathOfNAS/$i
+	done
+
+#+end_src
+
+- Professor, os arquivos gerados pelo Score-p para as três aplicações
+  estão na =hype2=. No path:
+  =/home/gabrielbmoro/rastros/exp7-NAS-cg_mg_ft-40threads= 
