@@ -1342,3 +1342,389 @@ ourganttline(df7, 546, 554);
 #+RESULTS:
 [[file:/tmp/babel-29526wPb/figure29526-fW.png]]
 *** 
+* 2017-02-03 Novos rastros gerados em =exp7-NAS-cg_mg_ft-40threads=
+Veja a explicação do Gabriel em:
+[[file:LabBook.org::*%5B10:47:50;%2003.02.2017%5D%20Gerando%20trace%20Hype2%20-%20Aplica%C3%A7%C3%A3o%20CG%20-%20NAS][{10:47:50; 03.02.2017} Gerando trace Hype2 - Aplicação CG - NAS]]
+** Obter os dados do servidor hype2
+#+begin_src shell :results output
+rsync hype2.inf:./exp7-NAS-cg_mg_ft-40threads.tar .
+#+end_src
+
+#+RESULTS:
+** Extrair os dados em um diretório específico
+#+begin_src shell :results output
+tar vxf exp7-NAS-cg_mg_ft-40threads.tar
+#+end_src
+
+#+RESULTS:
+#+begin_example
+exp7-NAS-cg_mg_ft-40threads/
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces.otf2
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/12884901888.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/64424509440.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/21474836480.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/85899345920.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/124554051584.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/103079215104.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/107374182400.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/120259084288.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/17179869184.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/141733920768.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/150323855360.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/94489280512.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/128849018880.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/115964116992.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/77309411328.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/0.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/85899345920.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/30064771072.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/150323855360.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/81604378624.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/154618822656.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/21474836480.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/47244640256.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/146028888064.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/120259084288.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/30064771072.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/133143986176.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/133143986176.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/12884901888.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/167503724544.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/77309411328.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/98784247808.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/25769803776.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/64424509440.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/4294967296.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/137438953472.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/154618822656.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/51539607552.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/98784247808.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/38654705664.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/111669149696.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/90194313216.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/47244640256.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/8589934592.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/73014444032.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/68719476736.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/55834574848.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/38654705664.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/137438953472.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/103079215104.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/68719476736.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/107374182400.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/90194313216.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/128849018880.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/51539607552.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/34359738368.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/17179869184.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/34359738368.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/60129542144.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/4294967296.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/163208757248.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/163208757248.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/0.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/141733920768.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/60129542144.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/111669149696.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/42949672960.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/8589934592.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/146028888064.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/124554051584.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/158913789952.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/115964116992.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/25769803776.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/42949672960.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/94489280512.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/73014444032.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/55834574848.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/167503724544.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/158913789952.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/81604378624.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/profile.cubex
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/scorep.cfg
+exp7-NAS-cg_mg_ft-40threads/scriptDeExecucao_exp7.bash
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.otf2
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/12884901888.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/64424509440.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/21474836480.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/85899345920.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/124554051584.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/103079215104.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/107374182400.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/120259084288.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/17179869184.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/141733920768.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/150323855360.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/94489280512.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/128849018880.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/115964116992.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/77309411328.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/0.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/85899345920.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/30064771072.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/150323855360.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/81604378624.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/154618822656.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/21474836480.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/47244640256.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/146028888064.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/120259084288.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/30064771072.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/133143986176.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/133143986176.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/12884901888.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/167503724544.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/77309411328.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/98784247808.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/25769803776.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/64424509440.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/4294967296.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/137438953472.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/154618822656.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/51539607552.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/98784247808.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/38654705664.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/111669149696.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/90194313216.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/47244640256.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/8589934592.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/73014444032.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/68719476736.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/55834574848.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/38654705664.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/137438953472.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/103079215104.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/68719476736.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/107374182400.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/90194313216.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/128849018880.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/51539607552.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/34359738368.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/17179869184.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/34359738368.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/60129542144.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/4294967296.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/163208757248.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/163208757248.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/0.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/141733920768.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/60129542144.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/111669149696.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/42949672960.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/8589934592.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/146028888064.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/124554051584.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/158913789952.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/115964116992.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/25769803776.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/42949672960.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/94489280512.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/73014444032.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/55834574848.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/167503724544.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/158913789952.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/81604378624.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/profile.cubex
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/scorep.cfg
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces.otf2
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/12884901888.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/64424509440.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/21474836480.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/85899345920.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/124554051584.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/103079215104.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/107374182400.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/120259084288.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/17179869184.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/141733920768.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/150323855360.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/94489280512.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/128849018880.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/115964116992.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/77309411328.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/0.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/85899345920.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/30064771072.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/150323855360.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/81604378624.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/154618822656.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/21474836480.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/47244640256.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/146028888064.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/120259084288.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/30064771072.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/133143986176.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/133143986176.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/12884901888.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/167503724544.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/77309411328.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/98784247808.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/25769803776.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/64424509440.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/4294967296.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/137438953472.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/154618822656.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/51539607552.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/98784247808.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/38654705664.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/111669149696.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/90194313216.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/47244640256.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/8589934592.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/73014444032.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/68719476736.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/55834574848.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/38654705664.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/137438953472.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/103079215104.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/68719476736.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/107374182400.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/90194313216.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/128849018880.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/51539607552.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/34359738368.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/17179869184.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/34359738368.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/60129542144.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/4294967296.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/163208757248.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/163208757248.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/0.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/141733920768.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/60129542144.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/111669149696.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/42949672960.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/8589934592.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/146028888064.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/124554051584.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/158913789952.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/115964116992.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/25769803776.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/42949672960.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/94489280512.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/73014444032.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/55834574848.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/167503724544.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/158913789952.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/81604378624.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/profile.cubex
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/scorep.cfg
+#+end_example
+** Converter para Paje, gerar o CSV correspondente
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for otf2 in $(find | grep otf2$); do
+    echo $otf2
+    DIR=$(dirname $otf2)
+    cd $DIR
+    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | pj_dump --user-defined --no-imbrication > traces.csv
+    cd ..
+done
+#+end_src
+
+#+RESULTS:
+: ./mg.B-scorep-40threads_exp7/traces.otf2
+: ./cg.B-scorep-40threads_exp7/traces.otf2
+: ./ft.B-scorep-40threads_exp7/traces.otf2
+** Verificando o correto tratamento dos rastros
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for csv in $(find | grep csv$); do
+    du -hs $csv
+    cat $csv | grep ^State | grep -i omp | wc -l
+    cat $csv | grep ^State | wc -l
+done
+#+end_src
+
+#+RESULTS:
+: 48M	./mg.B-scorep-40threads_exp7/traces.csv
+: 333120
+: 338225
+: 658M	./cg.B-scorep-40threads_exp7/traces.csv
+: 1390640
+: 5105025
+: 542M	./ft.B-scorep-40threads_exp7/traces.csv
+: 247492
+: 4168148
+
+Nota-se que Score-P está rastreando todas as funções da aplicação. Não
+há necessidade de realizar um rastreamento completo, apenas do
+comportamento OpenMP. Gabriel, por gentileza, no próximo experimento
+gerar apenas rastros com dados OpenMP
+** Converter para Paje, gerar o CSV, *apenas estados OpenMP*
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for otf2 in $(find | grep otf2$); do
+    echo $otf2
+    DIR=$(dirname $otf2)
+    cd $DIR
+    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | pj_dump --user-defined --no-imbrication | grep ^State | grep omp > traces.csv
+    cd ..
+done
+#+end_src
+
+#+RESULTS:
+: ./mg.B-scorep-40threads_exp7/traces.otf2
+: ./cg.B-scorep-40threads_exp7/traces.otf2
+: ./ft.B-scorep-40threads_exp7/traces.otf2
+** Verificando novamente o correto tratamento dos rastros
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for csv in $(find | grep csv$); do
+    echo $csv
+    head $csv
+done
+#+end_src
+
+#+RESULTS:
+#+begin_example
+./mg.B-scorep-40threads_exp7/traces.csv
+State, zero, S, 2.212986, 2.228209, 0.015223, 3.000000, !$omp parallel @mg.f:1368, 53778, 15609, 38963, 719225, 32000, 12000
+State, zero, S, 2.228209, 14.325622, 12.097413, 4.000000, !$omp do @mg.f:1368, 54359, 15844, 39272, 721232, 32000, 12000
+State, zero, S, 14.325622, 225.070143, 210.744521, 5.000000, !$omp implicit barrier @mg.f:1376, 96356, 23965, 99722, 4008719, 32000, 12000
+State, zero, S, 225.070143, 225.097661, 0.027518, 4.000000, !$omp do @mg.f:1368, 97786, 24814, 309880, 6112590, 32000, 16000
+State, zero, S, 225.097661, 225.105553, 0.007892, 3.000000, !$omp parallel @mg.f:1368, 98204, 25026, 310341, 6114387, 32000, 16000
+State, zero, S, 225.489852, 225.498132, 0.008280, 4.000000, !$omp parallel @mg.f:1368, 102251, 26490, 322291, 6185527, 32000, 16000
+State, zero, S, 225.498132, 235.006680, 9.508548, 5.000000, !$omp do @mg.f:1368, 102547, 26531, 322479, 6187538, 32000, 16000
+State, zero, S, 235.006680, 236.859330, 1.852650, 6.000000, !$omp implicit barrier @mg.f:1376, 154427, 61819, 460490, 9474784, 32000, 20000
+State, zero, S, 236.859330, 236.868274, 0.008944, 5.000000, !$omp do @mg.f:1368, 154843, 62049, 540208, 10001263, 32000, 20000
+State, zero, S, 236.868274, 236.877837, 0.009563, 4.000000, !$omp parallel @mg.f:1368, 155051, 62111, 540452, 10003059, 32000, 20000
+./cg.B-scorep-40threads_exp7/traces.csv
+State, zero, S, 3.120965, 3.140518, 0.019553, 3.000000, !$omp parallel @cg.f:736, 53340, 15546, 39632, 719477, 16000, 24000
+State, zero, S, 3.140518, 3.709081, 0.568563, 4.000000, !$omp do @cg.f:736, 53815, 15759, 40141, 721484, 16000, 24000
+State, zero, S, 3.709081, 221.204541, 217.495460, 5.000000, !$omp implicit barrier @cg.f:739, 54281, 15903, 40637, 740389, 16000, 24000
+State, zero, S, 221.204541, 221.224733, 0.020192, 4.000000, !$omp do @cg.f:736, 55361, 16420, 209501, 2844256, 16000, 24000
+State, zero, S, 221.224733, 221.232337, 0.007604, 3.000000, !$omp parallel @cg.f:736, 55640, 16489, 209855, 2846050, 16000, 24000
+State, zero, S, 8024.934787, 8024.941773, 0.006986, 4.000000, !$omp parallel @cg.f:836, 159470937, 1947545, 129570855, 7015526649, 2004000, 1432000
+State, zero, S, 8024.941773, 8024.984660, 0.042887, 5.000000, !$omp do @cg.f:836, 159471249, 1947591, 129570966, 7015528666, 2004000, 1432000
+State, zero, S, 8024.984660, 8029.809741, 4.825081, 6.000000, !$omp implicit barrier @cg.f:840, 159471677, 1947681, 129572105, 7015547584, 2004000, 1432000
+State, zero, S, 8029.809741, 8029.821999, 0.012258, 5.000000, !$omp do @cg.f:836, 159471985, 1947781, 129661083, 7016393217, 2004000, 1436000
+State, zero, S, 8029.821999, 8029.828258, 0.006259, 4.000000, !$omp parallel @cg.f:836, 159472335, 1947939, 129661284, 7016395020, 2004000, 1436000
+./ft.B-scorep-40threads_exp7/traces.csv
+State, zero, S, 3.741356, 3.757804, 0.016448, 3.000000, !$omp parallel @ft.f:190, 54181, 15968, 50467, 728398, 16000, 16000
+State, zero, S, 3.757804, 107.016384, 103.258580, 4.000000, !$omp do @ft.f:190, 54765, 16199, 50790, 730405, 16000, 16000
+State, zero, S, 107.016384, 334.541063, 227.524679, 5.000000, !$omp implicit barrier @ft.f:200, 558308, 39849, 783928, 16364468, 24000, 36000
+State, zero, S, 334.541063, 334.572829, 0.031766, 4.000000, !$omp do @ft.f:190, 559853, 40729, 975156, 18468339, 24000, 40000
+State, zero, S, 334.572829, 334.581001, 0.008172, 3.000000, !$omp parallel @ft.f:190, 560211, 40923, 975643, 18470135, 24000, 40000
+State, zero, S, 334.760263, 334.938401, 0.178138, 2.000000, compute_indexmap_, 562006, 41698, 982345, 18506671, 24000, 40000
+State, zero, S, 334.938401, 334.948327, 0.009926, 3.000000, !$omp parallel @ft.f:431, 563544, 42302, 985414, 18515469, 24000, 40000
+State, zero, S, 334.948327, 345.228366, 10.280039, 4.000000, !$omp do @ft.f:431, 563877, 42348, 985574, 18517479, 24000, 40000
+State, zero, S, 345.228366, 358.348897, 13.120531, 5.000000, !$omp implicit barrier @ft.f:444, 620237, 46405, 1392717, 34158438, 24000, 40000
+State, zero, S, 358.348897, 358.367253, 0.018356, 4.000000, !$omp do @ft.f:431, 620817, 46735, 1489520, 34909401, 24000, 48000
+#+end_example
+** Carregando em R como antes (condensado em um único bloco de código)
+Veja aqui para detalhes:
+[[*2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente][2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente]]
+#+begin_src R :results output :session :exports both
+df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv", header=FALSE, strip.white=TRUE);
+#+end_src
+A continuar pelo Gabriel.
