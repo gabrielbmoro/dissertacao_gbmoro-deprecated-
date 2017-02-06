@@ -1777,22 +1777,21 @@ head(df0);
 
 #+begin_src R :results output :session *R* :exports both
 library(dplyr);
-library(reshape);
-
-df1 <- df0 %>% rename(Type=V1,Thread=V2,StateType=V3,Start=V4,End=V5,
-Duration=V6,Imbrication=V7,Region=V8,
-Push_PAPI_TOT_INS=V9,
-Push_PAPI_REF_CYC=V10,
-Push_PAPI_L2_TCM=V11,
-Push_PAPI_L2_TCA=V12,
-Push_ru_utime=V13,
-Push_ru_stime=V14,
-Pop_PAPI_TOT_INS=V15,
-Pop_PAPI_REF_CYC=V16,
-Pop_PAPI_L2_TCM=V17,
-Pop_PAPI_L2_TCA=V18,
-Pop_ru_utime=V19,
-Pop_ru_stime=V20) %>% as.data.frame();
+df1 <- df0 %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Region=V8,
+        Push_PAPI_TOT_INS=V9,
+        Push_PAPI_REF_CYC=V10,
+	    Push_PAPI_L2_TCM=V11,
+        Push_PAPI_L2_TCA=V12,
+        Push_ru_utime=V13,
+        Push_ru_stime=V14,
+        Pop_PAPI_TOT_INS=V15,
+        Pop_PAPI_REF_CYC=V16,
+        Pop_PAPI_L2_TCM=V17,
+        Pop_PAPI_L2_TCA=V18,
+        Pop_ru_utime=V19,
+        Pop_ru_stime=V20);
 
 #Renomear os identificadores das threads
 tids = unique(df1$Thread)
@@ -1801,7 +1800,7 @@ df2 <- merge (df1, tidsdf, by.x="Thread", by.y="Thread");
 df2 <- df2 %>% select(-Thread) %>% rename(Thread=ntids) %>% group_by(Thread,Region) %>% as.data.frame();
 
 #calculando as métricas
-df3 <- df2 %>% mutate(
+df2 <- df2 %>% mutate(
         PAPI_TOT_INS = Pop_PAPI_TOT_INS - Push_PAPI_TOT_INS,
         PAPI_REF_CYC = Pop_PAPI_REF_CYC - Push_PAPI_REF_CYC,
         PAPI_L2_TCM = Pop_PAPI_L2_TCM - Push_PAPI_L2_TCM,
@@ -1817,35 +1816,32 @@ df3 <- df2 %>% mutate(
             IPC = PAPI_TOT_INS / PAPI_REF_CYC) %>%  
     select(-PAPI_TOT_INS,-PAPI_REF_CYC,-PAPI_L2_TCM, -PAPI_L2_TCA, -ru_utime, -ru_stime)
 
+
 #Separando Regiões e Linhas de Código
-df3$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df3$Region))
-df3$Region <- gsub("*[0-9]*|@[a-z]|!\\$|[a-z]\\.[a-z]|:","",df3$Region)
-df3$Region <- gsub("\\ ", "_",df2$Region);
+df2$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df2$Region))
+df2$Region <- gsub("*[0-9]*|@[a-z]|!\\$|[a-z]\\.[a-z]|:","",df2$Region)
+df2$Region <- gsub("\\ ", "_",df2$Region);
 
-df4 <- df3 %>% select(Start, End, Duration, -Imbrication, Region, line, ntids, MISSES_L2, IPC) %>% as.data.frame();
+df2 <- df2 %>% select(Start, End, Duration, -Imbrication, Region, line, Thread, MISSES_L2, IPC) %>% as.data.frame();
 
-df4 <- melt(df4, id=c("Start","End","Duration","Region","line","ntids"));
+head(df2);
 
-head(df4);
 #+end_src
 
 #+RESULTS:
 #+begin_example
-Error in rename(., Type = V1, Thread = V2, StateType = V3, Start = V4,  : 
-  unused arguments (Type = V1, Thread = V2, StateType = V3, Start = V4, End = V5, Duration = V6, Imbrication = V7, Region = V8, Push_PAPI_TOT_INS = V9, Push_PAPI_REF_CYC = V10, Push_PAPI_L2_TCM = V11, Push_PAPI_L2_TCA = V12, Push_ru_utime = V13, Push_ru_stime = V14, Pop_PAPI_TOT_INS = V15, Pop_PAPI_REF_CYC = V16, Pop_PAPI_L2_TCM = V17, Pop_PAPI_L2_TCA = V18, Pop_ru_utime = V19, Pop_ru_stime = V20)
-Error in rename(., Thread = ntids) : unused argument (Thread = ntids)
-       Start        End   Duration                           Region line ntids
-1   11.87650   11.89433   0.017836         !$omp_parallel_@cg.f:736  736    40
-2   11.89433   11.92660   0.032266               !$omp_do_@cg.f:736  736    40
-3   11.92660  221.22084 209.294243 !$omp_implicit_barrier_@cg.f:739  739    40
-4  221.22084  221.24101   0.020166               !$omp_do_@cg.f:736  736    40
-5  221.24101  221.24811   0.007102         !$omp_parallel_@cg.f:736  736    40
-6 8024.99327 8025.06138   0.068103         !$omp_parallel_@cg.f:836  836    40
-   variable      value
-1 MISSES_L2 0.40445269
-2 MISSES_L2 0.16498316
-3 MISSES_L2 0.21805556
-4 MISSES_L2 0.11962617
-5 MISSES_L2 0.09473684
-6 MISSES_L2 0.33911672
+       Start        End   Duration                Region line Thread  MISSES_L2
+1   11.87650   11.89433   0.017836         omp_parallel_  736     40 0.40445269
+2   11.89433   11.92660   0.032266               omp_do_  736     40 0.16498316
+3   11.92660  221.22084 209.294243 omp_implicit_barrier_  739     40 0.21805556
+4  221.22084  221.24101   0.020166               omp_do_  736     40 0.11962617
+5  221.24101  221.24811   0.007102         omp_parallel_  736     40 0.09473684
+6 8024.99327 8025.06138   0.068103         omp_parallel_  836     40 0.33911672
+        IPC
+1  4.722222
+2 26.333799
+3  6.729438
+4  5.415902
+5 13.458015
+6  2.297945
 #+end_example
