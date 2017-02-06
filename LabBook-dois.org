@@ -1,0 +1,1851 @@
+#+TITLE: LabBook
+#+AUTHOR: Gabriel Bronzatti Moro and Lucas M. Schnorr
+#+LATEX_HEADER: \usepackage[margin=2cm,a4paper]{geometry}
+#+STARTUP: overview indent
+#+TAGS: Gabriel(G) Lucas(L) noexport(n) deprecated(d)
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+#+mode: org
+#+coding: utf-8
+
+Esse documento está em pt-br
+
+* 2016-12-08 ScoreP com métricas de HW :ATTACH:
+:PROPERTIES:
+:Attachments: trace-by-lucas.csv
+:ID:       14a5541a-0c60-45c7-9342-f33ee6e6e2d6
+:END:
+Gabriel rastreou FT com métricas de HW. Os dados da saída de
+=otf2-print= estão aqui:
+#+name: rastro
+#+begin_src shell :results output
+find dados/exp_05-11-2016_ft/ | grep trace.csv
+#+end_src
+
+#+RESULTS: rastro
+: dados/exp_05-11-2016_ft/trace.csv
+
+O arquivo em si não é um CSV, veja:
+
+#+begin_src shell :results output :var RASTRO=rastro
+head $RASTRO
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+=== OTF2-PRINT ===
+=== Events =====================================================================
+Event                               Location            Timestamp  Attributes
+--------------------------------------------------------------------------------
+THREAD_FORK                                0     1960307801126418  Model: "OpenMP" <3>, # Requested Threads: 24
+THREAD_TEAM_BEGIN                          0     1960307821884732  Thread Team: "" <0>
+THREAD_TEAM_BEGIN                 4294967296     1960307821886487  Thread Team: "" <0>
+THREAD_TEAM_BEGIN                12884901888     1960307821887389  Thread Team: "" <0>
+THREAD_TEAM_BEGIN                 8589934592     1960307821887441  Thread Team: "" <0>
+#+end_example
+
+Bom, para converter, usamos o script que está aqui:
+https://github.com/schnorr/akypuera/tree/master/src/otf2-omp-print
+
+Em específico, a versão em PERL.
+
+#+begin_src shell :results output
+cd dados/exp_05-11-2016_ft/
+~/dev/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl trace.csv | ~/dev/pajeng/b/pj_dump --user-defined --no-imbrication | grep ^State > trace-by-lucas.csv
+ls -lh trace-by-lucas.csv
+#+end_src
+
+#+RESULTS:
+: -rw-r--r-- 1 schnorr schnorr 2.4M Dec  8 15:43 trace-by-lucas.csv
+
+Estou anexando o arquivo a esta entrada.
+
+Se digitares C-c C-a o poderá abrí-lo. Ou consultar diretamente aqui:
+
+#+name: pjdumprastro
+#+begin_src shell :results output
+ls -1 ./data/14/a5541a*/trace-by-lucas.csv
+#+end_src
+
+#+RESULTS: pjdumprastro
+: ./data/14/a5541a-0c60-45c7-9342-f33ee6e6e2d6/trace-by-lucas.csv
+
+Verificando o início.
+
+#+begin_src shell :results output :var filename=pjdumprastro
+head $filename
+#+end_src
+
+#+RESULTS:
+#+begin_example
+State, zero, S, 0.039640, 2.209130, 2.169490, 0.000000, !$omp parallel @ft.f:188, 26598, 4994, 4876, 121387, 20231, 27566, 5246, 5198, 121464, 20244
+State, zero, S, 2.209130, 257.736214, 255.527084, 1.000000, !$omp do @ft.f:188, 27566, 5246, 5198, 121464, 20244, 923791, 409598, 5471, 169889, 48539
+State, zero, S, 257.736214, 345.137454, 87.401240, 2.000000, !$omp implicit barrier @ft.f:198, 923791, 409598, 5471, 169889, 48539, 924329, 409773, 5735, 175453, 48963
+State, zero, S, 345.137454, 345.167150, 0.029696, 1.000000, !$omp do @ft.f:188, 924329, 409773, 5735, 175453, 48963, 924548, 409827, 5822, 175453, 48963
+State, zero, S, 345.167150, 345.175402, 0.008252, 0.000000, !$omp parallel @ft.f:188, 924548, 409827, 5822, 175453, 48963, 924618, 409837, 5830, 175453, 48963
+State, zero, S, 355.680184, 355.712329, 0.032145, 0.000000, !$omp parallel @ft.f:430, 926370, 410395, 6308, 178126, 48963, 926610, 410429, 6376, 178126, 48963
+State, zero, S, 355.712329, 512.841126, 157.128797, 1.000000, !$omp do @ft.f:430, 926610, 410429, 6376, 178126, 48963, 1117445, 419258, 6589, 246155, 48963
+State, zero, S, 512.841126, 519.507683, 6.666557, 2.000000, !$omp implicit barrier @ft.f:443, 1117445, 419258, 6589, 246155, 48963, 1117960, 419440, 6835, 250803, 48963
+State, zero, S, 519.507683, 519.532299, 0.024616, 1.000000, !$omp do @ft.f:430, 1117960, 419440, 6835, 250803, 48963, 1118225, 419497, 6944, 250803, 48963
+State, zero, S, 519.532299, 519.540851, 0.008552, 0.000000, !$omp parallel @ft.f:430, 1118225, 419497, 6944, 250803, 48963, 1118317, 419508, 6954, 250803, 48963
+#+end_example
+
+Vamos lê-lo em R, renomear e remover as colunas que não nos
+interessam, e, enfim, ter uma melhor numeração para as threads.
+
+#+begin_src R :results output :session :exports both :var filename=pjdumprastro
+library(dplyr);
+df <- read.csv(gsub("\n", "", filename), header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Value=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_PAPI_L2_ICM=V11,
+        Push_ru_utime=V12,
+        Push_ru_stime=V13,
+        Pop_PAPI_L2_TCA=V14,
+        Pop_PAPI_L2_DCM=V15,
+        Pop_PAPI_L2_ICM=V16,
+        Pop_ru_utime=V17,
+        Pop_ru_stime=V18) %>%
+    mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA-Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM-Push_PAPI_L2_DCM,
+        PAPI_L2_ICM = Pop_PAPI_L2_ICM-Push_PAPI_L2_ICM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>%
+    select(
+        -Type, -StateType, -Imbrication) %>%
+    select(-Push_PAPI_L2_TCA,
+        -Push_PAPI_L2_DCM,
+        -Push_PAPI_L2_ICM,
+        -Push_ru_utime,
+        -Push_ru_stime,
+        -Pop_PAPI_L2_TCA,
+        -Pop_PAPI_L2_DCM,
+        -Pop_PAPI_L2_ICM,
+        -Pop_ru_utime,
+        -Pop_ru_stime) %>% as.data.frame();
+#Renomear os identificadores das threads
+tids = unique(df$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
+df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+df$Value <- as.factor(gsub('!.omp ', "", df$Value));
+head(df);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      Start       End   Duration                      Value PAPI_L2_TCA
+1  19.41803  19.43686   0.018828         parallel @ft.f:188         310
+2  19.43686 192.85894 173.422084               do @ft.f:188      903905
+3 192.85894 345.05055 152.191609 implicit barrier @ft.f:198         588
+4 345.05055 345.13632   0.085768               do @ft.f:188         369
+5 345.13632 345.14311   0.006788         parallel @ft.f:188          79
+6 355.68586 355.71648   0.030613         parallel @ft.f:430         211
+  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
+1          26         121        0        0     24
+2      356861         207    36297    35513     24
+3         182         293     4937      811     24
+4          64         163        0        0     24
+5          13           7        0        0     24
+6          34          43        0        0     24
+#+end_example
+
+Okay, parece estar funcionando.
+
+Vamos plotar a visão geral, somente dos estados.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v1.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("^print",Value)) %>% as.data.frame();
+x <- c(188, 198);
+x <- c(222, 231);
+x <- c(273, 280);
+x <- c(430, 443);
+x <- c(540, 559);
+x <- c(586, 604);
+x <- c(631, 649);
+#x <- c(862, 869);
+df1 <- df %>% filter(grepl(x[1], Value) | grepl(x[2], Value)) %>% as.data.frame();
+#df1 <- df;
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+   # scale_fill_brewer(palette = "Set1");
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v1.png]]
+
+Okay. Parece estar funcionando.
+
+Vamos agora plotar os dados dos contadores, apenas para fornecer ao
+Gabriel um exemplo inicial a partir do qual ele poderá trabalhar.
+
+Somente para uma thread.
+
+#+begin_src R :results output graphics :file img/t1_gantt.png :exports both :width 1600 :height 200 :session
+library(ggplot2);
+gantt_plot <- function (dfa, thread, tstart, tend)
+{
+    df1 <- dfa %>% filter(Thread == thread) %>%  filter(End >= tstart, Start <= tend) %>% as.data.frame();
+    k <- ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "top",
+            legend.title = element_blank()
+        ) +
+    scale_y_continuous(breaks=unique(df1$Thread)) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+    k;
+}
+k <- gantt_plot (df, 1, tstart, tend);
+k;
+#+end_src
+
+#+RESULTS:
+[[file:img/t1_gantt.png]]
+
+
+Somente para uma thread, por contador.
+
+#+begin_src R :results output graphics :file img/t1_hw.png :exports both :width 1600 :height 200 :session
+library(ggplot2);
+hw_counter_plot <- function (dfa, thread, counter, tstart, tend)
+{
+    df1 <- dfa %>% filter(Thread == thread) %>% filter(End >= tstart, Start <= tend) %>% as.data.frame();
+    k <- ggplot() +
+        theme_bw(base_size = 16) +
+        xlab("Time [s]") + ylab(counter) +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "none",
+            legend.title = element_blank()
+        ) +
+        ylim(0,NA) +
+        coord_cartesian(xlim=c(tstart,tend)) +
+        geom_line(data=df1, alpha=.3, aes_string(x="Start+(End-Start)/2", y=counter)) +
+        geom_point(data=df1, aes_string(x="Start+(End-Start)/2", y=counter));
+    k;
+}
+z <- hw_counter_plot (df, 1, "PAPI_L2_ICM", tstart, tend);
+z;
+#+end_src
+
+#+RESULTS:
+[[file:img/t1_hw.png]]
+
+
+
+Colocando tudo junto, com as três métricas.
+
+#+begin_src R :results output graphics :file img/t1_tudojunto.png :exports both :width 1600 :height 400 :session
+library(gridExtra);
+library(grid);
+tstart = min(df$Start);
+tend = max(df$End);
+thread = 1;
+gantt <- gantt_plot(df, thread, tstart, tend) + theme(legend.position="top", axis.text.x=element_blank(), axis.title.x=element_blank());
+l2_icm <- hw_counter_plot (df, thread, "PAPI_L2_ICM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_dcm <- hw_counter_plot (df, thread, "PAPI_L2_DCM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_tca <- hw_counter_plot (df, thread, "PAPI_L2_TCA", tstart, tend) + theme(axis.title.y=element_text(angle=80));
+
+ gA <- ggplotGrob(gantt);
+ gB <- ggplotGrob(l2_icm);
+ gC <- ggplotGrob(l2_dcm);
+ gD <- ggplotGrob(l2_tca);
+
+maxWidth = grid::unit.pmax(gA$widths[2:5], gB$widths[2:5], gC$widths[2:5], gD$widths[2:5]);
+gA$widths[2:5] <- as.list(maxWidth)
+gB$widths[2:5] <- as.list(maxWidth)
+gC$widths[2:5] <- as.list(maxWidth)
+gD$widths[2:5] <- as.list(maxWidth)
+
+grid.arrange(gA, gB, gC, gD, ncol=1, heights=c(10,10,10,10));
+#+end_src
+
+#+RESULTS:
+[[file:img/t1_tudojunto.png]]
+
+
+Os eixos X estão sincronizados. Podes mudar o valor da variável thread
+para analisar a relação nas outras threads.
+* 2016-12-09 Correlacionando com o código :ATTACH:
+:PROPERTIES:
+:Attachments: ft.f
+:ID:       ee6ddb5f-9d37-46c7-b311-f36797fce1a0
+:END:
+
+Não tenho certeza se o código =ft.f= em anexo é o mesmo utilizado no
+experimento. Seria bom confirmar. O anexo oriunda da versão
+NPB3.3.1/NPB3.3-OMP/ disponível aqui:
+https://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
+
+Quero entender como o Score-P rastreou o programa.
+
+#+name: pjdumprastro
+#+begin_src shell :results output
+ls -1 ./data/14/a5541a*/trace-by-lucas.csv
+#+end_src
+
+#+begin_src R :results output :session :exports both :var filename=pjdumprastro
+library(dplyr);
+df <- read.csv(gsub("\n", "", filename), header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Value=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_PAPI_L2_ICM=V11,
+        Push_ru_utime=V12,
+        Push_ru_stime=V13,
+        Pop_PAPI_L2_TCA=V14,
+        Pop_PAPI_L2_DCM=V15,
+        Pop_PAPI_L2_ICM=V16,
+        Pop_ru_utime=V17,
+        Pop_ru_stime=V18) %>%
+    mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA-Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM-Push_PAPI_L2_DCM,
+        PAPI_L2_ICM = Pop_PAPI_L2_ICM-Push_PAPI_L2_ICM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>%
+    select(
+        -Type, -StateType, -Imbrication) %>%
+    select(-Push_PAPI_L2_TCA,
+        -Push_PAPI_L2_DCM,
+        -Push_PAPI_L2_ICM,
+        -Push_ru_utime,
+        -Push_ru_stime,
+        -Pop_PAPI_L2_TCA,
+        -Pop_PAPI_L2_DCM,
+        -Pop_PAPI_L2_ICM,
+        -Pop_ru_utime,
+        -Pop_ru_stime) %>% as.data.frame();
+#Renomear os identificadores das threads
+tids = unique(df$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+df <- merge (df, tidsdf, by.x="Thread", by.y="Thread");
+df <- df %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+df$Value <- as.factor(gsub('!.omp ', "", df$Value));
+head(df);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      Start       End   Duration                      Value PAPI_L2_TCA
+1  19.41803  19.43686   0.018828         parallel @ft.f:188         310
+2  19.43686 192.85894 173.422084               do @ft.f:188      903905
+3 192.85894 345.05055 152.191609 implicit barrier @ft.f:198         588
+4 345.05055 345.13632   0.085768               do @ft.f:188         369
+5 345.13632 345.14311   0.006788         parallel @ft.f:188          79
+6 355.68586 355.71648   0.030613         parallel @ft.f:430         211
+  PAPI_L2_DCM PAPI_L2_ICM ru_utime ru_stime Thread
+1          26         121        0        0     24
+2      356861         207    36297    35513     24
+3         182         293     4937      811     24
+4          64         163        0        0     24
+5          13           7        0        0     24
+6          34          43        0        0     24
+#+end_example
+
+Abra o arquivo =ft.f= em anexo, C-c C-a o
+
+Removo os rastros do arquivo =print_results.f=, menos importantes.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v2.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("print",Value)) %>% as.data.frame();
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v2.png]]
+
+
+Estranho de ver a relação entre do, parallel, e implicit
+barrier. Vamos investigar as combinações possíveis (pelos números das
+linhas). Entre as linhas 540 e 559.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v3.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("print",Value)) %>% as.data.frame();
+#x <- c(188, 198);
+#x <- c(222, 231);
+#x <- c(273, 280);
+#x <- c(430, 443);
+x <- c(540, 559);
+#x <- c(586, 604);
+#x <- c(631, 649);
+#x <- c(862, 869);
+df1 <- df %>% filter(grepl(x[1], Value) | grepl(x[2], Value)) %>% as.data.frame();
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v3.png]]
+
+This is the corresponding Fortran source code (line 540 to 559):
+
+#+begin_src fortran :results output :session :exports both
+!$omp parallel do default(shared) private(i,j,k,jj,y1,y2)
+!$omp&  shared(is,logd1,d1)
+      do k = 1, d3
+         do jj = 0, d2 - fftblock, fftblock
+            do j = 1, fftblock
+               do i = 1, d1
+                  y1(j,i) = x(i,j+jj,k)
+               enddo
+            enddo
+            
+            call cfftz (is, logd1, d1, y1, y2)
+
+
+            do j = 1, fftblock
+               do i = 1, d1
+                  xout(i,j+jj,k) = y1(j,i)
+               enddo
+            enddo
+         enddo
+      enddo
+#+end_src
+
+Let's try out another one:
+
+#+begin_src R :results output graphics :file img/gantt-chart_v4.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df1 <- df %>% filter(!grepl("print",Value)) %>% as.data.frame();
+#x <- c(188, 198);
+x <- c(222, 231);
+#x <- c(273, 280);
+#x <- c(430, 443);
+#x <- c(540, 559);
+#x <- c(586, 604);
+#x <- c(631, 649);
+#x <- c(862, 869);
+df1 <- df1 %>% filter(grepl(x[1], Value) | grepl(x[2], Value)) %>% as.data.frame();
+tstart = min(df1$Start);
+tend = max(df1$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Value,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v4.png]]
+
+From line 222 and 231.
+
+#+begin_src fortran :results output :session :exports both
+!$omp parallel do default(shared) private(i,j,k)
+      do k = 1, d3
+         do j = 1, d2
+            do i = 1, d1
+               u0(i,j,k) = u0(i,j,k) * twiddle(i,j,k)
+               u1(i,j,k) = u0(i,j,k)
+            end do
+         end do
+      end do
+#+end_src
+
+So, we should merge these in a single state. Let's try out.
+
+#+begin_src R :results output :session :exports both
+library(reshape);
+#prepare the new code regions identification
+df1 <- df %>% filter(grepl("ft.f", Value));
+x <- df1 %>% filter(grepl("do ", Value) | grepl("implicit barrier ", Value)) %>% select(Value);
+lines <- as.integer(gsub(".* @ft.f:", "", unique(x)$Value));
+newpairs <- as.data.frame(matrix(lines, ncol=2, byrow=TRUE)) %>% arrange(V1);
+newpairs$Region = paste0(1:nrow(newpairs), "@ft.f:", newpairs$V1, "-", newpairs$V2);
+newpairs <- melt(newpairs, id.vars=("Region")) %>% select(-variable) %>% as.data.frame();
+newpairs;
+df1$Value <- as.integer(gsub("^.*@ft.f:", "", df1$Value));
+#merge the code regions in the trace
+df1 <- merge (df1, newpairs, by.x="Value", by.y="value");
+head(df1);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+           Region value
+1  1@ft.f:188-198   188
+2  2@ft.f:222-231   222
+3  3@ft.f:273-280   273
+4  4@ft.f:430-443   430
+5  5@ft.f:540-559   540
+6  6@ft.f:586-604   586
+7  7@ft.f:631-649   631
+8  8@ft.f:862-869   862
+9  1@ft.f:188-198   198
+10 2@ft.f:222-231   231
+11 3@ft.f:273-280   280
+12 4@ft.f:430-443   443
+13 5@ft.f:540-559   559
+14 6@ft.f:586-604   604
+15 7@ft.f:631-649   649
+16 8@ft.f:862-869   869
+  Value     Start       End   Duration PAPI_L2_TCA PAPI_L2_DCM PAPI_L2_ICM
+1   188  19.41803  19.43686   0.018828         310          26         121
+2   188  19.43686 192.85894 173.422084      903905      356861         207
+3   188 344.99815 345.01645   0.018293         114          36           8
+4   188 345.05055 345.13632   0.085768         369          64         163
+5   188 345.13632 345.14311   0.006788          79          13           7
+6   188  18.87762 199.26224 180.384616      904850      373880         223
+  ru_utime ru_stime Thread         Region
+1        0        0     24 1@ft.f:188-198
+2    36297    35513     24 1@ft.f:188-198
+3        0        0     17 1@ft.f:188-198
+4        0        0     24 1@ft.f:188-198
+5        0        0     24 1@ft.f:188-198
+6    53211    23457     14 1@ft.f:188-198
+#+end_example
+
+Let's plot again:
+
+
+#+begin_src R :results output graphics :file img/gantt-chart_v5.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+df2 <- df1 %>% filter(grepl("2@", Region)) %>% as.data.frame();
+tstart = min(df$Start);
+tend = max(df$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df2, alpha=1, aes(fill=Region,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v5.png]]
+Now they have been merged.
+
+Let's plot them all.
+
+#+begin_src R :results output graphics :file img/gantt-chart_v6.png :exports both :width 1600 :height 400 :session
+library(ggplot2);
+tstart = min(df$Start);
+tend = max(df$End);
+ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank()
+        ) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 2)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Region,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+#+end_src
+
+#+RESULTS:
+[[file:img/gantt-chart_v6.png]]
+
+Great, now it looks much better: we have 8 regions.
+
+Let's merge all that again.
+
+#+begin_src R :results output graphics :file img/t1_tudojunto_v2.png :exports both :width 1600 :height 400 :session
+gantt_plot <- function (dfa, thread, tstart, tend)
+{
+    df1 <- dfa %>% filter(Thread == thread) %>%  filter(End >= tstart, Start <= tend) %>% as.data.frame();
+    k <- ggplot() +
+    theme_bw(base_size = 16) +
+    xlab("Time [s]") + ylab("Thread") +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "top",
+            legend.title = element_blank()
+        ) +
+    scale_y_continuous(breaks=unique(df1$Thread)) +
+    coord_cartesian(xlim=c(tstart,tend)) +
+    guides(fill = guide_legend(nrow = 1)) +
+    geom_rect(data=df1, alpha=1, aes(fill=Region,
+                                  xmin=Start,
+                                  xmax=End,
+                                  ymin=Thread,
+                                  ymax=Thread + 0.9)) 
+    k;
+}
+
+hw_counter_plot <- function (dfa, thread, counter, tstart, tend)
+{
+    df1 <- dfa %>% filter(Thread == thread) %>% filter(End >= tstart, Start <= tend) %>% as.data.frame();
+    df2 <- df1
+    k <- ggplot() +
+        theme_bw(base_size = 16) +
+        xlab("Time [s]") + ylab(counter) +
+        theme (
+            plot.margin = unit(c(0,0,0,0), "cm"),
+            legend.margin = unit(.1, "line"),
+            panel.grid = element_blank(),
+            legend.position = "none",
+            legend.title = element_blank()
+        ) +
+        ylim(0,NA) +
+        coord_cartesian(xlim=c(tstart,tend)) +
+        geom_line(data=df2, alpha=.3, aes_string(x="Start+(End-Start)/2", y=counter)) +
+        geom_point(data=df2, aes_string(x="Start+(End-Start)/2", y=counter));
+    k;
+}
+
+library(gridExtra);
+library(grid);
+tstart = min(df$Start);
+tend = max(df$End);
+thread = 1;
+gantt <- gantt_plot(df1, thread, tstart, tend) + theme(legend.position="top", axis.text.x=element_blank(), axis.title.x=element_blank());
+l2_icm <- hw_counter_plot (df1, thread, "PAPI_L2_ICM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_dcm <- hw_counter_plot (df1, thread, "PAPI_L2_DCM", tstart, tend) + theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_text(angle=80));
+l2_tca <- hw_counter_plot (df1, thread, "PAPI_L2_TCA", tstart, tend) + theme(axis.title.y=element_text(angle=80));
+
+ gA <- ggplotGrob(gantt);
+ gB <- ggplotGrob(l2_icm);
+ gC <- ggplotGrob(l2_dcm);
+ gD <- ggplotGrob(l2_tca);
+
+maxWidth = grid::unit.pmax(gA$widths[2:5], gB$widths[2:5], gC$widths[2:5], gD$widths[2:5]);
+gA$widths[2:5] <- as.list(maxWidth)
+gB$widths[2:5] <- as.list(maxWidth)
+gC$widths[2:5] <- as.list(maxWidth)
+gD$widths[2:5] <- as.list(maxWidth)
+
+grid.arrange(gA, gB, gC, gD, ncol=1, heights=c(10,10,10,10));
+#+end_src
+
+#+RESULTS:
+[[file:img/t1_tudojunto_v2.png]]
+
+Ainda não está certo. Precisamos agrupar os contadores de hardware por região.
+* 2016-12-14 Problemas relacionados aos rastros hype2 (CG, LU, FT)
+#+name: rastro-ft_40threads_exp4
+#+begin_src shell :results output
+find dados/cg_lu_ft | grep traces.otf2$ | grep ft\-
+#+end_src
+
+#+RESULTS: rastro-ft_40threads_exp4
+: dados/cg_lu_ft/ft-40threads_exp4/traces.otf2
+
+#+begin_src shell :results output :var filename=rastro-ft_40threads_exp4
+BIN=~/dev/akypuera/src/otf2-omp-print/otf2ompprint2paje.pl
+SDIR=`pwd`
+for dir in $(find dados/cg_lu_ft/ | grep exp4$); do
+    cd $dir
+    $BIN traces.otf2 > traces.paje
+    cd $SDIR
+done
+#+end_src
+
+#+RESULTS:
+
+Let's see the size of these traces.
+
+#+begin_src shell :results output
+ls -lh $(find dados/cg_lu_ft | grep paje$)
+#+end_src
+
+#+RESULTS:
+: -rw-r--r-- 1 schnorr schnorr 346M Dec 14 09:47 dados/cg_lu_ft/cg-40threads_exp4/traces.paje
+: -rw-r--r-- 1 schnorr schnorr 294M Dec 14 09:49 dados/cg_lu_ft/ft-40threads_exp4/traces.paje
+: -rw-r--r-- 1 schnorr schnorr 6.6G Dec 14 10:26 dados/cg_lu_ft/lu-40threads_exp4/traces.paje
+
+Quite large, let's =pj_dump= then, as before.
+
+#+begin_src shell :results output
+BIN=~/dev/pajeng/b/pj_dump
+SDIR=`pwd`
+for file in $(find dados/cg_lu_ft/ | grep traces.paje$); do
+    cd $(dirname $file)
+    $BIN --user-defined --no-imbrication traces.paje > traces.csv
+    cd $SDIR
+done
+#+end_src
+
+#+RESULTS:
+: dados/cg_lu_ft/cg-40threads_exp4
+: dados/cg_lu_ft/ft-40threads_exp4
+: dados/cg_lu_ft/lu-40threads_exp4
+
+Well, traces are very large, that didn't work, but I just realized
+Gabriel has traced everything. I should tell him that he should launch
+scorep with the following parameters.
+
+#+BEGIN_SRC sh
+scorep --nocompiler --nocuda --noonline-access --nopdt --nouser  --noopencl
+#+END_SRC
+* 2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente
+** Introdução
+Gabriel fornece um CSV registrado aqui:
+
+#+begin_src shell :results output
+head scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv
+#+end_src
+
+#+RESULTS:
+#+begin_example
+State, zero, S, 1.040083, 1.053624, 0.013541, 2.000000, !$omp parallel @cg.f:185, 33575, 4214, 12000, 4000, 34408, 4302, 12000, 4000
+State, zero, S, 1.057177, 1.063913, 0.006736, 2.000000, !$omp parallel @cg.f:185, 34650, 4303, 12000, 4000, 35096, 4324, 12000, 4000
+State, zero, S, 8345.835045, 25213.400111, 16867.565066, 4.000000, !$omp barrier @cg.f:805, 113718173, 374753, 2016000, 2748000, 113718763, 374938, 2020000, 2748000
+State, zero, S, 25227.942463, 25235.141154, 7.198691, 5.000000, !$omp barrier @cg.f:883, 113921313, 402654, 2028000, 2748000, 113921962, 402804, 2028000, 2752000
+State, zero, S, 25235.153436, 25235.189693, 0.036257, 5.000000, !$omp barrier @cg.f:896, 113922417, 402861, 2028000, 2752000, 113922668, 402892, 2028000, 2752000
+State, zero, S, 28591.264528, 28591.299142, 0.034614, 5.000000, !$omp barrier @cg.f:984, 117127138, 9304536, 3860000, 2792000, 117128106, 9304637, 3860000, 2792000
+State, zero, S, 28591.438597, 28591.484499, 0.045902, 5.000000, !$omp barrier @cg.f:994, 117128599, 9304826, 3860000, 2792000, 117128854, 9304877, 3860000, 2792000
+State, zero, S, 28591.488709, 28591.544375, 0.055666, 5.000000, !$omp barrier @cg.f:1007, 117128912, 9304884, 3860000, 2792000, 117129026, 9304900, 3860000, 2792000
+State, zero, S, 28591.548929, 28738.871958, 147.323029, 5.000000, !$omp do @cg.f:1009, 117129085, 9304910, 3860000, 2792000, 117727595, 9954517, 3880000, 2856000
+State, zero, S, 28738.871958, 28748.106292, 9.234334, 6.000000, !$omp implicit barrier @cg.f:1024, 117727595, 9954517, 3880000, 2856000, 117728696, 9954761, 3888000, 2856000
+#+end_example
+
+Uma vez que não tem o nome das colunas, vou acreditar que os nomes
+localizados no script R do LabBook do Gabriel para ler um arquivo
+similar estão corretos.
+** Ler os dados
+Lendo os dados.
+
+#+begin_src R :results output :session :exports both
+df0 <- read.csv("scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv", header=FALSE, strip.white=TRUE);
+head(df0);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+     V1   V2 V3           V4           V5           V6 V7
+1 State zero  S     1.040083     1.053624     0.013541  2
+2 State zero  S     1.057177     1.063913     0.006736  2
+3 State zero  S  8345.835045 25213.400111 16867.565066  4
+4 State zero  S 25227.942463 25235.141154     7.198691  5
+5 State zero  S 25235.153436 25235.189693     0.036257  5
+6 State zero  S 28591.264528 28591.299142     0.034614  5
+                        V8        V9     V10     V11     V12       V13     V14
+1 !$omp parallel @cg.f:185     33575    4214   12000    4000     34408    4302
+2 !$omp parallel @cg.f:185     34650    4303   12000    4000     35096    4324
+3  !$omp barrier @cg.f:805 113718173  374753 2016000 2748000 113718763  374938
+4  !$omp barrier @cg.f:883 113921313  402654 2028000 2748000 113921962  402804
+5  !$omp barrier @cg.f:896 113922417  402861 2028000 2752000 113922668  402892
+6  !$omp barrier @cg.f:984 117127138 9304536 3860000 2792000 117128106 9304637
+      V15     V16
+1   12000    4000
+2   12000    4000
+3 2020000 2748000
+4 2028000 2752000
+5 2028000 2752000
+6 3860000 2792000
+#+end_example
+** Tratamento dos dados
+Renomeando as colunas.
+
+#+begin_src R :results output :session :exports both
+library(dplyr);
+df1 <- df0 %>%
+    rename(
+        Type=V1, Thread=V2, StateType=V3, Start=V4, End=V5, Duration=V6, Imbrication=V7, Region=V8,
+        Push_PAPI_L2_TCA=V9,
+        Push_PAPI_L2_DCM=V10,
+        Push_ru_utime=V11,
+        Push_ru_stime=V12,
+        Pop_PAPI_L2_TCA=V13,
+        Pop_PAPI_L2_DCM=V14,
+        Pop_ru_utime=V15,
+        Pop_ru_stime=V16);
+head(df1);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   Type Thread StateType        Start          End     Duration Imbrication
+1 State   zero         S     1.040083     1.053624     0.013541           2
+2 State   zero         S     1.057177     1.063913     0.006736           2
+3 State   zero         S  8345.835045 25213.400111 16867.565066           4
+4 State   zero         S 25227.942463 25235.141154     7.198691           5
+5 State   zero         S 25235.153436 25235.189693     0.036257           5
+6 State   zero         S 28591.264528 28591.299142     0.034614           5
+                    Region Push_PAPI_L2_TCA Push_PAPI_L2_DCM Push_ru_utime
+1 !$omp parallel @cg.f:185            33575             4214         12000
+2 !$omp parallel @cg.f:185            34650             4303         12000
+3  !$omp barrier @cg.f:805        113718173           374753       2016000
+4  !$omp barrier @cg.f:883        113921313           402654       2028000
+5  !$omp barrier @cg.f:896        113922417           402861       2028000
+6  !$omp barrier @cg.f:984        117127138          9304536       3860000
+  Push_ru_stime Pop_PAPI_L2_TCA Pop_PAPI_L2_DCM Pop_ru_utime Pop_ru_stime
+1          4000           34408            4302        12000         4000
+2          4000           35096            4324        12000         4000
+3       2748000       113718763          374938      2020000      2748000
+4       2748000       113921962          402804      2028000      2752000
+5       2752000       113922668          402892      2028000      2752000
+6       2792000       117128106         9304637      3860000      2792000
+#+end_example
+
+Calculando as reais quantidades para as variáveis:
+
+#+begin_src R :results output :session :exports both
+df2 <- df1 %>% mutate(
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA - Push_PAPI_L2_TCA,
+        PAPI_L2_DCM = Pop_PAPI_L2_DCM - Push_PAPI_L2_DCM,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime);
+head(df2);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   Type Thread StateType        Start          End     Duration Imbrication
+1 State   zero         S     1.040083     1.053624     0.013541           2
+2 State   zero         S     1.057177     1.063913     0.006736           2
+3 State   zero         S  8345.835045 25213.400111 16867.565066           4
+4 State   zero         S 25227.942463 25235.141154     7.198691           5
+5 State   zero         S 25235.153436 25235.189693     0.036257           5
+6 State   zero         S 28591.264528 28591.299142     0.034614           5
+                    Region Push_PAPI_L2_TCA Push_PAPI_L2_DCM Push_ru_utime
+1 !$omp parallel @cg.f:185            33575             4214         12000
+2 !$omp parallel @cg.f:185            34650             4303         12000
+3  !$omp barrier @cg.f:805        113718173           374753       2016000
+4  !$omp barrier @cg.f:883        113921313           402654       2028000
+5  !$omp barrier @cg.f:896        113922417           402861       2028000
+6  !$omp barrier @cg.f:984        117127138          9304536       3860000
+  Push_ru_stime Pop_PAPI_L2_TCA Pop_PAPI_L2_DCM Pop_ru_utime Pop_ru_stime
+1          4000           34408            4302        12000         4000
+2          4000           35096            4324        12000         4000
+3       2748000       113718763          374938      2020000      2748000
+4       2748000       113921962          402804      2028000      2752000
+5       2752000       113922668          402892      2028000      2752000
+6       2792000       117128106         9304637      3860000      2792000
+  PAPI_L2_TCA PAPI_L2_DCM ru_utime ru_stime
+1         833          88        0        0
+2         446          21        0        0
+3         590         185     4000        0
+4         649         150        0     4000
+5         251          31        0        0
+6         968         101        0        0
+#+end_example
+
+Eliminar colunas irrelevantes:
+
+#+begin_src R :results output :session :exports both
+df3 <- df2 %>% select(
+                   -Type, -Imbrication, -StateType, -Push_PAPI_L2_TCA, 
+                   -Push_PAPI_L2_DCM, -Push_ru_utime, -Push_ru_stime, -Pop_PAPI_L2_TCA, 
+                   -Pop_PAPI_L2_DCM, -Pop_ru_utime, -Pop_ru_stime);
+head(df3);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  Thread        Start          End     Duration                   Region
+1   zero     1.040083     1.053624     0.013541 !$omp parallel @cg.f:185
+2   zero     1.057177     1.063913     0.006736 !$omp parallel @cg.f:185
+3   zero  8345.835045 25213.400111 16867.565066  !$omp barrier @cg.f:805
+4   zero 25227.942463 25235.141154     7.198691  !$omp barrier @cg.f:883
+5   zero 25235.153436 25235.189693     0.036257  !$omp barrier @cg.f:896
+6   zero 28591.264528 28591.299142     0.034614  !$omp barrier @cg.f:984
+  PAPI_L2_TCA PAPI_L2_DCM ru_utime ru_stime
+1         833          88        0        0
+2         446          21        0        0
+3         590         185     4000        0
+4         649         150        0     4000
+5         251          31        0        0
+6         968         101        0        0
+#+end_example
+
+Transformando para as métricas utilizadas:
+
+#+begin_src R :results output :session :exports both
+df4 <- df3 %>% mutate(MISSES_L2 = PAPI_L2_DCM / PAPI_L2_TCA);
+head(df4);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  Thread        Start          End     Duration                   Region
+1   zero     1.040083     1.053624     0.013541 !$omp parallel @cg.f:185
+2   zero     1.057177     1.063913     0.006736 !$omp parallel @cg.f:185
+3   zero  8345.835045 25213.400111 16867.565066  !$omp barrier @cg.f:805
+4   zero 25227.942463 25235.141154     7.198691  !$omp barrier @cg.f:883
+5   zero 25235.153436 25235.189693     0.036257  !$omp barrier @cg.f:896
+6   zero 28591.264528 28591.299142     0.034614  !$omp barrier @cg.f:984
+  PAPI_L2_TCA PAPI_L2_DCM ru_utime ru_stime MISSES_L2
+1         833          88        0        0 0.1056423
+2         446          21        0        0 0.0470852
+3         590         185     4000        0 0.3135593
+4         649         150        0     4000 0.2311248
+5         251          31        0        0 0.1235060
+6         968         101        0        0 0.1043388
+#+end_example
+
+Remove variáveis não desejadas:
+
+#+begin_src R :results output :session :exports both
+df5 <- df4 %>% select(-PAPI_L2_TCA, -PAPI_L2_DCM, -ru_utime, -ru_stime);
+head(df5);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  Thread        Start          End     Duration                   Region
+1   zero     1.040083     1.053624     0.013541 !$omp parallel @cg.f:185
+2   zero     1.057177     1.063913     0.006736 !$omp parallel @cg.f:185
+3   zero  8345.835045 25213.400111 16867.565066  !$omp barrier @cg.f:805
+4   zero 25227.942463 25235.141154     7.198691  !$omp barrier @cg.f:883
+5   zero 25235.153436 25235.189693     0.036257  !$omp barrier @cg.f:896
+6   zero 28591.264528 28591.299142     0.034614  !$omp barrier @cg.f:984
+  MISSES_L2
+1 0.1056423
+2 0.0470852
+3 0.3135593
+4 0.2311248
+5 0.1235060
+6 0.1043388
+#+end_example
+
+Renomear o nome das Threads:
+
+#+begin_src R :results output :session :exports both
+tids = unique(df5$Thread);
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids)) %>% arrange(Thread);
+df6 <- merge (df5, tidsdf, by.x="Thread", by.y="Thread");
+df6 <- df6 %>% select(-Thread) %>% rename(Thread=ntids) %>% as.data.frame();
+df6 %>% arrange(Start) %>% head;
+#+end_src
+
+#+RESULTS:
+:      Start      End Duration                   Region  MISSES_L2 Thread
+: 1 1.040083 1.053624 0.013541 !$omp parallel @cg.f:185 0.10564226      1
+: 2 1.057177 1.063913 0.006736 !$omp parallel @cg.f:185 0.04708520      1
+: 3 1.674345 1.684685 0.010340 !$omp parallel @cg.f:185 0.07833333      3
+: 4 1.690057 1.694647 0.004590 !$omp parallel @cg.f:185 0.05415162      3
+: 5 1.974331 1.980759 0.006428 !$omp parallel @cg.f:185 0.05389222      4
+: 6 1.984382 1.988035 0.003653 !$omp parallel @cg.f:185 0.06086957      4
+
+** Agrupando as regiões de código :ATTACH:
+:PROPERTIES:
+:Attachments: cg.f
+:ID:       cd254451-15d1-443a-9548-ccff07667157
+:END:
+
+#+begin_src R :results output :session :exports both
+df6 %>%
+    select(Region) %>%
+    unique %>%
+    filter(grepl("cg.f", Region)) %>%
+    mutate(Region=gsub("\\!\\$omp ", "", Region)) %>%
+    mutate(Operation = as.factor(gsub(" [^ ]*$", "", Region))) %>%
+    mutate(File = as.factor(gsub(":.*$", "", gsub(".* @", "", Region)))) %>%
+    mutate(Line = as.integer(gsub(".*:", "", Region))) %>%
+    arrange(Line)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                        Region        Operation File Line
+1           parallel @cg.f:185         parallel cg.f  185
+2            barrier @cg.f:196          barrier cg.f  196
+3                 do @cg.f:207               do cg.f  207
+4                 do @cg.f:218               do cg.f  218
+5                 do @cg.f:223               do cg.f  223
+6   implicit barrier @cg.f:231 implicit barrier cg.f  231
+7           parallel @cg.f:263         parallel cg.f  263
+8                 do @cg.f:263               do cg.f  263
+9   implicit barrier @cg.f:269 implicit barrier cg.f  269
+10          parallel @cg.f:277         parallel cg.f  277
+11                do @cg.f:277               do cg.f  277
+12  implicit barrier @cg.f:281 implicit barrier cg.f  281
+13          parallel @cg.f:293         parallel cg.f  293
+14                do @cg.f:293               do cg.f  293
+15  implicit barrier @cg.f:297 implicit barrier cg.f  297
+16          parallel @cg.f:339         parallel cg.f  339
+17                do @cg.f:339               do cg.f  339
+18  implicit barrier @cg.f:345 implicit barrier cg.f  345
+19          parallel @cg.f:361         parallel cg.f  361
+20                do @cg.f:361               do cg.f  361
+21  implicit barrier @cg.f:365 implicit barrier cg.f  365
+22          parallel @cg.f:513         parallel cg.f  513
+23                do @cg.f:519               do cg.f  519
+24  implicit barrier @cg.f:526 implicit barrier cg.f  526
+25                do @cg.f:533               do cg.f  533
+26  implicit barrier @cg.f:537 implicit barrier cg.f  537
+27            master @cg.f:546           master cg.f  546
+28           barrier @cg.f:554          barrier cg.f  554
+29                do @cg.f:568               do cg.f  568
+30  implicit barrier @cg.f:576 implicit barrier cg.f  576
+31                do @cg.f:617               do cg.f  617
+32  implicit barrier @cg.f:621 implicit barrier cg.f  621
+33                do @cg.f:633               do cg.f  633
+34  implicit barrier @cg.f:646 implicit barrier cg.f  646
+35                do @cg.f:656               do cg.f  656
+36  implicit barrier @cg.f:660 implicit barrier cg.f  660
+37                do @cg.f:671               do cg.f  671
+38  implicit barrier @cg.f:679 implicit barrier cg.f  679
+39                do @cg.f:685               do cg.f  685
+40  implicit barrier @cg.f:691 implicit barrier cg.f  691
+41           barrier @cg.f:805          barrier cg.f  805
+42           barrier @cg.f:883          barrier cg.f  883
+43           barrier @cg.f:896          barrier cg.f  896
+44           barrier @cg.f:984          barrier cg.f  984
+45           barrier @cg.f:994          barrier cg.f  994
+46          barrier @cg.f:1007          barrier cg.f 1007
+47               do @cg.f:1009               do cg.f 1009
+48 implicit barrier @cg.f:1024 implicit barrier cg.f 1024
+49               do @cg.f:1025               do cg.f 1025
+50 implicit barrier @cg.f:1029 implicit barrier cg.f 1029
+#+end_example
+
+Olhando o código podemos ver regiões de código entre:
+- 185 e 231 (entre o primeiro parallel e o primeiro implicit) - chamada a =makea=
+Aqui a função =conj_grad= é chamada pela thread principal.
+- 207 a 231
+- 263 e 269 (entre um parallel e o próximo implicit)
+- 277 e 281
+- 293 e 297
+- 339 e 345
+- 361 e 365
+
+Em seguida, uma grande região paralela (função =conj_grad=) entre linhas
+513 e 691, quebrada em pedaços paralelos (sub-regiões paralelas) da
+seguinte forma:
+- 519 e 526 (do e implicit)
+- 533 e 537
+- 546 e 554 (entre master e barrier - única thread) - DENIED
+- 568 e 576
+- 617 e 621
+- ... (entre cada do e implicit)
+- 685 e 691
+
+Em seguida, vem a implementação da função =makea=, que contém algumas
+barreiras. Essas barreiras existem pois a dita função é chamada dentro
+de uma região paralela a partir da função =main= do programa, entre as
+linhas 185 e 196 (barreira). Isso pode nos levar a definir uma região
+paralela entre 185 e 196, seguida de outra região entre as linhas
+196+1 e 231.
+
+A barreira interna da função =makea= é a seguinte, chamada antes da
+chamada a =sparse= (lembrando que estamos sempre em uma região paralela
+definida na função main):
+- 805
+
+A função =sparse= contém também barreiras, nas linhas:
+- 883
+- 896
+- 984
+- 1007
+
+Ela se termina por duas regiões paralelas:
+- 1009 a 1024 (do e implicit)
+- 1025 e 1029 (do e implicit)
+
+De uma maneira geral, as relações entre do e implicit barrier são
+claras, elas sempre representam uma região paralela (só podem aparecer
+dentro de uma região marcada =parallel=). Já a presença de =barrier= é
+mais complexa de ser tratada.
+** Olhando alguns estados para entender melhor a estrutura do programa
+*** Quebrando as informações sobre a localização dos estados
+#+begin_src R :results output :session :exports both
+df7 <- df6 %>%
+    filter(grepl("cg.f", Region)) %>%
+    mutate(Region=gsub("\\!\\$omp ", "", Region)) %>%
+    mutate(Operation = as.factor(gsub(" [^ ]*$", "", Region))) %>%
+    mutate(File = as.factor(gsub(":.*$", "", gsub(".* @", "", Region)))) %>%
+    mutate(Line = as.integer(gsub(".*:", "", Region))) %>%
+    arrange(Line);
+df7 %>% arrange(Start) %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+     Start      End Duration             Region  MISSES_L2 Thread Operation
+1 1.040083 1.053624 0.013541 parallel @cg.f:185 0.10564226      1  parallel
+2 1.057177 1.063913 0.006736 parallel @cg.f:185 0.04708520      1  parallel
+3 1.674345 1.684685 0.010340 parallel @cg.f:185 0.07833333      3  parallel
+4 1.690057 1.694647 0.004590 parallel @cg.f:185 0.05415162      3  parallel
+5 1.974331 1.980759 0.006428 parallel @cg.f:185 0.05389222      4  parallel
+6 1.984382 1.988035 0.003653 parallel @cg.f:185 0.06086957      4  parallel
+  File Line
+1 cg.f  185
+2 cg.f  185
+3 cg.f  185
+4 cg.f  185
+5 cg.f  185
+6 cg.f  185
+#+end_example
+*** Algumas constatações
+#+begin_src R :results output :session :exports both
+df7 %>% select(Operation) %>% group_by(Operation) %>% summarize(Count=n()) %>% as.data.frame();
+#+end_src
+
+#+RESULTS:
+:          Operation Count
+: 1          barrier  7628
+: 2               do 64180
+: 3 implicit barrier 32240
+: 4           master  1900
+: 5         parallel 42980
+
+#+begin_src R :results output :session :exports both
+df7 %>% select(Region) %>% .$Region %>% unique %>% length;
+#+end_src
+
+#+RESULTS:
+: [1] 50
+
+#+begin_src R :results output :session :exports both
+df7 %>% filter(Thread == 1) %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+         Start          End Duration             Region MISSES_L2 Thread
+1     1.040083     1.053624 0.013541 parallel @cg.f:185 0.1056423      1
+2     1.057177     1.063913 0.006736 parallel @cg.f:185 0.0470852      1
+3 28748.270331 28748.274207 0.003876 parallel @cg.f:185 0.3529412      1
+4 28748.278517 28748.281768 0.003251 parallel @cg.f:185 0.1333333      1
+5 28765.734916 28765.789951 0.055035 parallel @cg.f:185 0.2422535      1
+6 28768.899077 28768.924942 0.025865 parallel @cg.f:185 0.1828194      1
+  Operation File Line
+1  parallel cg.f  185
+2  parallel cg.f  185
+3  parallel cg.f  185
+4  parallel cg.f  185
+5  parallel cg.f  185
+6  parallel cg.f  185
+#+end_example
+
+#+begin_src R :results output :session :exports both
+df7 %>% group_by(Thread) %>% count (N=n());
+#+end_src
+
+#+RESULTS:
+: Source: local data frame [4 x 3]
+: Groups: Thread [?]
+: 
+:   Thread     N     n
+:    <int> <int> <int>
+: 1      1 40082 40082
+: 2      2 36282 36282
+: 3      3 36282 36282
+: 4      4 36282 36282
+
+#+begin_src R :results output :session :exports both
+df7 %>% filter(Line >= 207, Line <= 231) %>% arrange(Start) %>% filter(Thread == 1); # %>% group_by(Thread) %>% summarize(N=n());
+#+end_src
+
+#+RESULTS:
+#+begin_example
+     Start      End  Duration                     Region MISSES_L2 Thread
+1 28748.28 28765.73 17.453148               do @cg.f:207 5.5071467      1
+2 28765.79 28768.90  3.109126               do @cg.f:218 0.9183767      1
+3 28768.92 28769.60  0.673462               do @cg.f:223 0.3513710      1
+4 28769.61 28772.21  2.601060 implicit barrier @cg.f:231 0.2886297      1
+         Operation File Line
+1               do cg.f  207
+2               do cg.f  218
+3               do cg.f  223
+4 implicit barrier cg.f  231
+#+end_example
+*** Função que plota o gantt-chart
+#+begin_src R :results output :session :exports both
+ourganttline <- function(df, ls, le) {
+    df %>% filter(Line >= ls, Line <= le) %>% ggplot() +
+            theme_bw(base_size = 16) +
+            xlab("Time [s]") + ylab("Thread") +
+            theme (
+                plot.margin = unit(c(0,0,0,0), "cm"),
+                legend.margin = unit(.1, "line"),
+                panel.grid = element_blank(),
+                legend.position = "bottom",
+                legend.title = element_blank()
+            ) +
+            ylim(0,7) +
+            guides(fill = guide_legend(nrow = 2)) +
+            geom_rect(alpha=.8, color="black", aes(fill=Region,
+                                                   xmin=Start,
+                                                   xmax=End,
+                                                   ymin=Thread,
+                                                   ymax=Thread + 0.9));
+}
+#+end_src
+
+#+RESULTS:
+
+*** Região 207 a 231
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 207, 231);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526Lc0.png]]
+*** Região 185 a 196
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 185, 196);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure295269lD.png]]
+*** Região 263 a 269
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 263, 269);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526KwJ.png]]
+
+*** 277 a 281
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 277, 281);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526X6P.png]]
+
+*** 293 a 297
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 293, 297);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526kEW.png]]
+
+*** 339 a 345
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 339, 345);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526xOc.png]]
+
+*** 361 a 365
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 361, 365);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526-Yi.png]]
+*** 519 a 526
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 519, 526);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526Ljo.png]]
+*** 533 e 537
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 533, 537);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526Ytu.png]]
+*** 546 e 554
+#+begin_src R :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 1400 :height 200 :session
+ourganttline(df7, 546, 554);
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-29526wPb/figure29526-fW.png]]
+*** 
+* 2017-02-03 Novos rastros gerados em =exp7-NAS-cg_mg_ft-40threads=
+Veja a explicação do Gabriel em:
+[[file:LabBook.org::*%5B10:47:50;%2003.02.2017%5D%20Gerando%20trace%20Hype2%20-%20Aplica%C3%A7%C3%A3o%20CG%20-%20NAS][{10:47:50; 03.02.2017} Gerando trace Hype2 - Aplicação CG - NAS]]
+** Obter os dados do servidor hype2
+#+begin_src shell :results output
+rsync hype2.inf:./exp7-NAS-cg_mg_ft-40threads.tar .
+#+end_src
+
+#+RESULTS:
+** Extrair os dados em um diretório específico
+#+begin_src shell :results output
+tar vxf exp7-NAS-cg_mg_ft-40threads.tar
+#+end_src
+
+#+RESULTS:
+#+begin_example
+exp7-NAS-cg_mg_ft-40threads/
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces.otf2
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/12884901888.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/64424509440.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/21474836480.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/85899345920.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/124554051584.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/103079215104.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/107374182400.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/120259084288.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/17179869184.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/141733920768.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/150323855360.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/94489280512.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/128849018880.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/115964116992.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/77309411328.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/0.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/85899345920.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/30064771072.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/150323855360.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/81604378624.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/154618822656.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/21474836480.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/47244640256.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/146028888064.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/120259084288.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/30064771072.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/133143986176.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/133143986176.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/12884901888.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/167503724544.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/77309411328.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/98784247808.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/25769803776.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/64424509440.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/4294967296.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/137438953472.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/154618822656.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/51539607552.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/98784247808.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/38654705664.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/111669149696.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/90194313216.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/47244640256.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/8589934592.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/73014444032.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/68719476736.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/55834574848.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/38654705664.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/137438953472.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/103079215104.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/68719476736.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/107374182400.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/90194313216.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/128849018880.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/51539607552.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/34359738368.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/17179869184.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/34359738368.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/60129542144.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/4294967296.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/163208757248.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/163208757248.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/0.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/141733920768.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/60129542144.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/111669149696.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/42949672960.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/8589934592.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/146028888064.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/124554051584.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/158913789952.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/115964116992.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/25769803776.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/42949672960.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/94489280512.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/73014444032.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/55834574848.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/167503724544.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/158913789952.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces/81604378624.evt
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces.def
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/profile.cubex
+exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/scorep.cfg
+exp7-NAS-cg_mg_ft-40threads/scriptDeExecucao_exp7.bash
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.otf2
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/12884901888.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/64424509440.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/21474836480.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/85899345920.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/124554051584.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/103079215104.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/107374182400.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/120259084288.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/17179869184.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/141733920768.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/150323855360.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/94489280512.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/128849018880.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/115964116992.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/77309411328.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/0.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/85899345920.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/30064771072.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/150323855360.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/81604378624.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/154618822656.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/21474836480.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/47244640256.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/146028888064.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/120259084288.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/30064771072.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/133143986176.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/133143986176.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/12884901888.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/167503724544.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/77309411328.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/98784247808.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/25769803776.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/64424509440.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/4294967296.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/137438953472.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/154618822656.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/51539607552.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/98784247808.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/38654705664.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/111669149696.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/90194313216.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/47244640256.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/8589934592.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/73014444032.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/68719476736.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/55834574848.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/38654705664.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/137438953472.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/103079215104.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/68719476736.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/107374182400.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/90194313216.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/128849018880.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/51539607552.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/34359738368.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/17179869184.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/34359738368.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/60129542144.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/4294967296.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/163208757248.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/163208757248.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/0.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/141733920768.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/60129542144.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/111669149696.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/42949672960.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/8589934592.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/146028888064.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/124554051584.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/158913789952.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/115964116992.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/25769803776.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/42949672960.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/94489280512.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/73014444032.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/55834574848.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/167503724544.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/158913789952.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces/81604378624.evt
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.def
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/profile.cubex
+exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/scorep.cfg
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces.otf2
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/12884901888.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/64424509440.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/21474836480.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/85899345920.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/124554051584.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/103079215104.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/107374182400.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/120259084288.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/17179869184.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/141733920768.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/150323855360.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/94489280512.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/128849018880.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/115964116992.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/77309411328.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/0.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/85899345920.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/30064771072.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/150323855360.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/81604378624.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/154618822656.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/21474836480.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/47244640256.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/146028888064.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/120259084288.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/30064771072.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/133143986176.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/133143986176.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/12884901888.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/167503724544.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/77309411328.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/98784247808.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/25769803776.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/64424509440.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/4294967296.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/137438953472.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/154618822656.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/51539607552.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/98784247808.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/38654705664.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/111669149696.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/90194313216.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/47244640256.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/8589934592.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/73014444032.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/68719476736.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/55834574848.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/38654705664.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/137438953472.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/103079215104.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/68719476736.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/107374182400.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/90194313216.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/128849018880.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/51539607552.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/34359738368.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/17179869184.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/34359738368.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/60129542144.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/4294967296.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/163208757248.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/163208757248.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/0.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/141733920768.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/60129542144.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/111669149696.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/42949672960.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/8589934592.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/146028888064.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/124554051584.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/158913789952.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/115964116992.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/25769803776.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/42949672960.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/94489280512.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/73014444032.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/55834574848.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/167503724544.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/158913789952.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces/81604378624.evt
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces.def
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/profile.cubex
+exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/scorep.cfg
+#+end_example
+** Converter para Paje, gerar o CSV correspondente
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for otf2 in $(find | grep otf2$); do
+    echo $otf2
+    DIR=$(dirname $otf2)
+    cd $DIR
+    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | pj_dump --user-defined --no-imbrication > traces.csv
+    cd ..
+done
+#+end_src
+
+#+RESULTS:
+: ./mg.B-scorep-40threads_exp7/traces.otf2
+: ./cg.B-scorep-40threads_exp7/traces.otf2
+: ./ft.B-scorep-40threads_exp7/traces.otf2
+** Verificando o correto tratamento dos rastros
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for csv in $(find | grep csv$); do
+    du -hs $csv
+    cat $csv | grep ^State | grep -i omp | wc -l
+    cat $csv | grep ^State | wc -l
+done
+#+end_src
+
+#+RESULTS:
+: 48M	./mg.B-scorep-40threads_exp7/traces.csv
+: 333120
+: 338225
+: 658M	./cg.B-scorep-40threads_exp7/traces.csv
+: 1390640
+: 5105025
+: 542M	./ft.B-scorep-40threads_exp7/traces.csv
+: 247492
+: 4168148
+
+Nota-se que Score-P está rastreando todas as funções da aplicação. Não
+há necessidade de realizar um rastreamento completo, apenas do
+comportamento OpenMP. Gabriel, por gentileza, no próximo experimento
+gerar apenas rastros com dados OpenMP
+** Converter para Paje, gerar o CSV, *apenas estados OpenMP*
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for otf2 in $(find | grep otf2$); do
+    echo $otf2
+    DIR=$(dirname $otf2)
+    cd $DIR
+    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | pj_dump --user-defined --no-imbrication | grep ^State | grep omp > traces.csv
+    cd ..
+done
+#+end_src
+
+#+RESULTS:
+: ./mg.B-scorep-40threads_exp7/traces.otf2
+: ./cg.B-scorep-40threads_exp7/traces.otf2
+: ./ft.B-scorep-40threads_exp7/traces.otf2
+** Verificando novamente o correto tratamento dos rastros
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for csv in $(find | grep csv$); do
+    echo $csv
+    head $csv
+done
+#+end_src
+
+#+RESULTS:
+#+begin_example
+./mg.B-scorep-40threads_exp7/traces.csv
+State, zero, S, 2.212986, 2.228209, 0.015223, 3.000000, !$omp parallel @mg.f:1368, 53778, 15609, 38963, 719225, 32000, 12000
+State, zero, S, 2.228209, 14.325622, 12.097413, 4.000000, !$omp do @mg.f:1368, 54359, 15844, 39272, 721232, 32000, 12000
+State, zero, S, 14.325622, 225.070143, 210.744521, 5.000000, !$omp implicit barrier @mg.f:1376, 96356, 23965, 99722, 4008719, 32000, 12000
+State, zero, S, 225.070143, 225.097661, 0.027518, 4.000000, !$omp do @mg.f:1368, 97786, 24814, 309880, 6112590, 32000, 16000
+State, zero, S, 225.097661, 225.105553, 0.007892, 3.000000, !$omp parallel @mg.f:1368, 98204, 25026, 310341, 6114387, 32000, 16000
+State, zero, S, 225.489852, 225.498132, 0.008280, 4.000000, !$omp parallel @mg.f:1368, 102251, 26490, 322291, 6185527, 32000, 16000
+State, zero, S, 225.498132, 235.006680, 9.508548, 5.000000, !$omp do @mg.f:1368, 102547, 26531, 322479, 6187538, 32000, 16000
+State, zero, S, 235.006680, 236.859330, 1.852650, 6.000000, !$omp implicit barrier @mg.f:1376, 154427, 61819, 460490, 9474784, 32000, 20000
+State, zero, S, 236.859330, 236.868274, 0.008944, 5.000000, !$omp do @mg.f:1368, 154843, 62049, 540208, 10001263, 32000, 20000
+State, zero, S, 236.868274, 236.877837, 0.009563, 4.000000, !$omp parallel @mg.f:1368, 155051, 62111, 540452, 10003059, 32000, 20000
+./cg.B-scorep-40threads_exp7/traces.csv
+State, zero, S, 3.120965, 3.140518, 0.019553, 3.000000, !$omp parallel @cg.f:736, 53340, 15546, 39632, 719477, 16000, 24000
+State, zero, S, 3.140518, 3.709081, 0.568563, 4.000000, !$omp do @cg.f:736, 53815, 15759, 40141, 721484, 16000, 24000
+State, zero, S, 3.709081, 221.204541, 217.495460, 5.000000, !$omp implicit barrier @cg.f:739, 54281, 15903, 40637, 740389, 16000, 24000
+State, zero, S, 221.204541, 221.224733, 0.020192, 4.000000, !$omp do @cg.f:736, 55361, 16420, 209501, 2844256, 16000, 24000
+State, zero, S, 221.224733, 221.232337, 0.007604, 3.000000, !$omp parallel @cg.f:736, 55640, 16489, 209855, 2846050, 16000, 24000
+State, zero, S, 8024.934787, 8024.941773, 0.006986, 4.000000, !$omp parallel @cg.f:836, 159470937, 1947545, 129570855, 7015526649, 2004000, 1432000
+State, zero, S, 8024.941773, 8024.984660, 0.042887, 5.000000, !$omp do @cg.f:836, 159471249, 1947591, 129570966, 7015528666, 2004000, 1432000
+State, zero, S, 8024.984660, 8029.809741, 4.825081, 6.000000, !$omp implicit barrier @cg.f:840, 159471677, 1947681, 129572105, 7015547584, 2004000, 1432000
+State, zero, S, 8029.809741, 8029.821999, 0.012258, 5.000000, !$omp do @cg.f:836, 159471985, 1947781, 129661083, 7016393217, 2004000, 1436000
+State, zero, S, 8029.821999, 8029.828258, 0.006259, 4.000000, !$omp parallel @cg.f:836, 159472335, 1947939, 129661284, 7016395020, 2004000, 1436000
+./ft.B-scorep-40threads_exp7/traces.csv
+State, zero, S, 3.741356, 3.757804, 0.016448, 3.000000, !$omp parallel @ft.f:190, 54181, 15968, 50467, 728398, 16000, 16000
+State, zero, S, 3.757804, 107.016384, 103.258580, 4.000000, !$omp do @ft.f:190, 54765, 16199, 50790, 730405, 16000, 16000
+State, zero, S, 107.016384, 334.541063, 227.524679, 5.000000, !$omp implicit barrier @ft.f:200, 558308, 39849, 783928, 16364468, 24000, 36000
+State, zero, S, 334.541063, 334.572829, 0.031766, 4.000000, !$omp do @ft.f:190, 559853, 40729, 975156, 18468339, 24000, 40000
+State, zero, S, 334.572829, 334.581001, 0.008172, 3.000000, !$omp parallel @ft.f:190, 560211, 40923, 975643, 18470135, 24000, 40000
+State, zero, S, 334.760263, 334.938401, 0.178138, 2.000000, compute_indexmap_, 562006, 41698, 982345, 18506671, 24000, 40000
+State, zero, S, 334.938401, 334.948327, 0.009926, 3.000000, !$omp parallel @ft.f:431, 563544, 42302, 985414, 18515469, 24000, 40000
+State, zero, S, 334.948327, 345.228366, 10.280039, 4.000000, !$omp do @ft.f:431, 563877, 42348, 985574, 18517479, 24000, 40000
+State, zero, S, 345.228366, 358.348897, 13.120531, 5.000000, !$omp implicit barrier @ft.f:444, 620237, 46405, 1392717, 34158438, 24000, 40000
+State, zero, S, 358.348897, 358.367253, 0.018356, 4.000000, !$omp do @ft.f:431, 620817, 46735, 1489520, 34909401, 24000, 48000
+#+end_example
+** Carregando em R como antes (condensado em um único bloco de código)
+Veja aqui para detalhes:
+[[*2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente][2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente]]
+#+begin_src R :results output :session :exports both
+df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv", header=FALSE, strip.white=TRUE);
+#+end_src
+A continuar pelo Gabriel.
+
+** Analisando a aplicação CG com R
+
+- Primeiramente, copiei os rastros da =hype2= para minha máquina, visto
+  que o ambiente está configurado nela.
+
+#+begin_src sh :session foo :results output :exports both 
+ls /tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
+#+end_src
+
+#+RESULTS:
+: profile.cubex  scorep.cfg  traces  traces.csv  traces.def  traces.otf2
+
+- O csv gerado já está conforme o tratamento preliminar realizado pelo
+  professor Lucas.
+
+#+begin_src R :results output :session *R* :exports both
+df0 <- read.csv("/tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv", header=FALSE, strip.white=TRUE);
+head(df0);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+     V1   V2 V3          V4          V5         V6 V7
+1 State zero  S    3.120965    3.140518   0.019553  3
+2 State zero  S    3.140518    3.709081   0.568563  4
+3 State zero  S    3.709081  221.204541 217.495460  5
+4 State zero  S  221.204541  221.224733   0.020192  4
+5 State zero  S  221.224733  221.232337   0.007604  3
+6 State zero  S 8024.934787 8024.941773   0.006986  4
+                                V8         V9       V10     V11       V12
+1         !$omp parallel @cg.f:736     719477     39632   15546     53340
+2               !$omp do @cg.f:736     721484     40141   15759     53815
+3 !$omp implicit barrier @cg.f:739     740389     40637   15903     54281
+4               !$omp do @cg.f:736    2844256    209501   16420     55361
+5         !$omp parallel @cg.f:736    2846050    209855   16489     55640
+6         !$omp parallel @cg.f:836 7015526649 129570855 1947545 159470937
+      V13     V14        V15       V16     V17       V18     V19     V20
+1   24000   16000     721484     40141   15759     53815   24000   16000
+2   24000   16000     740389     40637   15903     54281   24000   16000
+3   24000   16000    2844256    209501   16420     55361   24000   16000
+4   24000   16000    2846050    209855   16489     55640   24000   16000
+5   24000   16000    2847836    210013   16503     55759   24000   16000
+6 1432000 2004000 7015528666 129570966 1947591 159471249 1432000 2004000
+#+end_example
+
+
+#+begin_src R :results output :session *R* :exports both
+library(dplyr);
+library(reshape);
+
+df1 <- df0 %>% rename(Type=V1,Thread=V2,StateType=V3,Start=V4,End=V5,
+Duration=V6,Imbrication=V7,Region=V8,
+Push_PAPI_TOT_INS=V9,
+Push_PAPI_REF_CYC=V10,
+Push_PAPI_L2_TCM=V11,
+Push_PAPI_L2_TCA=V12,
+Push_ru_utime=V13,
+Push_ru_stime=V14,
+Pop_PAPI_TOT_INS=V15,
+Pop_PAPI_REF_CYC=V16,
+Pop_PAPI_L2_TCM=V17,
+Pop_PAPI_L2_TCA=V18,
+Pop_ru_utime=V19,
+Pop_ru_stime=V20) %>% as.data.frame();
+
+#Renomear os identificadores das threads
+tids = unique(df1$Thread)
+tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
+df2 <- merge (df1, tidsdf, by.x="Thread", by.y="Thread");
+df2 <- df2 %>% select(-Thread) %>% rename(Thread=ntids) %>% group_by(Thread,Region) %>% as.data.frame();
+
+#calculando as métricas
+df3 <- df2 %>% mutate(
+        PAPI_TOT_INS = Pop_PAPI_TOT_INS - Push_PAPI_TOT_INS,
+        PAPI_REF_CYC = Pop_PAPI_REF_CYC - Push_PAPI_REF_CYC,
+        PAPI_L2_TCM = Pop_PAPI_L2_TCM - Push_PAPI_L2_TCM,
+        PAPI_L2_TCA = Pop_PAPI_L2_TCA - Push_PAPI_L2_TCA,
+        ru_utime = Pop_ru_utime - Push_ru_utime,
+        ru_stime = Pop_ru_stime - Push_ru_stime) %>% 
+    select(
+        -Type, -StateType, -Push_PAPI_TOT_INS,-Push_PAPI_REF_CYC, 
+-Push_PAPI_L2_TCM,-Push_PAPI_L2_TCA, -Push_ru_utime, -Push_ru_stime,-Pop_PAPI_TOT_INS,-Pop_PAPI_REF_CYC, 
+-Pop_PAPI_L2_TCM,-Pop_PAPI_L2_TCA,-Pop_ru_utime, -Pop_ru_stime) %>%
+	mutate(
+		MISSES_L2 = PAPI_L2_TCM / PAPI_L2_TCA,
+            IPC = PAPI_TOT_INS / PAPI_REF_CYC) %>%  
+    select(-PAPI_TOT_INS,-PAPI_REF_CYC,-PAPI_L2_TCM, -PAPI_L2_TCA, -ru_utime, -ru_stime)
+
+#Separando Regiões e Linhas de Código
+df3$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df3$Region))
+df3$Region <- gsub("*[0-9]*|@[a-z]|!\\$|[a-z]\\.[a-z]|:","",df3$Region)
+df3$Region <- gsub("\\ ", "_",df2$Region);
+
+df4 <- df3 %>% select(Start, End, Duration, -Imbrication, Region, line, ntids, MISSES_L2, IPC) %>% as.data.frame();
+
+df4 <- melt(df4, id=c("Start","End","Duration","Region","line","ntids"));
+
+head(df4);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Error in rename(., Type = V1, Thread = V2, StateType = V3, Start = V4,  : 
+  unused arguments (Type = V1, Thread = V2, StateType = V3, Start = V4, End = V5, Duration = V6, Imbrication = V7, Region = V8, Push_PAPI_TOT_INS = V9, Push_PAPI_REF_CYC = V10, Push_PAPI_L2_TCM = V11, Push_PAPI_L2_TCA = V12, Push_ru_utime = V13, Push_ru_stime = V14, Pop_PAPI_TOT_INS = V15, Pop_PAPI_REF_CYC = V16, Pop_PAPI_L2_TCM = V17, Pop_PAPI_L2_TCA = V18, Pop_ru_utime = V19, Pop_ru_stime = V20)
+Error in rename(., Thread = ntids) : unused argument (Thread = ntids)
+       Start        End   Duration                           Region line ntids
+1   11.87650   11.89433   0.017836         !$omp_parallel_@cg.f:736  736    40
+2   11.89433   11.92660   0.032266               !$omp_do_@cg.f:736  736    40
+3   11.92660  221.22084 209.294243 !$omp_implicit_barrier_@cg.f:739  739    40
+4  221.22084  221.24101   0.020166               !$omp_do_@cg.f:736  736    40
+5  221.24101  221.24811   0.007102         !$omp_parallel_@cg.f:736  736    40
+6 8024.99327 8025.06138   0.068103         !$omp_parallel_@cg.f:836  836    40
+   variable      value
+1 MISSES_L2 0.40445269
+2 MISSES_L2 0.16498316
+3 MISSES_L2 0.21805556
+4 MISSES_L2 0.11962617
+5 MISSES_L2 0.09473684
+6 MISSES_L2 0.33911672
+#+end_example
