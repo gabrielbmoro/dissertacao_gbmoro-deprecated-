@@ -1729,8 +1729,9 @@ df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.cs
 #+end_src
 A continuar pelo Gabriel.
 
-** Analisando a aplicação CG com R
+** WAITING [12:34:41; 07.02.2017] Analisando a aplicação CG com R  :Gabriel:
 
+- State "WAITING"    from              [2017-02-07 Ter 12:34]
 - Primeiramente, copiei os rastros da =hype2= para minha máquina, visto
   que o ambiente está configurado nela.
 
@@ -1777,7 +1778,6 @@ head(df0);
 
 #+begin_src R :results output :session *R* :exports both
 library(dplyr);
-library(reshape);
 
 df1 <- df0 %>% rename(Type=V1,Thread=V2,StateType=V3,Start=V4,End=V5,
 Duration=V6,Imbrication=V7,Region=V8,
@@ -1819,33 +1819,43 @@ df3 <- df2 %>% mutate(
 
 #Separando Regiões e Linhas de Código
 df3$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df3$Region))
-df3$Region <- gsub("*[0-9]*|@[a-z]|!\\$|[a-z]\\.[a-z]|:","",df3$Region)
-df3$Region <- gsub("\\ ", "_",df2$Region);
+df3$Region <- gsub("*[0-9]*|:|@[a-z]*.[a-z]|!\\$","",df3$Region)
+df3$Region <- gsub("\\ ","_",df3$Region)
 
-df4 <- df3 %>% select(Start, End, Duration, -Imbrication, Region, line, ntids, MISSES_L2, IPC) %>% as.data.frame();
+#agrupando os contadores por região
+df4 <- select(df3, Start, End, Duration, -Imbrication, Region, line, Thread, MISSES_L2,IPC);
+df4 <- df4 %>% group_by(Thread, Region, line) %>% summarise(mean_misses_l2 = mean(MISSES_L2),
+ mean_ipc=mean(IPC)) %>% as.data.frame();
 
-df4 <- melt(df4, id=c("Start","End","Duration","Region","line","ntids"));
+#agora vamos filtrar misses igual ou acima de 30% e ipc menor ou igual a 10
+df5 <- df4 %>% filter(!(mean_misses_l2 < 0.3 | mean_ipc > 10));
 
-head(df4);
+head(df5);
 #+end_src
 
 #+RESULTS:
-#+begin_example
-Error in rename(., Type = V1, Thread = V2, StateType = V3, Start = V4,  : 
-  unused arguments (Type = V1, Thread = V2, StateType = V3, Start = V4, End = V5, Duration = V6, Imbrication = V7, Region = V8, Push_PAPI_TOT_INS = V9, Push_PAPI_REF_CYC = V10, Push_PAPI_L2_TCM = V11, Push_PAPI_L2_TCA = V12, Push_ru_utime = V13, Push_ru_stime = V14, Pop_PAPI_TOT_INS = V15, Pop_PAPI_REF_CYC = V16, Pop_PAPI_L2_TCM = V17, Pop_PAPI_L2_TCA = V18, Pop_ru_utime = V19, Pop_ru_stime = V20)
-Error in rename(., Thread = ntids) : unused argument (Thread = ntids)
-       Start        End   Duration                           Region line ntids
-1   11.87650   11.89433   0.017836         !$omp_parallel_@cg.f:736  736    40
-2   11.89433   11.92660   0.032266               !$omp_do_@cg.f:736  736    40
-3   11.92660  221.22084 209.294243 !$omp_implicit_barrier_@cg.f:739  739    40
-4  221.22084  221.24101   0.020166               !$omp_do_@cg.f:736  736    40
-5  221.24101  221.24811   0.007102         !$omp_parallel_@cg.f:736  736    40
-6 8024.99327 8025.06138   0.068103         !$omp_parallel_@cg.f:836  836    40
-   variable      value
-1 MISSES_L2 0.40445269
-2 MISSES_L2 0.16498316
-3 MISSES_L2 0.21805556
-4 MISSES_L2 0.11962617
-5 MISSES_L2 0.09473684
-6 MISSES_L2 0.33911672
-#+end_example
+:   Thread                Region line mean_misses_l2 mean_ipc
+: 1      1 omp_implicit_barrier_  221      0.3983740 9.548906
+: 2      1 omp_implicit_barrier_  549      0.5837766 9.731087
+: 3      1 omp_implicit_barrier_  657      0.6216951 9.758888
+: 4      1 omp_implicit_barrier_  840      0.3246753 9.503844
+: 5      1 omp_implicit_barrier_  868      0.5011287 9.302465
+: 6      2               omp_do_  836      0.3078551 7.124884
+
+- Professor, está correto a maneira com que agrupei as regiões? 
+Pensei da seguinte forma, a prioridade do agrupamento deve ser por
+  Threads, visto que em um mesmo momento são coletadas as métricas de
+  misses e ipc para diferentes threads. Depois de separar os dados por
+  Threads, agrupei como prioridade secundária por Região e linha de
+  código. Pensei que a melhor maneira seria utilizar uma média para as
+  métricas serem agrupadas. Após isso, estabeleci uma faixa de
+  valores, aonde considerei misses na l2 a cima ou igual 30% e IPC
+  menor ou igual a 10. Nesse primeiro momento pensei nesses valores
+  como limitadores, não sei se esses são os mais indicados, para
+  analisar corretamente o IPC ideal, deveria ser levado em
+  consideração aspectos arquiteturais da plataforma. O misses na l2
+  sabemos, por experimentos anteriores que >= 30% é um limite
+  interessante para considerar uma região memory-bound. Será que uma
+  equação utilizando essas duas métricas poderia ser o mais indicado
+  para considerar essa uma região candidata a ser executada em uma
+  frequência baixa?
