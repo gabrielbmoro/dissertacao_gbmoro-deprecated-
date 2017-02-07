@@ -1812,4 +1812,54 @@ funciona. Isso nos permite automatizar completamente a leitura dos
 rastros, fazendo a subtração necessária para obter os valores corretos
 de contadores de hardware.
 
+#+begin_src R :results output :session :exports both
+df1 <- df;
 
+extra_start = 9;
+extra_total = length(names(df)) - 8;
+extra_half = extra_total/2;
+
+# do the substraction automatically
+for (i in c(extra_start:(extra_start+extra_half-1))){
+    x = i;
+    y = i+extra_half;
+
+#    print(paste(x, y, sep=" "));
+
+    df1[,x] = df1[,y] - df1[,x];
+}
+
+# remove the extra columns that are no longer needed
+df1 <- df1 %>% select(1:(extra_start+extra_half-1));
+df1 %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  State Container Type       Start         End   Duration Imbrication
+1 State      zero    S    3.120965    3.140518   0.019553           3
+2 State      zero    S    3.140518    3.709081   0.568563           4
+3 State      zero    S    3.709081  221.204541 217.495460           5
+4 State      zero    S  221.204541  221.224733   0.020192           4
+5 State      zero    S  221.224733  221.232337   0.007604           3
+6 State      zero    S 8024.934787 8024.941773   0.006986           4
+                             Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @cg.f:736         2007          509         213
+2               !$omp do @cg.f:736        18905          496         144
+3 !$omp implicit barrier @cg.f:739      2103867       168864         517
+4               !$omp do @cg.f:736         1794          354          69
+5         !$omp parallel @cg.f:736         1786          158          14
+6         !$omp parallel @cg.f:836         2017          111          46
+  PAPI_L2_TCA ru_utime ru_stime
+1         475        0        0
+2         466        0        0
+3        1080        0        0
+4         279        0        0
+5         119        0        0
+6         312        0        0
+#+end_example
+
+Ótimo, assim conseguimos fazer a substração e remover as colunas
+extras automaticamente, assumindo que o data frame inicial tem apenas
+estados (linhas que começam por "State") gerados por =pj_dump= quando
+executado como indicado na sessão precendente.
