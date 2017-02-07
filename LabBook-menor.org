@@ -1342,7 +1342,7 @@ ourganttline(df7, 546, 554);
 #+RESULTS:
 [[file:/tmp/babel-29526wPb/figure29526-fW.png]]
 *** 
-* 2017-02-03 Novos rastros gerados em =exp7-NAS-cg_mg_ft-40threads=
+* 2017-02-06 Novos rastros gerados em =exp7-NAS-cg_mg_ft-40threads=
 Veja a explicação do Gabriel em:
 [[file:LabBook.org::*%5B10:47:50;%2003.02.2017%5D%20Gerando%20trace%20Hype2%20-%20Aplica%C3%A7%C3%A3o%20CG%20-%20NAS][{10:47:50; 03.02.2017} Gerando trace Hype2 - Aplicação CG - NAS]]
 ** Obter os dados do servidor hype2
