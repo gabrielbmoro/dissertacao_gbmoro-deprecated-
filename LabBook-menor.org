@@ -1879,6 +1879,7 @@ for otf2 in $(find | grep otf2$); do
 done
 #+end_src
 ** Leitura em R (função de leitura)
+#+name: read_exp_gabriel_v1
 #+begin_src R :results output :session :exports both
 read_exp_gabriel <- function (filename)
 {
@@ -1996,3 +1997,94 @@ df %>% head;
 #+end_example
 ** Sumário
 Resta agrupar as regiões apropriadamente.
+* 2017-02-08 Isolando o comportamento de uma thread
+Existem as seguintes threads:
+#+begin_src R :results output :session :exports both
+df %>% select(Container) %>% unique;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+          Container
+1              zero
+6728    98784247808
+12563   94489280512
+18398   90194313216
+24233   85899345920
+30068    8589934592
+36783   81604378624
+42618   77309411328
+48453   73014444032
+54288   68719476736
+60123   64424509440
+66838   60129542144
+73553   55834574848
+80268   51539607552
+86983   47244640256
+93698   42949672960
+100413   4294967296
+107128  38654705664
+113843  34359738368
+120558  30064771072
+127273  25769803776
+133988  21474836480
+140703  17179869184
+147418 167503724544
+153253 163208757248
+159088 158913789952
+164923 154618822656
+170758 150323855360
+176593 146028888064
+182428 141733920768
+188263 137438953472
+194098 133143986176
+199933 128849018880
+205768  12884901888
+212483 124554051584
+218318 120259084288
+224153 115964116992
+229988 111669149696
+235823 107374182400
+241658 103079215104
+#+end_example
+
+Vamos filtrar, pegamos apenas os estados da thread =133143986176=,
+ordenados temporalmente por tempo de início (Start). Note que
+removemos os campos irrelevantes por enquanto.
+
+#+begin_src R :results output :session :exports both
+df %>%
+    select(Container, Start, End, Value) %>%
+    filter(Container == 133143986176) %>%
+    arrange(Start) %>%
+    head (n=20);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      Container    Start      End                            Value
+1  133143986176 225.6864 225.7117         !$omp parallel @ft.f:190
+2  133143986176 225.7117 300.0041               !$omp do @ft.f:190
+3  133143986176 300.0041 334.6068 !$omp implicit barrier @ft.f:200
+4  133143986176 334.6068 334.6395               !$omp do @ft.f:190
+5  133143986176 334.6395 334.6516         !$omp parallel @ft.f:190
+6  133143986176 334.9452 334.9639         !$omp parallel @ft.f:431
+7  133143986176 334.9639 344.1390               !$omp do @ft.f:431
+8  133143986176 344.1390 358.3487 !$omp implicit barrier @ft.f:444
+9  133143986176 358.3487 358.3669               !$omp do @ft.f:431
+10 133143986176 358.3669 358.3736         !$omp parallel @ft.f:431
+11 133143986176 397.0233 397.0500         !$omp parallel @ft.f:275
+12 133143986176 397.0500 439.0137               !$omp do @ft.f:275
+13 133143986176 439.0137 441.1357 !$omp implicit barrier @ft.f:284
+14 133143986176 441.1357 441.1468               !$omp do @ft.f:275
+15 133143986176 441.1468 441.1589         !$omp parallel @ft.f:275
+16 133143986176 442.8354 442.8718         !$omp parallel @ft.f:553
+17 133143986176 442.8718 444.8224               !$omp do @ft.f:553
+18 133143986176 448.0181 448.6539               !$omp do @ft.f:553
+19 133143986176 450.5139 451.1386               !$omp do @ft.f:553
+20 133143986176 453.0030 453.6189               !$omp do @ft.f:553
+#+end_example
+
+Veja a evolução temporal do comportamento desta thread.
+
+Devemos agrupar as regiões de acordo com a semântica OpenMP.
