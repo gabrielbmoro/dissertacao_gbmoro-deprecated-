@@ -1342,7 +1342,7 @@ ourganttline(df7, 546, 554);
 #+RESULTS:
 [[file:/tmp/babel-29526wPb/figure29526-fW.png]]
 *** 
-* 2017-02-03 Novos rastros gerados em =exp7-NAS-cg_mg_ft-40threads=
+* 2017-02-06 Novos rastros gerados em =exp7-NAS-cg_mg_ft-40threads=
 Veja a explicação do Gabriel em:
 [[file:LabBook.org::*%5B10:47:50;%2003.02.2017%5D%20Gerando%20trace%20Hype2%20-%20Aplica%C3%A7%C3%A3o%20CG%20-%20NAS][{10:47:50; 03.02.2017} Gerando trace Hype2 - Aplicação CG - NAS]]
 ** Obter os dados do servidor hype2
@@ -1620,54 +1620,17 @@ exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/profile.cubex
 exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/scorep.cfg
 #+end_example
 ** Converter para Paje, gerar o CSV correspondente
+
+As versões das ferramentas utilizadas (=otf2ompprint2paje.pl= e =pj_dump=)
+devem ser aquelas do repositório github, com a data de hoje.
+
 #+begin_src shell :results output
 cd exp7-NAS-cg_mg_ft-40threads
 for otf2 in $(find | grep otf2$); do
     echo $otf2
     DIR=$(dirname $otf2)
     cd $DIR
-    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | pj_dump --user-defined --no-imbrication > traces.csv
-    cd ..
-done
-#+end_src
-
-#+RESULTS:
-: ./mg.B-scorep-40threads_exp7/traces.otf2
-: ./cg.B-scorep-40threads_exp7/traces.otf2
-: ./ft.B-scorep-40threads_exp7/traces.otf2
-** Verificando o correto tratamento dos rastros
-#+begin_src shell :results output
-cd exp7-NAS-cg_mg_ft-40threads
-for csv in $(find | grep csv$); do
-    du -hs $csv
-    cat $csv | grep ^State | grep -i omp | wc -l
-    cat $csv | grep ^State | wc -l
-done
-#+end_src
-
-#+RESULTS:
-: 48M	./mg.B-scorep-40threads_exp7/traces.csv
-: 333120
-: 338225
-: 658M	./cg.B-scorep-40threads_exp7/traces.csv
-: 1390640
-: 5105025
-: 542M	./ft.B-scorep-40threads_exp7/traces.csv
-: 247492
-: 4168148
-
-Nota-se que Score-P está rastreando todas as funções da aplicação. Não
-há necessidade de realizar um rastreamento completo, apenas do
-comportamento OpenMP. Gabriel, por gentileza, no próximo experimento
-gerar apenas rastros com dados OpenMP
-** Converter para Paje, gerar o CSV, *apenas estados OpenMP*
-#+begin_src shell :results output
-cd exp7-NAS-cg_mg_ft-40threads
-for otf2 in $(find | grep otf2$); do
-    echo $otf2
-    DIR=$(dirname $otf2)
-    cd $DIR
-    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | pj_dump --user-defined --no-imbrication | grep ^State | grep omp > traces.csv
+    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | ~/dev/pajeng/b/pj_dump --header --user-defined --no-imbrication | grep ^State | grep -e Imbrication -e omp > traces.csv
     cd ..
 done
 #+end_src
@@ -1681,6 +1644,7 @@ done
 cd exp7-NAS-cg_mg_ft-40threads
 for csv in $(find | grep csv$); do
     echo $csv
+    ls -lh $csv
     head $csv
 done
 #+end_src
@@ -1688,164 +1652,513 @@ done
 #+RESULTS:
 #+begin_example
 ./mg.B-scorep-40threads_exp7/traces.csv
-State, zero, S, 2.212986, 2.228209, 0.015223, 3.000000, !$omp parallel @mg.f:1368, 53778, 15609, 38963, 719225, 32000, 12000
-State, zero, S, 2.228209, 14.325622, 12.097413, 4.000000, !$omp do @mg.f:1368, 54359, 15844, 39272, 721232, 32000, 12000
-State, zero, S, 14.325622, 225.070143, 210.744521, 5.000000, !$omp implicit barrier @mg.f:1376, 96356, 23965, 99722, 4008719, 32000, 12000
-State, zero, S, 225.070143, 225.097661, 0.027518, 4.000000, !$omp do @mg.f:1368, 97786, 24814, 309880, 6112590, 32000, 16000
-State, zero, S, 225.097661, 225.105553, 0.007892, 3.000000, !$omp parallel @mg.f:1368, 98204, 25026, 310341, 6114387, 32000, 16000
-State, zero, S, 225.489852, 225.498132, 0.008280, 4.000000, !$omp parallel @mg.f:1368, 102251, 26490, 322291, 6185527, 32000, 16000
-State, zero, S, 225.498132, 235.006680, 9.508548, 5.000000, !$omp do @mg.f:1368, 102547, 26531, 322479, 6187538, 32000, 16000
-State, zero, S, 235.006680, 236.859330, 1.852650, 6.000000, !$omp implicit barrier @mg.f:1376, 154427, 61819, 460490, 9474784, 32000, 20000
-State, zero, S, 236.859330, 236.868274, 0.008944, 5.000000, !$omp do @mg.f:1368, 154843, 62049, 540208, 10001263, 32000, 20000
-State, zero, S, 236.868274, 236.877837, 0.009563, 4.000000, !$omp parallel @mg.f:1368, 155051, 62111, 540452, 10003059, 32000, 20000
+-rw-r--r-- 1 schnorr schnorr 65M Feb  6 15:16 ./mg.B-scorep-40threads_exp7/traces.csv
+State, Container, Type, Start, End, Duration, Imbrication, Value, PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM, PAPI_L2_TCA, ru_utime, ru_stime, PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM, PAPI_L2_TCA, ru_utime, ru_stime
+State, zero, S, 2.212986, 2.228209, 0.015223, 3.000000, !$omp parallel @mg.f:1368, 719225, 38963, 15609, 53778, 12000, 32000, 721232, 39272, 15844, 54359, 12000, 32000
+State, zero, S, 2.228209, 14.325622, 12.097413, 4.000000, !$omp do @mg.f:1368, 721232, 39272, 15844, 54359, 12000, 32000, 4008719, 99722, 23965, 96356, 12000, 32000
+State, zero, S, 14.325622, 225.070143, 210.744521, 5.000000, !$omp implicit barrier @mg.f:1376, 4008719, 99722, 23965, 96356, 12000, 32000, 6112590, 309880, 24814, 97786, 16000, 32000
+State, zero, S, 225.070143, 225.097661, 0.027518, 4.000000, !$omp do @mg.f:1368, 6112590, 309880, 24814, 97786, 16000, 32000, 6114387, 310341, 25026, 98204, 16000, 32000
+State, zero, S, 225.097661, 225.105553, 0.007892, 3.000000, !$omp parallel @mg.f:1368, 6114387, 310341, 25026, 98204, 16000, 32000, 6116176, 310509, 25044, 98314, 16000, 32000
+State, zero, S, 225.489852, 225.498132, 0.008280, 4.000000, !$omp parallel @mg.f:1368, 6185527, 322291, 26490, 102251, 16000, 32000, 6187538, 322479, 26531, 102547, 16000, 32000
+State, zero, S, 225.498132, 235.006680, 9.508548, 5.000000, !$omp do @mg.f:1368, 6187538, 322479, 26531, 102547, 16000, 32000, 9474784, 460490, 61819, 154427, 20000, 32000
+State, zero, S, 235.006680, 236.859330, 1.852650, 6.000000, !$omp implicit barrier @mg.f:1376, 9474784, 460490, 61819, 154427, 20000, 32000, 10001263, 540208, 62049, 154843, 20000, 32000
+State, zero, S, 236.859330, 236.868274, 0.008944, 5.000000, !$omp do @mg.f:1368, 10001263, 540208, 62049, 154843, 20000, 32000, 10003059, 540452, 62111, 155051, 20000, 32000
 ./cg.B-scorep-40threads_exp7/traces.csv
-State, zero, S, 3.120965, 3.140518, 0.019553, 3.000000, !$omp parallel @cg.f:736, 53340, 15546, 39632, 719477, 16000, 24000
-State, zero, S, 3.140518, 3.709081, 0.568563, 4.000000, !$omp do @cg.f:736, 53815, 15759, 40141, 721484, 16000, 24000
-State, zero, S, 3.709081, 221.204541, 217.495460, 5.000000, !$omp implicit barrier @cg.f:739, 54281, 15903, 40637, 740389, 16000, 24000
-State, zero, S, 221.204541, 221.224733, 0.020192, 4.000000, !$omp do @cg.f:736, 55361, 16420, 209501, 2844256, 16000, 24000
-State, zero, S, 221.224733, 221.232337, 0.007604, 3.000000, !$omp parallel @cg.f:736, 55640, 16489, 209855, 2846050, 16000, 24000
-State, zero, S, 8024.934787, 8024.941773, 0.006986, 4.000000, !$omp parallel @cg.f:836, 159470937, 1947545, 129570855, 7015526649, 2004000, 1432000
-State, zero, S, 8024.941773, 8024.984660, 0.042887, 5.000000, !$omp do @cg.f:836, 159471249, 1947591, 129570966, 7015528666, 2004000, 1432000
-State, zero, S, 8024.984660, 8029.809741, 4.825081, 6.000000, !$omp implicit barrier @cg.f:840, 159471677, 1947681, 129572105, 7015547584, 2004000, 1432000
-State, zero, S, 8029.809741, 8029.821999, 0.012258, 5.000000, !$omp do @cg.f:836, 159471985, 1947781, 129661083, 7016393217, 2004000, 1436000
-State, zero, S, 8029.821999, 8029.828258, 0.006259, 4.000000, !$omp parallel @cg.f:836, 159472335, 1947939, 129661284, 7016395020, 2004000, 1436000
+-rw-r--r-- 1 schnorr schnorr 287M Feb  6 15:20 ./cg.B-scorep-40threads_exp7/traces.csv
+State, Container, Type, Start, End, Duration, Imbrication, Value, PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM, PAPI_L2_TCA, ru_utime, ru_stime, PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM, PAPI_L2_TCA, ru_utime, ru_stime
+State, zero, S, 3.120965, 3.140518, 0.019553, 3.000000, !$omp parallel @cg.f:736, 719477, 39632, 15546, 53340, 24000, 16000, 721484, 40141, 15759, 53815, 24000, 16000
+State, zero, S, 3.140518, 3.709081, 0.568563, 4.000000, !$omp do @cg.f:736, 721484, 40141, 15759, 53815, 24000, 16000, 740389, 40637, 15903, 54281, 24000, 16000
+State, zero, S, 3.709081, 221.204541, 217.495460, 5.000000, !$omp implicit barrier @cg.f:739, 740389, 40637, 15903, 54281, 24000, 16000, 2844256, 209501, 16420, 55361, 24000, 16000
+State, zero, S, 221.204541, 221.224733, 0.020192, 4.000000, !$omp do @cg.f:736, 2844256, 209501, 16420, 55361, 24000, 16000, 2846050, 209855, 16489, 55640, 24000, 16000
+State, zero, S, 221.224733, 221.232337, 0.007604, 3.000000, !$omp parallel @cg.f:736, 2846050, 209855, 16489, 55640, 24000, 16000, 2847836, 210013, 16503, 55759, 24000, 16000
+State, zero, S, 8024.934787, 8024.941773, 0.006986, 4.000000, !$omp parallel @cg.f:836, 7015526649, 129570855, 1947545, 159470937, 1432000, 2004000, 7015528666, 129570966, 1947591, 159471249, 1432000, 2004000
+State, zero, S, 8024.941773, 8024.984660, 0.042887, 5.000000, !$omp do @cg.f:836, 7015528666, 129570966, 1947591, 159471249, 1432000, 2004000, 7015547584, 129572105, 1947681, 159471677, 1432000, 2004000
+State, zero, S, 8024.984660, 8029.809741, 4.825081, 6.000000, !$omp implicit barrier @cg.f:840, 7015547584, 129572105, 1947681, 159471677, 1432000, 2004000, 7016393217, 129661083, 1947781, 159471985, 1436000, 2004000
+State, zero, S, 8029.809741, 8029.821999, 0.012258, 5.000000, !$omp do @cg.f:836, 7016393217, 129661083, 1947781, 159471985, 1436000, 2004000, 7016395020, 129661284, 1947939, 159472335, 1436000, 2004000
 ./ft.B-scorep-40threads_exp7/traces.csv
-State, zero, S, 3.741356, 3.757804, 0.016448, 3.000000, !$omp parallel @ft.f:190, 54181, 15968, 50467, 728398, 16000, 16000
-State, zero, S, 3.757804, 107.016384, 103.258580, 4.000000, !$omp do @ft.f:190, 54765, 16199, 50790, 730405, 16000, 16000
-State, zero, S, 107.016384, 334.541063, 227.524679, 5.000000, !$omp implicit barrier @ft.f:200, 558308, 39849, 783928, 16364468, 24000, 36000
-State, zero, S, 334.541063, 334.572829, 0.031766, 4.000000, !$omp do @ft.f:190, 559853, 40729, 975156, 18468339, 24000, 40000
-State, zero, S, 334.572829, 334.581001, 0.008172, 3.000000, !$omp parallel @ft.f:190, 560211, 40923, 975643, 18470135, 24000, 40000
-State, zero, S, 334.760263, 334.938401, 0.178138, 2.000000, compute_indexmap_, 562006, 41698, 982345, 18506671, 24000, 40000
-State, zero, S, 334.938401, 334.948327, 0.009926, 3.000000, !$omp parallel @ft.f:431, 563544, 42302, 985414, 18515469, 24000, 40000
-State, zero, S, 334.948327, 345.228366, 10.280039, 4.000000, !$omp do @ft.f:431, 563877, 42348, 985574, 18517479, 24000, 40000
-State, zero, S, 345.228366, 358.348897, 13.120531, 5.000000, !$omp implicit barrier @ft.f:444, 620237, 46405, 1392717, 34158438, 24000, 40000
-State, zero, S, 358.348897, 358.367253, 0.018356, 4.000000, !$omp do @ft.f:431, 620817, 46735, 1489520, 34909401, 24000, 48000
+-rw-r--r-- 1 schnorr schnorr 49M Feb  6 15:23 ./ft.B-scorep-40threads_exp7/traces.csv
+State, Container, Type, Start, End, Duration, Imbrication, Value, PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM, PAPI_L2_TCA, ru_utime, ru_stime, PAPI_TOT_INS, PAPI_REF_CYC, PAPI_L2_TCM, PAPI_L2_TCA, ru_utime, ru_stime
+State, zero, S, 3.741356, 3.757804, 0.016448, 3.000000, !$omp parallel @ft.f:190, 728398, 50467, 15968, 54181, 16000, 16000, 730405, 50790, 16199, 54765, 16000, 16000
+State, zero, S, 3.757804, 107.016384, 103.258580, 4.000000, !$omp do @ft.f:190, 730405, 50790, 16199, 54765, 16000, 16000, 16364468, 783928, 39849, 558308, 36000, 24000
+State, zero, S, 107.016384, 334.541063, 227.524679, 5.000000, !$omp implicit barrier @ft.f:200, 16364468, 783928, 39849, 558308, 36000, 24000, 18468339, 975156, 40729, 559853, 40000, 24000
+State, zero, S, 334.541063, 334.572829, 0.031766, 4.000000, !$omp do @ft.f:190, 18468339, 975156, 40729, 559853, 40000, 24000, 18470135, 975643, 40923, 560211, 40000, 24000
+State, zero, S, 334.572829, 334.581001, 0.008172, 3.000000, !$omp parallel @ft.f:190, 18470135, 975643, 40923, 560211, 40000, 24000, 18471924, 975806, 40945, 560348, 40000, 24000
+State, zero, S, 334.760263, 334.938401, 0.178138, 2.000000, compute_indexmap_, 18506671, 982345, 41698, 562006, 40000, 24000, 18515469, 985414, 42302, 563544, 40000, 24000
+State, zero, S, 334.938401, 334.948327, 0.009926, 3.000000, !$omp parallel @ft.f:431, 18515469, 985414, 42302, 563544, 40000, 24000, 18517479, 985574, 42348, 563877, 40000, 24000
+State, zero, S, 334.948327, 345.228366, 10.280039, 4.000000, !$omp do @ft.f:431, 18517479, 985574, 42348, 563877, 40000, 24000, 34158438, 1392717, 46405, 620237, 40000, 24000
+State, zero, S, 345.228366, 358.348897, 13.120531, 5.000000, !$omp implicit barrier @ft.f:444, 34158438, 1392717, 46405, 620237, 40000, 24000, 34909401, 1489520, 46735, 620817, 48000, 24000
 #+end_example
 ** Carregando em R como antes (condensado em um único bloco de código)
 Veja aqui para detalhes:
 [[*2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente][2017-01-31 Analisando rastro =cg.B.x-4threads_exp5= registrado localmente]]
 #+begin_src R :results output :session :exports both
-df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv", header=FALSE, strip.white=TRUE);
-#+end_src
-A continuar pelo Gabriel.
-
-** Analisando a aplicação CG com R
-
-- Primeiramente, copiei os rastros da =hype2= para minha máquina, visto
-  que o ambiente está configurado nela.
-
-#+begin_src sh :session foo :results output :exports both 
-ls /tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
-#+end_src
-
-#+RESULTS:
-: profile.cubex  scorep.cfg  traces  traces.csv  traces.def  traces.otf2
-
-- O csv gerado já está conforme o tratamento preliminar realizado pelo
-  professor Lucas.
-
-#+begin_src R :results output :session *R* :exports both
-df0 <- read.csv("/tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv", header=FALSE, strip.white=TRUE);
-head(df0);
+df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv", strip.white=TRUE);
+names(df);
+head(df);
 #+end_src
 
 #+RESULTS:
 #+begin_example
-     V1   V2 V3          V4          V5         V6 V7
-1 State zero  S    3.120965    3.140518   0.019553  3
-2 State zero  S    3.140518    3.709081   0.568563  4
-3 State zero  S    3.709081  221.204541 217.495460  5
-4 State zero  S  221.204541  221.224733   0.020192  4
-5 State zero  S  221.224733  221.232337   0.007604  3
-6 State zero  S 8024.934787 8024.941773   0.006986  4
-                                V8         V9       V10     V11       V12
-1         !$omp parallel @cg.f:736     719477     39632   15546     53340
-2               !$omp do @cg.f:736     721484     40141   15759     53815
-3 !$omp implicit barrier @cg.f:739     740389     40637   15903     54281
-4               !$omp do @cg.f:736    2844256    209501   16420     55361
-5         !$omp parallel @cg.f:736    2846050    209855   16489     55640
-6         !$omp parallel @cg.f:836 7015526649 129570855 1947545 159470937
-      V13     V14        V15       V16     V17       V18     V19     V20
-1   24000   16000     721484     40141   15759     53815   24000   16000
-2   24000   16000     740389     40637   15903     54281   24000   16000
-3   24000   16000    2844256    209501   16420     55361   24000   16000
-4   24000   16000    2846050    209855   16489     55640   24000   16000
-5   24000   16000    2847836    210013   16503     55759   24000   16000
-6 1432000 2004000 7015528666 129570966 1947591 159471249 1432000 2004000
+ [1] "State"          "Container"      "Type"           "Start"         
+ [5] "End"            "Duration"       "Imbrication"    "Value"         
+ [9] "PAPI_TOT_INS"   "PAPI_REF_CYC"   "PAPI_L2_TCM"    "PAPI_L2_TCA"   
+[13] "ru_utime"       "ru_stime"       "PAPI_TOT_INS.1" "PAPI_REF_CYC.1"
+[17] "PAPI_L2_TCM.1"  "PAPI_L2_TCA.1"  "ru_utime.1"     "ru_stime.1"
+  State Container Type       Start         End   Duration Imbrication
+1 State      zero    S    3.120965    3.140518   0.019553           3
+2 State      zero    S    3.140518    3.709081   0.568563           4
+3 State      zero    S    3.709081  221.204541 217.495460           5
+4 State      zero    S  221.204541  221.224733   0.020192           4
+5 State      zero    S  221.224733  221.232337   0.007604           3
+6 State      zero    S 8024.934787 8024.941773   0.006986           4
+                             Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @cg.f:736       719477        39632       15546
+2               !$omp do @cg.f:736       721484        40141       15759
+3 !$omp implicit barrier @cg.f:739       740389        40637       15903
+4               !$omp do @cg.f:736      2844256       209501       16420
+5         !$omp parallel @cg.f:736      2846050       209855       16489
+6         !$omp parallel @cg.f:836   7015526649    129570855     1947545
+  PAPI_L2_TCA ru_utime ru_stime PAPI_TOT_INS.1 PAPI_REF_CYC.1 PAPI_L2_TCM.1
+1       53340    24000    16000         721484          40141         15759
+2       53815    24000    16000         740389          40637         15903
+3       54281    24000    16000        2844256         209501         16420
+4       55361    24000    16000        2846050         209855         16489
+5       55640    24000    16000        2847836         210013         16503
+6   159470937  1432000  2004000     7015528666      129570966       1947591
+  PAPI_L2_TCA.1 ru_utime.1 ru_stime.1
+1         53815      24000      16000
+2         54281      24000      16000
+3         55361      24000      16000
+4         55640      24000      16000
+5         55759      24000      16000
+6     159471249    1432000    2004000
 #+end_example
 
+Os campos "extra" nos rastros gerados pelo Gabriel sempre começam na
+coluna de número nove. Os oito primeiros campos são os tradicionais
+gerados por =pj_dump= para linhas que começam com State.
 
-#+begin_src R :results output :session *R* :exports both
+#+begin_src R :results output :session :exports both
+extra_start = 9;
+extra_total = length(names(df)) - 8;
+extra_half = extra_total/2;
+
+for (i in c(extra_start:(extra_start+extra_half-1))){
+ print(paste(i, (i+extra_half), sep=" "));
+}
+#for (i in 
+#extra_start
+#extra_half;
+
+
+names(df)[9:length(names(df))];
+#+end_src
+
+#+RESULTS:
+: [1] "9 15"
+: [1] "10 16"
+: [1] "11 17"
+: [1] "12 18"
+: [1] "13 19"
+: [1] "14 20"
+:  [1] "PAPI_TOT_INS"   "PAPI_REF_CYC"   "PAPI_L2_TCM"    "PAPI_L2_TCA"   
+:  [5] "ru_utime"       "ru_stime"       "PAPI_TOT_INS.1" "PAPI_REF_CYC.1"
+:  [9] "PAPI_L2_TCM.1"  "PAPI_L2_TCA.1"  "ru_utime.1"     "ru_stime.1"
+
+#+begin_src R :results output :session :exports both
 library(dplyr);
-library(reshape);
+#df %>% head;
 
-df1 <- df0 %>% rename(Type=V1,Thread=V2,StateType=V3,Start=V4,End=V5,
-Duration=V6,Imbrication=V7,Region=V8,
-Push_PAPI_TOT_INS=V9,
-Push_PAPI_REF_CYC=V10,
-Push_PAPI_L2_TCM=V11,
-Push_PAPI_L2_TCA=V12,
-Push_ru_utime=V13,
-Push_ru_stime=V14,
-Pop_PAPI_TOT_INS=V15,
-Pop_PAPI_REF_CYC=V16,
-Pop_PAPI_L2_TCM=V17,
-Pop_PAPI_L2_TCA=V18,
-Pop_ru_utime=V19,
-Pop_ru_stime=V20) %>% as.data.frame();
-
-#Renomear os identificadores das threads
-tids = unique(df1$Thread)
-tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
-df2 <- merge (df1, tidsdf, by.x="Thread", by.y="Thread");
-df2 <- df2 %>% select(-Thread) %>% rename(Thread=ntids) %>% group_by(Thread,Region) %>% as.data.frame();
-
-#calculando as métricas
-df3 <- df2 %>% mutate(
-        PAPI_TOT_INS = Pop_PAPI_TOT_INS - Push_PAPI_TOT_INS,
-        PAPI_REF_CYC = Pop_PAPI_REF_CYC - Push_PAPI_REF_CYC,
-        PAPI_L2_TCM = Pop_PAPI_L2_TCM - Push_PAPI_L2_TCM,
-        PAPI_L2_TCA = Pop_PAPI_L2_TCA - Push_PAPI_L2_TCA,
-        ru_utime = Pop_ru_utime - Push_ru_utime,
-        ru_stime = Pop_ru_stime - Push_ru_stime) %>% 
-    select(
-        -Type, -StateType, -Push_PAPI_TOT_INS,-Push_PAPI_REF_CYC, 
--Push_PAPI_L2_TCM,-Push_PAPI_L2_TCA, -Push_ru_utime, -Push_ru_stime,-Pop_PAPI_TOT_INS,-Pop_PAPI_REF_CYC, 
--Pop_PAPI_L2_TCM,-Pop_PAPI_L2_TCA,-Pop_ru_utime, -Pop_ru_stime) %>%
-	mutate(
-		MISSES_L2 = PAPI_L2_TCM / PAPI_L2_TCA,
-            IPC = PAPI_TOT_INS / PAPI_REF_CYC) %>%  
-    select(-PAPI_TOT_INS,-PAPI_REF_CYC,-PAPI_L2_TCM, -PAPI_L2_TCA, -ru_utime, -ru_stime)
-
-#Separando Regiões e Linhas de Código
-df3$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df3$Region))
-df3$Region <- gsub("*[0-9]*|@[a-z]|!\\$|[a-z]\\.[a-z]|:","",df3$Region)
-df3$Region <- gsub("\\ ", "_",df2$Region);
-
-df4 <- df3 %>% select(Start, End, Duration, -Imbrication, Region, line, ntids, MISSES_L2, IPC) %>% as.data.frame();
-
-df4 <- melt(df4, id=c("Start","End","Duration","Region","line","ntids"));
-
-head(df4);
+df1 <- df;
+df1$T <- df[,5] - df[,4];
+df1 %>% head;
+#df[,4] %>% head;
 #+end_src
 
 #+RESULTS:
 #+begin_example
-Error in rename(., Type = V1, Thread = V2, StateType = V3, Start = V4,  : 
-  unused arguments (Type = V1, Thread = V2, StateType = V3, Start = V4, End = V5, Duration = V6, Imbrication = V7, Region = V8, Push_PAPI_TOT_INS = V9, Push_PAPI_REF_CYC = V10, Push_PAPI_L2_TCM = V11, Push_PAPI_L2_TCA = V12, Push_ru_utime = V13, Push_ru_stime = V14, Pop_PAPI_TOT_INS = V15, Pop_PAPI_REF_CYC = V16, Pop_PAPI_L2_TCM = V17, Pop_PAPI_L2_TCA = V18, Pop_ru_utime = V19, Pop_ru_stime = V20)
-Error in rename(., Thread = ntids) : unused argument (Thread = ntids)
-       Start        End   Duration                           Region line ntids
-1   11.87650   11.89433   0.017836         !$omp_parallel_@cg.f:736  736    40
-2   11.89433   11.92660   0.032266               !$omp_do_@cg.f:736  736    40
-3   11.92660  221.22084 209.294243 !$omp_implicit_barrier_@cg.f:739  739    40
-4  221.22084  221.24101   0.020166               !$omp_do_@cg.f:736  736    40
-5  221.24101  221.24811   0.007102         !$omp_parallel_@cg.f:736  736    40
-6 8024.99327 8025.06138   0.068103         !$omp_parallel_@cg.f:836  836    40
-   variable      value
-1 MISSES_L2 0.40445269
-2 MISSES_L2 0.16498316
-3 MISSES_L2 0.21805556
-4 MISSES_L2 0.11962617
-5 MISSES_L2 0.09473684
-6 MISSES_L2 0.33911672
+  State Container Type       Start         End   Duration Imbrication
+1 State      zero    S    3.120965    3.140518   0.019553           3
+2 State      zero    S    3.140518    3.709081   0.568563           4
+3 State      zero    S    3.709081  221.204541 217.495460           5
+4 State      zero    S  221.204541  221.224733   0.020192           4
+5 State      zero    S  221.224733  221.232337   0.007604           3
+6 State      zero    S 8024.934787 8024.941773   0.006986           4
+                             Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @cg.f:736       719477        39632       15546
+2               !$omp do @cg.f:736       721484        40141       15759
+3 !$omp implicit barrier @cg.f:739       740389        40637       15903
+4               !$omp do @cg.f:736      2844256       209501       16420
+5         !$omp parallel @cg.f:736      2846050       209855       16489
+6         !$omp parallel @cg.f:836   7015526649    129570855     1947545
+  PAPI_L2_TCA ru_utime ru_stime PAPI_TOT_INS.1 PAPI_REF_CYC.1 PAPI_L2_TCM.1
+1       53340    24000    16000         721484          40141         15759
+2       53815    24000    16000         740389          40637         15903
+3       54281    24000    16000        2844256         209501         16420
+4       55361    24000    16000        2846050         209855         16489
+5       55640    24000    16000        2847836         210013         16503
+6   159470937  1432000  2004000     7015528666      129570966       1947591
+  PAPI_L2_TCA.1 ru_utime.1 ru_stime.1          T
+1         53815      24000      16000   0.019553
+2         54281      24000      16000   0.568563
+3         55361      24000      16000 217.495460
+4         55640      24000      16000   0.020192
+5         55759      24000      16000   0.007604
+6     159471249    1432000    2004000   0.006986
 #+end_example
+
+Ótimo, operações sobre colunas utilizando índices ao invés de nomes
+funciona. Isso nos permite automatizar completamente a leitura dos
+rastros, fazendo a subtração necessária para obter os valores corretos
+de contadores de hardware.
+
+#+begin_src R :results output :session :exports both
+df1 <- df;
+
+extra_start = 9;
+extra_total = length(names(df)) - 8;
+extra_half = extra_total/2;
+
+# do the substraction automatically
+for (i in c(extra_start:(extra_start+extra_half-1))){
+    x = i;
+    y = i+extra_half;
+
+#    print(paste(x, y, sep=" "));
+
+    df1[,x] = df1[,y] - df1[,x];
+}
+
+# remove the extra columns that are no longer needed
+df1 <- df1 %>% select(1:(extra_start+extra_half-1));
+df1 %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  State Container Type       Start         End   Duration Imbrication
+1 State      zero    S    3.120965    3.140518   0.019553           3
+2 State      zero    S    3.140518    3.709081   0.568563           4
+3 State      zero    S    3.709081  221.204541 217.495460           5
+4 State      zero    S  221.204541  221.224733   0.020192           4
+5 State      zero    S  221.224733  221.232337   0.007604           3
+6 State      zero    S 8024.934787 8024.941773   0.006986           4
+                             Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @cg.f:736         2007          509         213
+2               !$omp do @cg.f:736        18905          496         144
+3 !$omp implicit barrier @cg.f:739      2103867       168864         517
+4               !$omp do @cg.f:736         1794          354          69
+5         !$omp parallel @cg.f:736         1786          158          14
+6         !$omp parallel @cg.f:836         2017          111          46
+  PAPI_L2_TCA ru_utime ru_stime
+1         475        0        0
+2         466        0        0
+3        1080        0        0
+4         279        0        0
+5         119        0        0
+6         312        0        0
+#+end_example
+
+Ótimo, assim conseguimos fazer a substração e remover as colunas
+extras automaticamente, assumindo que o data frame inicial tem apenas
+estados (linhas que começam por "State") gerados por =pj_dump= quando
+executado como indicado na sessão precendente.
+* 2017-02-07 Automatização da leitura de arquivos
+** Prerequisitos
+Os seguintes arquivos CSV foram gerados da seguinte forma:
+- em particular, atenção aos parâmetros passados a =pj_dump= (todos são obrigatórios)
+
+#+begin_src shell :results output
+cd exp7-NAS-cg_mg_ft-40threads
+for otf2 in $(find | grep otf2$); do
+    echo $otf2
+    DIR=$(dirname $otf2)
+    cd $DIR
+    ~/dev/akypuera3/src/otf2-omp-print/otf2ompprint2paje.pl traces.otf2 | ~/dev/pajeng/b/pj_dump --header --user-defined --no-imbrication | grep ^State | grep -e Imbrication -e omp > traces.csv
+    cd ..
+done
+#+end_src
+** Leitura em R (função de leitura)
+#+name: read_exp_gabriel_v1
+#+begin_src R :results output :session :exports both
+read_exp_gabriel <- function (filename)
+{
+   # read the file
+   df <- read.csv(filename, strip.white=TRUE);
+
+   # configuration for automatic data extraction
+   extra_start = 9;
+   extra_total = length(names(df)) - 8;
+   extra_half = extra_total/2;
+
+   # do the substraction automatically
+   for (i in c(extra_start:(extra_start+extra_half-1))){
+      x = i;
+      y = i+extra_half;
+      df[,x] = df[,y] - df[,x];
+   }
+
+   # remove the extra columns that are no longer needed
+   df <- df %>% select(1:(extra_start+extra_half-1));
+
+   # return the final data frame
+   df;
+}
+#+end_src
+** Testando a função de leitura (CG)
+#+begin_src R :results output :session :exports both
+df <- read_exp_gabriel ("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.csv");
+df %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  State Container Type       Start         End   Duration Imbrication
+1 State      zero    S    3.120965    3.140518   0.019553           3
+2 State      zero    S    3.140518    3.709081   0.568563           4
+3 State      zero    S    3.709081  221.204541 217.495460           5
+4 State      zero    S  221.204541  221.224733   0.020192           4
+5 State      zero    S  221.224733  221.232337   0.007604           3
+6 State      zero    S 8024.934787 8024.941773   0.006986           4
+                             Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @cg.f:736         2007          509         213
+2               !$omp do @cg.f:736        18905          496         144
+3 !$omp implicit barrier @cg.f:739      2103867       168864         517
+4               !$omp do @cg.f:736         1794          354          69
+5         !$omp parallel @cg.f:736         1786          158          14
+6         !$omp parallel @cg.f:836         2017          111          46
+  PAPI_L2_TCA ru_utime ru_stime
+1         475        0        0
+2         466        0        0
+3        1080        0        0
+4         279        0        0
+5         119        0        0
+6         312        0        0
+#+end_example
+** Testando a função de leitura (MG)
+#+begin_src R :results output :session :exports both
+df <- read_exp_gabriel ("exp7-NAS-cg_mg_ft-40threads/mg.B-scorep-40threads_exp7/traces.csv");
+df %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  State Container Type      Start        End   Duration Imbrication
+1 State      zero    S   2.212986   2.228209   0.015223           3
+2 State      zero    S   2.228209  14.325622  12.097413           4
+3 State      zero    S  14.325622 225.070143 210.744521           5
+4 State      zero    S 225.070143 225.097661   0.027518           4
+5 State      zero    S 225.097661 225.105553   0.007892           3
+6 State      zero    S 225.489852 225.498132   0.008280           4
+                              Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @mg.f:1368         2007          309         235
+2               !$omp do @mg.f:1368      3287487        60450        8121
+3 !$omp implicit barrier @mg.f:1376      2103871       210158         849
+4               !$omp do @mg.f:1368         1797          461         212
+5         !$omp parallel @mg.f:1368         1789          168          18
+6         !$omp parallel @mg.f:1368         2011          188          41
+  PAPI_L2_TCA ru_utime ru_stime
+1         581        0        0
+2       41997        0        0
+3        1430     4000        0
+4         418        0        0
+5         110        0        0
+6         296        0        0
+#+end_example
+** Testando a função de leitura (FT)
+#+begin_src R :results output :session :exports both
+df <- read_exp_gabriel ("exp7-NAS-cg_mg_ft-40threads/ft.B-scorep-40threads_exp7/traces.csv");
+df %>% head;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  State Container Type      Start        End   Duration Imbrication
+1 State      zero    S   3.741356   3.757804   0.016448           3
+2 State      zero    S   3.757804 107.016384 103.258580           4
+3 State      zero    S 107.016384 334.541063 227.524679           5
+4 State      zero    S 334.541063 334.572829   0.031766           4
+5 State      zero    S 334.572829 334.581001   0.008172           3
+6 State      zero    S 334.760263 334.938401   0.178138           2
+                             Value PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1         !$omp parallel @ft.f:190         2007          323         231
+2               !$omp do @ft.f:190     15634063       733138       23650
+3 !$omp implicit barrier @ft.f:200      2103871       191228         880
+4               !$omp do @ft.f:190         1796          487         194
+5         !$omp parallel @ft.f:190         1789          163          22
+6                compute_indexmap_         8798         3069         604
+  PAPI_L2_TCA ru_utime ru_stime
+1         584        0        0
+2      503543    20000     8000
+3        1545     4000        0
+4         358        0        0
+5         137        0        0
+6        1538        0        0
+#+end_example
+** Sumário
+Resta agrupar as regiões apropriadamente.
+* 2017-02-08 Isolando o comportamento de uma thread
+** Listagem de identificadores de threads
+Existem as seguintes threads:
+#+begin_src R :results output :session :exports both
+df %>% select(Container) %>% unique;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+          Container
+1              zero
+6728    98784247808
+12563   94489280512
+18398   90194313216
+24233   85899345920
+30068    8589934592
+36783   81604378624
+42618   77309411328
+48453   73014444032
+54288   68719476736
+60123   64424509440
+66838   60129542144
+73553   55834574848
+80268   51539607552
+86983   47244640256
+93698   42949672960
+100413   4294967296
+107128  38654705664
+113843  34359738368
+120558  30064771072
+127273  25769803776
+133988  21474836480
+140703  17179869184
+147418 167503724544
+153253 163208757248
+159088 158913789952
+164923 154618822656
+170758 150323855360
+176593 146028888064
+182428 141733920768
+188263 137438953472
+194098 133143986176
+199933 128849018880
+205768  12884901888
+212483 124554051584
+218318 120259084288
+224153 115964116992
+229988 111669149696
+235823 107374182400
+241658 103079215104
+#+end_example
+** Obtendo o comportamento de apenas uma thread
+Vamos filtrar, pegamos apenas os estados da thread =133143986176=,
+ordenados temporalmente por tempo de início (Start). Note que
+removemos os campos irrelevantes por enquanto.
+
+#+begin_src R :results output :session :exports both
+df %>%
+    select(Container, Start, End, Value) %>%
+    filter(Container == 133143986176) %>%
+    arrange(Start) %>%
+    head (n=20);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+      Container      Start        End                            Value
+1  133143986176   12.00164   12.01549         !$omp parallel @cg.f:736
+2  133143986176   12.01549   12.05696               !$omp do @cg.f:736
+3  133143986176   12.05696  221.27163 !$omp implicit barrier @cg.f:739
+4  133143986176  221.27163  221.30359               !$omp do @cg.f:736
+5  133143986176  221.30359  221.31379         !$omp parallel @cg.f:736
+6  133143986176 8025.23195 8025.28043         !$omp parallel @cg.f:836
+7  133143986176 8025.28043 8025.33848               !$omp do @cg.f:836
+8  133143986176 8025.33848 8029.81141 !$omp implicit barrier @cg.f:840
+9  133143986176 8029.81141 8029.84322               !$omp do @cg.f:836
+10 133143986176 8029.84322 8029.85495         !$omp parallel @cg.f:836
+11 133143986176 8086.04769 8086.08742         !$omp parallel @cg.f:862
+12 133143986176 8086.08742 8108.99339               !$omp do @cg.f:862
+13 133143986176 8108.99339 8109.12932 !$omp implicit barrier @cg.f:868
+14 133143986176 8109.12932 8109.14088               !$omp do @cg.f:862
+15 133143986176 8109.14088 8109.15070         !$omp parallel @cg.f:862
+16 133143986176 9250.41651 9250.45614         !$omp parallel @cg.f:894
+17 133143986176 9250.45614 9250.53253               !$omp do @cg.f:894
+18 133143986176 9250.53253 9250.55278 !$omp implicit barrier @cg.f:899
+19 133143986176 9250.55278 9250.57258               !$omp do @cg.f:894
+20 133143986176 9250.57258 9250.58600         !$omp parallel @cg.f:894
+#+end_example
+
+Veja a evolução temporal do comportamento desta thread.
+
+Devemos agrupar as regiões de acordo com a semântica OpenMP.
+
+#+begin_src R :results output :session :exports both
+df %>%
+    select(Container, Start, End, Value) %>%
+    filter(Container == "zero") %>%
+    arrange(Start) %>%
+    mutate(Value = gsub("!.omp ", "", Value)) %>%
+    mutate(Operation = gsub("@.*$", "", Value)) %>%
+    mutate(File = gsub(".*@", "", Value)) %>%
+    mutate(File = gsub(":.*$", "", File)) %>%
+    mutate(Line = gsub(".*:", "", Value)) %>%
+    select(-Value) %>%
+    slice (1000:1050);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   Container    Start      End         Operation File Line
+1       zero 19362.47 19362.48 implicit barrier  cg.f  591
+2       zero 19362.48 19362.48               do  cg.f  586
+3       zero 19362.48 19362.49         parallel  cg.f  522
+4       zero 19362.49 19362.57               do  cg.f  607
+5       zero 19362.57 19362.59 implicit barrier  cg.f  620
+6       zero 19362.59 19362.60               do  cg.f  607
+7       zero 19362.60 19362.61         parallel  cg.f  522
+8       zero 19362.61 19362.64               do  cg.f  629
+9       zero 19362.64 19362.65         parallel  cg.f  522
+10      zero 19362.65 19362.67 implicit barrier  cg.f  634
+11      zero 19362.67 19362.68         parallel  cg.f  522
+12      zero 19362.73 19362.74         parallel  cg.f  522
+13      zero 19362.74 19369.53               do  cg.f  537
+14      zero 19369.53 19370.49 implicit barrier  cg.f  549
+15      zero 19370.49 19370.50               do  cg.f  537
+16      zero 19370.50 19370.50         parallel  cg.f  522
+17      zero 19370.50 19370.52               do  cg.f  586
+18      zero 19370.52 19370.55 implicit barrier  cg.f  591
+19      zero 19370.55 19370.55               do  cg.f  586
+20      zero 19370.55 19370.56         parallel  cg.f  522
+21      zero 19370.56 19370.61               do  cg.f  607
+22      zero 19370.61 19370.66 implicit barrier  cg.f  620
+23      zero 19370.66 19370.67               do  cg.f  607
+24      zero 19370.67 19370.68         parallel  cg.f  522
+25      zero 19370.68 19370.72               do  cg.f  629
+26      zero 19370.72 19370.73         parallel  cg.f  522
+27      zero 19370.73 19370.74 implicit barrier  cg.f  634
+28      zero 19370.74 19370.75         parallel  cg.f  522
+29      zero 19370.80 19370.81         parallel  cg.f  522
+30      zero 19370.81 19377.72               do  cg.f  537
+31      zero 19377.72 19378.67 implicit barrier  cg.f  549
+32      zero 19378.67 19378.68               do  cg.f  537
+33      zero 19378.68 19378.69         parallel  cg.f  522
+34      zero 19378.69 19378.71               do  cg.f  586
+35      zero 19378.71 19378.73 implicit barrier  cg.f  591
+36      zero 19378.73 19378.73               do  cg.f  586
+37      zero 19378.73 19378.74         parallel  cg.f  522
+38      zero 19378.74 19378.81               do  cg.f  607
+39      zero 19378.81 19378.83 implicit barrier  cg.f  620
+40      zero 19378.83 19378.84               do  cg.f  607
+41      zero 19378.84 19378.85         parallel  cg.f  522
+42      zero 19378.85 19378.89               do  cg.f  629
+43      zero 19378.89 19378.89         parallel  cg.f  522
+44      zero 19378.89 19378.92 implicit barrier  cg.f  634
+45      zero 19378.92 19378.92         parallel  cg.f  522
+46      zero 19378.98 19378.99         parallel  cg.f  522
+47      zero 19378.99 19385.83               do  cg.f  537
+48      zero 19385.83 19386.76 implicit barrier  cg.f  549
+49      zero 19386.76 19386.76               do  cg.f  537
+50      zero 19386.76 19386.78         parallel  cg.f  522
+51      zero 19386.78 19386.80               do  cg.f  586
+#+end_example
+
+Acabo de descobrir que esse rastro (exp7) utiliza a versão 3.0 do
+NAS, que não é a última.
