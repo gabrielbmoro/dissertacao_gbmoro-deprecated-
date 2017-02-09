@@ -2063,29 +2063,102 @@ df %>%
 
 #+RESULTS:
 #+begin_example
-      Container    Start      End                            Value
-1  133143986176 225.6864 225.7117         !$omp parallel @ft.f:190
-2  133143986176 225.7117 300.0041               !$omp do @ft.f:190
-3  133143986176 300.0041 334.6068 !$omp implicit barrier @ft.f:200
-4  133143986176 334.6068 334.6395               !$omp do @ft.f:190
-5  133143986176 334.6395 334.6516         !$omp parallel @ft.f:190
-6  133143986176 334.9452 334.9639         !$omp parallel @ft.f:431
-7  133143986176 334.9639 344.1390               !$omp do @ft.f:431
-8  133143986176 344.1390 358.3487 !$omp implicit barrier @ft.f:444
-9  133143986176 358.3487 358.3669               !$omp do @ft.f:431
-10 133143986176 358.3669 358.3736         !$omp parallel @ft.f:431
-11 133143986176 397.0233 397.0500         !$omp parallel @ft.f:275
-12 133143986176 397.0500 439.0137               !$omp do @ft.f:275
-13 133143986176 439.0137 441.1357 !$omp implicit barrier @ft.f:284
-14 133143986176 441.1357 441.1468               !$omp do @ft.f:275
-15 133143986176 441.1468 441.1589         !$omp parallel @ft.f:275
-16 133143986176 442.8354 442.8718         !$omp parallel @ft.f:553
-17 133143986176 442.8718 444.8224               !$omp do @ft.f:553
-18 133143986176 448.0181 448.6539               !$omp do @ft.f:553
-19 133143986176 450.5139 451.1386               !$omp do @ft.f:553
-20 133143986176 453.0030 453.6189               !$omp do @ft.f:553
+      Container      Start        End                            Value
+1  133143986176   12.00164   12.01549         !$omp parallel @cg.f:736
+2  133143986176   12.01549   12.05696               !$omp do @cg.f:736
+3  133143986176   12.05696  221.27163 !$omp implicit barrier @cg.f:739
+4  133143986176  221.27163  221.30359               !$omp do @cg.f:736
+5  133143986176  221.30359  221.31379         !$omp parallel @cg.f:736
+6  133143986176 8025.23195 8025.28043         !$omp parallel @cg.f:836
+7  133143986176 8025.28043 8025.33848               !$omp do @cg.f:836
+8  133143986176 8025.33848 8029.81141 !$omp implicit barrier @cg.f:840
+9  133143986176 8029.81141 8029.84322               !$omp do @cg.f:836
+10 133143986176 8029.84322 8029.85495         !$omp parallel @cg.f:836
+11 133143986176 8086.04769 8086.08742         !$omp parallel @cg.f:862
+12 133143986176 8086.08742 8108.99339               !$omp do @cg.f:862
+13 133143986176 8108.99339 8109.12932 !$omp implicit barrier @cg.f:868
+14 133143986176 8109.12932 8109.14088               !$omp do @cg.f:862
+15 133143986176 8109.14088 8109.15070         !$omp parallel @cg.f:862
+16 133143986176 9250.41651 9250.45614         !$omp parallel @cg.f:894
+17 133143986176 9250.45614 9250.53253               !$omp do @cg.f:894
+18 133143986176 9250.53253 9250.55278 !$omp implicit barrier @cg.f:899
+19 133143986176 9250.55278 9250.57258               !$omp do @cg.f:894
+20 133143986176 9250.57258 9250.58600         !$omp parallel @cg.f:894
 #+end_example
 
 Veja a evolução temporal do comportamento desta thread.
 
 Devemos agrupar as regiões de acordo com a semântica OpenMP.
+
+#+begin_src R :results output :session :exports both
+df %>%
+    select(Container, Start, End, Value) %>%
+    filter(Container == "zero") %>%
+    arrange(Start) %>%
+    mutate(Value = gsub("!.omp ", "", Value)) %>%
+    mutate(Operation = gsub("@.*$", "", Value)) %>%
+    mutate(File = gsub(".*@", "", Value)) %>%
+    mutate(File = gsub(":.*$", "", File)) %>%
+    mutate(Line = gsub(".*:", "", Value)) %>%
+    select(-Value) %>%
+    slice (1000:1050);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   Container    Start      End         Operation File Line
+1       zero 19362.47 19362.48 implicit barrier  cg.f  591
+2       zero 19362.48 19362.48               do  cg.f  586
+3       zero 19362.48 19362.49         parallel  cg.f  522
+4       zero 19362.49 19362.57               do  cg.f  607
+5       zero 19362.57 19362.59 implicit barrier  cg.f  620
+6       zero 19362.59 19362.60               do  cg.f  607
+7       zero 19362.60 19362.61         parallel  cg.f  522
+8       zero 19362.61 19362.64               do  cg.f  629
+9       zero 19362.64 19362.65         parallel  cg.f  522
+10      zero 19362.65 19362.67 implicit barrier  cg.f  634
+11      zero 19362.67 19362.68         parallel  cg.f  522
+12      zero 19362.73 19362.74         parallel  cg.f  522
+13      zero 19362.74 19369.53               do  cg.f  537
+14      zero 19369.53 19370.49 implicit barrier  cg.f  549
+15      zero 19370.49 19370.50               do  cg.f  537
+16      zero 19370.50 19370.50         parallel  cg.f  522
+17      zero 19370.50 19370.52               do  cg.f  586
+18      zero 19370.52 19370.55 implicit barrier  cg.f  591
+19      zero 19370.55 19370.55               do  cg.f  586
+20      zero 19370.55 19370.56         parallel  cg.f  522
+21      zero 19370.56 19370.61               do  cg.f  607
+22      zero 19370.61 19370.66 implicit barrier  cg.f  620
+23      zero 19370.66 19370.67               do  cg.f  607
+24      zero 19370.67 19370.68         parallel  cg.f  522
+25      zero 19370.68 19370.72               do  cg.f  629
+26      zero 19370.72 19370.73         parallel  cg.f  522
+27      zero 19370.73 19370.74 implicit barrier  cg.f  634
+28      zero 19370.74 19370.75         parallel  cg.f  522
+29      zero 19370.80 19370.81         parallel  cg.f  522
+30      zero 19370.81 19377.72               do  cg.f  537
+31      zero 19377.72 19378.67 implicit barrier  cg.f  549
+32      zero 19378.67 19378.68               do  cg.f  537
+33      zero 19378.68 19378.69         parallel  cg.f  522
+34      zero 19378.69 19378.71               do  cg.f  586
+35      zero 19378.71 19378.73 implicit barrier  cg.f  591
+36      zero 19378.73 19378.73               do  cg.f  586
+37      zero 19378.73 19378.74         parallel  cg.f  522
+38      zero 19378.74 19378.81               do  cg.f  607
+39      zero 19378.81 19378.83 implicit barrier  cg.f  620
+40      zero 19378.83 19378.84               do  cg.f  607
+41      zero 19378.84 19378.85         parallel  cg.f  522
+42      zero 19378.85 19378.89               do  cg.f  629
+43      zero 19378.89 19378.89         parallel  cg.f  522
+44      zero 19378.89 19378.92 implicit barrier  cg.f  634
+45      zero 19378.92 19378.92         parallel  cg.f  522
+46      zero 19378.98 19378.99         parallel  cg.f  522
+47      zero 19378.99 19385.83               do  cg.f  537
+48      zero 19385.83 19386.76 implicit barrier  cg.f  549
+49      zero 19386.76 19386.76               do  cg.f  537
+50      zero 19386.76 19386.78         parallel  cg.f  522
+51      zero 19386.78 19386.80               do  cg.f  586
+#+end_example
+
+Acabo de descobrir que esse rastro (exp7) utiliza a versão 3.0 do
+NAS, que não é a última.
