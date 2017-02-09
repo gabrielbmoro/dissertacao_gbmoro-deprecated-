@@ -1729,8 +1729,9 @@ df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.cs
 #+end_src
 A continuar pelo Gabriel.
 
-** WAITING [12:34:41; 07.02.2017] Analisando a aplicação CG com R  :Gabriel:
+** STARTED [12:34:41; 07.02.2017] Analisando a aplicação CG com R  :Gabriel:
 
+- State "STARTED"    from "WAITING"    [2017-02-09 Qui 11:25]
 - State "WAITING"    from              [2017-02-07 Ter 12:34]
 - Primeiramente, copiei os rastros da =hype2= para minha máquina, visto
   que o ambiente está configurado nela.
@@ -1778,7 +1779,6 @@ head(df0);
 
 #+begin_src R :results output :session *R* :exports both
 library(dplyr);
-
 df1 <- df0 %>% rename(Type=V1,Thread=V2,StateType=V3,Start=V4,End=V5,
 Duration=V6,Imbrication=V7,Region=V8,
 Push_PAPI_TOT_INS=V9,
@@ -1797,11 +1797,11 @@ Pop_ru_stime=V20) %>% as.data.frame();
 #Renomear os identificadores das threads
 tids = unique(df1$Thread)
 tidsdf = data.frame(Thread=tids, ntids = 1:length(tids));
-df2 <- merge (df1, tidsdf, by.x="Thread", by.y="Thread");
-df2 <- df2 %>% select(-Thread) %>% rename(Thread=ntids) %>% group_by(Thread,Region) %>% as.data.frame();
+df1 <- merge (df1, tidsdf, by.x="Thread", by.y="Thread");
+df1 <- df1 %>% select(-Thread) %>% rename(Thread=ntids) %>% group_by(Thread,Region) %>% as.data.frame();
 
 #calculando as métricas
-df3 <- df2 %>% mutate(
+df1 <- df1 %>% mutate(
         PAPI_TOT_INS = Pop_PAPI_TOT_INS - Push_PAPI_TOT_INS,
         PAPI_REF_CYC = Pop_PAPI_REF_CYC - Push_PAPI_REF_CYC,
         PAPI_L2_TCM = Pop_PAPI_L2_TCM - Push_PAPI_L2_TCM,
@@ -1811,51 +1811,64 @@ df3 <- df2 %>% mutate(
     select(
         -Type, -StateType, -Push_PAPI_TOT_INS,-Push_PAPI_REF_CYC, 
 -Push_PAPI_L2_TCM,-Push_PAPI_L2_TCA, -Push_ru_utime, -Push_ru_stime,-Pop_PAPI_TOT_INS,-Pop_PAPI_REF_CYC, 
--Pop_PAPI_L2_TCM,-Pop_PAPI_L2_TCA,-Pop_ru_utime, -Pop_ru_stime) %>%
-	mutate(
-		MISSES_L2 = PAPI_L2_TCM / PAPI_L2_TCA,
-            IPC = PAPI_TOT_INS / PAPI_REF_CYC) %>%  
-    select(-PAPI_TOT_INS,-PAPI_REF_CYC,-PAPI_L2_TCM, -PAPI_L2_TCA, -ru_utime, -ru_stime)
+-Pop_PAPI_L2_TCM,-Pop_PAPI_L2_TCA,-Pop_ru_utime, -Pop_ru_stime);
 
 #Separando Regiões e Linhas de Código
-df3$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df3$Region))
-df3$Region <- gsub("*[0-9]*|:|@[a-z]*.[a-z]|!\\$","",df3$Region)
-df3$Region <- gsub("\\ ","_",df3$Region)
-
-#agrupando os contadores por região
-df4 <- select(df3, Start, End, Duration, -Imbrication, Region, line, Thread, MISSES_L2,IPC);
-df4 <- df4 %>% group_by(Thread, Region, line) %>% summarise(mean_misses_l2 = mean(MISSES_L2),
- mean_ipc=mean(IPC)) %>% as.data.frame();
-
-#agora vamos filtrar misses igual ou acima de 30% e ipc menor ou igual a 10
-df5 <- df4 %>% filter(!(mean_misses_l2 < 0.3 | mean_ipc > 10));
-
-head(df5);
+df1$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df1$Region))
+df1$Region <- gsub("*[0-9]*|:|@[a-z]*.[a-z]|!\\$","",df1$Region)
+df1$Region <- gsub("\\ ","_",df1$Region)
+df1$Region <- gsub("omp_|_implicit","",df1$Region)
+head(df1);
 #+end_src
 
 #+RESULTS:
-:   Thread                Region line mean_misses_l2 mean_ipc
-: 1      1 omp_implicit_barrier_  221      0.3983740 9.548906
-: 2      1 omp_implicit_barrier_  549      0.5837766 9.731087
-: 3      1 omp_implicit_barrier_  657      0.6216951 9.758888
-: 4      1 omp_implicit_barrier_  840      0.3246753 9.503844
-: 5      1 omp_implicit_barrier_  868      0.5011287 9.302465
-: 6      2               omp_do_  836      0.3078551 7.124884
+#+begin_example
+       Start        End   Duration Imbrication            Region Thread
+1   11.87650   11.89433   0.017836           0         parallel_     40
+2   11.89433   11.92660   0.032266           1               do_     40
+3   11.92660  221.22084 209.294243           2 implicit_barrier_     40
+4  221.22084  221.24101   0.020166           1               do_     40
+5  221.24101  221.24811   0.007102           0         parallel_     40
+6 8024.99327 8025.06138   0.068103           0         parallel_     40
+  PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM PAPI_L2_TCA ru_utime ru_stime line
+1         2040          432         218         539        0        0  736
+2        18855          716          49         297        0        0  736
+3      2102041       312365         157         720     8000        0  739
+4         1771          327          64         535        0        0  736
+5         1763          131           9          95        0        0  736
+6         2013          876         215         634        0        0  836
+#+end_example
 
-- Professor, está correto a maneira com que agrupei as regiões? 
-Pensei da seguinte forma, a prioridade do agrupamento deve ser por
-  Threads, visto que em um mesmo momento são coletadas as métricas de
-  misses e ipc para diferentes threads. Depois de separar os dados por
-  Threads, agrupei como prioridade secundária por Região e linha de
-  código. Pensei que a melhor maneira seria utilizar uma média para as
-  métricas serem agrupadas. Após isso, estabeleci uma faixa de
-  valores, aonde considerei misses na l2 a cima ou igual 30% e IPC
-  menor ou igual a 10. Nesse primeiro momento pensei nesses valores
-  como limitadores, não sei se esses são os mais indicados, para
-  analisar corretamente o IPC ideal, deveria ser levado em
-  consideração aspectos arquiteturais da plataforma. O misses na l2
-  sabemos, por experimentos anteriores que >= 30% é um limite
-  interessante para considerar uma região memory-bound. Será que uma
-  equação utilizando essas duas métricas poderia ser o mais indicado
-  para considerar essa uma região candidata a ser executada em uma
-  frequência baixa?
+#+begin_src R :results output :session *R* :exports both
+library(stringr);
+
+#selecionando primeiramente pela thread 1
+thread=1
+
+df2 <- df1 %>% filter(Thread==1);
+df3 <- df2 %>% filter(str_detect(Region, 'parallel'));
+
+# somando os contadores para mesma linha,regiao
+
+df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
+ group_by(Region,Thread) %>%
+ summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
+ PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame();
+
+df3
+
+#+end_src
+
+#+RESULTS:
+:      Region Thread Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM PAPI_L2_TCA
+: 1 parallel_      1 104.3637     22002925      1107749      139017      701665
+
+- A saida do script R acima apresenta um agrupamento inicial dos
+  dados, da seguinte forma: primeiramente é selecionado uma thread,
+  após isso, uma função (nesse caso, =_parallel=). Com isso, podemos
+  desprezar o Start e o End, visto que podemos levar em consideração
+  apenas a duração, a partir desses resultados podemos dizer que para
+  a thread 'X', na região 'Y', quando acumula 'N' segundos temos, por
+  exemplo, o total de instruções 'W', o qual foi acumulado de acordo com
+  a duração em segundos. Claro, estou bem longe do necessário, mas um
+  passo de cada vez.
