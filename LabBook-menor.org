@@ -1998,6 +1998,7 @@ df %>% head;
 ** Sumário
 Resta agrupar as regiões apropriadamente.
 * 2017-02-08 Isolando o comportamento de uma thread
+** Listagem de identificadores de threads
 Existem as seguintes threads:
 #+begin_src R :results output :session :exports both
 df %>% select(Container) %>% unique;
@@ -2047,7 +2048,7 @@ df %>% select(Container) %>% unique;
 235823 107374182400
 241658 103079215104
 #+end_example
-
+** Obtendo o comportamento de apenas uma thread
 Vamos filtrar, pegamos apenas os estados da thread =133143986176=,
 ordenados temporalmente por tempo de início (Start). Note que
 removemos os campos irrelevantes por enquanto.
