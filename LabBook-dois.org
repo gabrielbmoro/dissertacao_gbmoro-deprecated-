@@ -1741,6 +1741,7 @@ ls /tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
 #+end_src
 
 #+RESULTS:
+: 
 : profile.cubex  scorep.cfg  traces  traces.csv  traces.def  traces.otf2
 
 - O csv gerado já está conforme o tratamento preliminar realizado pelo
@@ -1818,11 +1819,22 @@ df1$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df1$Region))
 df1$Region <- gsub("*[0-9]*|:|@[a-z]*.[a-z]|!\\$","",df1$Region)
 df1$Region <- gsub("\\ ","_",df1$Region)
 df1$Region <- gsub("omp_|_implicit","",df1$Region)
+
 head(df1);
 #+end_src
 
 #+RESULTS:
 #+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
        Start        End   Duration Imbrication            Region Thread
 1   11.87650   11.89433   0.017836           0         parallel_     40
 2   11.89433   11.92660   0.032266           1               do_     40
@@ -1841,6 +1853,7 @@ head(df1);
 
 #+begin_src R :results output :session *R* :exports both
 library(stringr);
+library(reshape);
 
 #selecionando primeiramente pela thread 1
 thread=1
@@ -1849,19 +1862,77 @@ df2 <- df1 %>% filter(Thread==1);
 df3 <- df2 %>% filter(str_detect(Region, 'parallel'));
 
 # somando os contadores para mesma linha,regiao
-
 df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
- group_by(Region,Thread) %>%
+ group_by(Thread,Region,line) %>%
  summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
  PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame();
 
-df3
-
+head(df3); 
 #+end_src
 
 #+RESULTS:
-:      Region Thread Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM PAPI_L2_TCA
-: 1 parallel_      1 104.3637     22002925      1107749      139017      701665
+#+begin_example
+  Thread    Region line Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1      1 parallel_  196 0.096711         9244         1416         538
+2      1 parallel_  253 0.012071         3868          226          39
+3      1 parallel_  266 0.014656         3888          237          59
+4      1 parallel_  281 0.015630         3908          225          24
+5      1 parallel_  323 1.149141       264294        18450        3962
+6      1 parallel_  344 2.312714       262836        23045        8118
+  PAPI_L2_TCA
+1        1571
+2         143
+3         272
+4         170
+5       18889
+6       22032
+#+end_example
+
+
+#+begin_src R :results output :session *R* :exports both
+lines <- unique(df3$line);
+
+sizeOfLines=length(lines)
+count=1
+x=0
+
+#localizar intervalos
+vectorTmp <- NULL
+while(count < sizeOfLines) {
+	if(count + 1 < sizeOfLines) {
+		vectorTmp[x] <- cat(lines[count],"-",lines[count+1],"\n");
+		x <- x+1
+	}
+	count <- count+1
+}
+
+nrow=nrow(df3)
+ncol=ncol(df3)
+
+i=1
+j=3
+
+while(i < nrow) {
+    print(df3[i]);
+}
+#+end_src
+
+#+RESULTS:
+#+begin_example
+196 - 253 
+253 - 266 
+266 - 281 
+281 - 323 
+323 - 344 
+344 - 488 
+488 - 522 
+522 - 646 
+646 - 736 
+736 - 836 
+836 - 862
+Error in `[.data.frame`(df3[i], 3) (from #2) : colunas indefinidas selecionadas
+#+end_example
+
 
 - A saida do script R acima apresenta um agrupamento inicial dos
   dados, da seguinte forma: primeiramente é selecionado uma thread,
@@ -1872,3 +1943,6 @@ df3
   exemplo, o total de instruções 'W', o qual foi acumulado de acordo com
   a duração em segundos. Claro, estou bem longe do necessário, mas um
   passo de cada vez.
+  
+
+
