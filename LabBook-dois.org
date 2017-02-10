@@ -1825,16 +1825,6 @@ head(df1);
 
 #+RESULTS:
 #+begin_example
-
-Attaching package: ‘dplyr’
-
-The following objects are masked from ‘package:stats’:
-
-    filter, lag
-
-The following objects are masked from ‘package:base’:
-
-    intersect, setdiff, setequal, union
        Start        End   Duration Imbrication            Region Thread
 1   11.87650   11.89433   0.017836           0         parallel_     40
 2   11.89433   11.92660   0.032266           1               do_     40
@@ -1872,6 +1862,12 @@ head(df3);
 
 #+RESULTS:
 #+begin_example
+
+Attaching package: ‘reshape’
+
+The following object is masked from ‘package:dplyr’:
+
+    rename
   Thread    Region line Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
 1      1 parallel_  196 0.096711         9244         1416         538
 2      1 parallel_  253 0.012071         3868          226          39
@@ -1913,7 +1909,8 @@ i=1
 j=3
 
 while(i < nrow) {
-    print(df3[i]);
+    x <- grep1(df3[i,j],vectorTmp[1],value=TRUE)
+	i <- i + 1
 }
 #+end_src
 
@@ -1930,7 +1927,18 @@ while(i < nrow) {
 646 - 736 
 736 - 836 
 836 - 862
-Error in `[.data.frame`(df3[i], 3) (from #2) : colunas indefinidas selecionadas
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
+character(0)
 #+end_example
 
 
