@@ -1819,12 +1819,21 @@ df1$line <- as.numeric(gsub("*[a-z]*|@|:|!\\$|\\.","",df1$Region))
 df1$Region <- gsub("*[0-9]*|:|@[a-z]*.[a-z]|!\\$","",df1$Region)
 df1$Region <- gsub("\\ ","_",df1$Region)
 df1$Region <- gsub("omp_|_implicit","",df1$Region)
-
 head(df1);
 #+end_src
 
 #+RESULTS:
 #+begin_example
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
        Start        End   Duration Imbrication            Region Thread
 1   11.87650   11.89433   0.017836           0         parallel_     40
 2   11.89433   11.92660   0.032266           1               do_     40
@@ -1847,98 +1856,89 @@ library(reshape);
 
 #selecionando primeiramente pela thread 1
 thread=1
+region='parallel'
 
-df2 <- df1 %>% filter(Thread==1);
-df3 <- df2 %>% filter(str_detect(Region, 'parallel'));
+exportByThreadAndRegion <- function(thread,region) {
 
-# somando os contadores para mesma linha,regiao
-df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
- group_by(Thread,Region,line) %>%
- summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
- PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame();
+	df2 <- df1 %>% filter(Thread==thread);
+	df3 <- df2 %>% filter(str_detect(Region, region));
 
-head(df3); 
-#+end_src
+	# somando os contadores para mesma linha,regiao
+	df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
+	 group_by(Thread,Region,line) %>%
+	 summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
+	 PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame();
 
-#+RESULTS:
-#+begin_example
+	lines <- unique(df3$line);
 
-Attaching package: ‘reshape’
+	sizeOfLines=length(lines)
+	count=1
+	x=0	
+	nrow=nrow(df3)
+	i=1
+	j=3
 
-The following object is masked from ‘package:dplyr’:
+	#localizar intervalos
+	vectorTmp <- NULL
+	m_final <- matrix(ncol = 7,nrow=sizeOfLines-1)
+	index_final=1
 
-    rename
-  Thread    Region line Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
-1      1 parallel_  196 0.096711         9244         1416         538
-2      1 parallel_  253 0.012071         3868          226          39
-3      1 parallel_  266 0.014656         3888          237          59
-4      1 parallel_  281 0.015630         3908          225          24
-5      1 parallel_  323 1.149141       264294        18450        3962
-6      1 parallel_  344 2.312714       262836        23045        8118
-  PAPI_L2_TCA
-1        1571
-2         143
-3         272
-4         170
-5       18889
-6       22032
-#+end_example
+	while(count < sizeOfLines) {
+		if(count + 1 < sizeOfLines) {
+			duration <- 0
+			papi_tot_inst <- 0
+			papi_ref_cyc <- 0
+			papi_l2_tcm <- 0
+            	papi_l2_tca <- 0
 
-
-#+begin_src R :results output :session *R* :exports both
-lines <- unique(df3$line);
-
-sizeOfLines=length(lines)
-count=1
-x=0
-
-#localizar intervalos
-vectorTmp <- NULL
-while(count < sizeOfLines) {
-	if(count + 1 < sizeOfLines) {
-		vectorTmp[x] <- cat(lines[count],"-",lines[count+1],"\n");
-		x <- x+1
+			while(i < nrow) {
+				#está no intervalo desejado, serão agrupados os contadores (somados)
+				if(df3[i,j]==lines[count] || df3[i,j]==lines[count+1]) {
+            	                duration <- df3[i,4] + duration
+					papi_tot_inst <- df3[i,5] + papi_tot_inst
+					papi_ref_cyc <- df3[i,6] + papi_ref_cyc
+					papi_l2_tcm <- df3[i,7] + papi_l2_tcm
+				        papi_l2_tca <- df3[i,8] + papi_l2_tca
+				}
+				
+				if(duration > 0) {
+		        		m_final[index_final,1] <- lines[count]
+					m_final[index_final,2] <- lines[count+1]
+					m_final[index_final,3] <- duration
+					m_final[index_final,4] <- papi_tot_inst
+					m_final[index_final,5] <- papi_ref_cyc
+					m_final[index_final,6] <- papi_l2_tcm
+					m_final[index_final,7] <- papi_l2_tca
+					index_final <- index_final + 1
+				}
+				i <- i + 1
+			}
+			x <- x + 1
+		}
+		count <- count + 1
 	}
-	count <- count+1
+
+	df_final <- data.frame(m_final);
+	return (df_final)
 }
-
-nrow=nrow(df3)
-ncol=ncol(df3)
-
-i=1
-j=3
-
-while(i < nrow) {
-    x <- grep1(df3[i,j],vectorTmp[1],value=TRUE)
-	i <- i + 1
-}
+exportByThreadAndRegion(thread,region);
 #+end_src
 
 #+RESULTS:
 #+begin_example
-196 - 253 
-253 - 266 
-266 - 281 
-281 - 323 
-323 - 344 
-344 - 488 
-488 - 522 
-522 - 646 
-646 - 736 
-736 - 836 
-836 - 862
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
-character(0)
+    X1  X2       X3    X4   X5  X6   X7
+1  196 253 0.096711  9244 1416 538 1571
+2  196 253 0.108782 13112 1642 577 1714
+3  196 253 0.108782 13112 1642 577 1714
+4  196 253 0.108782 13112 1642 577 1714
+5  196 253 0.108782 13112 1642 577 1714
+6  196 253 0.108782 13112 1642 577 1714
+7  196 253 0.108782 13112 1642 577 1714
+8  196 253 0.108782 13112 1642 577 1714
+9  196 253 0.108782 13112 1642 577 1714
+10 196 253 0.108782 13112 1642 577 1714
+11 196 253 0.108782 13112 1642 577 1714
+12 196 253 0.108782 13112 1642 577 1714
 #+end_example
 
 
@@ -1952,5 +1952,9 @@ character(0)
   a duração em segundos. Claro, estou bem longe do necessário, mas um
   passo de cada vez.
   
+- Acredito que essa função pode ser melhorada e refinada, fiz essa
+  primeira versão. Pretendo melhorar bastante, a partir dos estudos em
+  R que estou fazendo. Após refinar essa função essa poderá ser
+  chamada de acordo com o número de threads e regiões possíveis.
 
 
