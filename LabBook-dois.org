@@ -1859,7 +1859,6 @@ thread=1
 region='parallel'
 
 exportByThreadAndRegion <- function(thread,region) {
-
 	df2 <- df1 %>% filter(Thread==thread);
 	df3 <- df2 %>% filter(str_detect(Region, region));
 
@@ -1919,27 +1918,19 @@ exportByThreadAndRegion <- function(thread,region) {
 	}
 
 	df_final <- data.frame(m_final);
+	df_final$X8 <- thread
+    df_final$V9 <- region
+	df_final <- unique(df_final);
 	return (df_final)
 }
+
 exportByThreadAndRegion(thread,region);
 #+end_src
 
 #+RESULTS:
-#+begin_example
-    X1  X2       X3    X4   X5  X6   X7
-1  196 253 0.096711  9244 1416 538 1571
-2  196 253 0.108782 13112 1642 577 1714
-3  196 253 0.108782 13112 1642 577 1714
-4  196 253 0.108782 13112 1642 577 1714
-5  196 253 0.108782 13112 1642 577 1714
-6  196 253 0.108782 13112 1642 577 1714
-7  196 253 0.108782 13112 1642 577 1714
-8  196 253 0.108782 13112 1642 577 1714
-9  196 253 0.108782 13112 1642 577 1714
-10 196 253 0.108782 13112 1642 577 1714
-11 196 253 0.108782 13112 1642 577 1714
-12 196 253 0.108782 13112 1642 577 1714
-#+end_example
+:    X1  X2       X3    X4   X5  X6   X7 X8       V9
+: 1 196 253 0.096711  9244 1416 538 1571  1 parallel
+: 2 196 253 0.108782 13112 1642 577 1714  1 parallel
 
 
 - A saida do script R acima apresenta um agrupamento inicial dos
