@@ -1741,7 +1741,6 @@ ls /tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
 #+end_src
 
 #+RESULTS:
-: 
 : profile.cubex  scorep.cfg  traces  traces.csv  traces.def  traces.otf2
 
 - O csv gerado já está conforme o tratamento preliminar realizado pelo
@@ -1858,22 +1857,22 @@ library(reshape);
 thread=1
 region='parallel'
 
+df2 <- df1 %>% filter(Thread==thread)
+df3 <- df2 %>% filter(str_detect(Region, region))
+
+# somando os contadores para mesma linha,regiao
+df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
+ group_by(Thread,Region,line) %>%
+ summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
+ PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame()
+
+head(df3)
 exportByThreadAndRegion <- function(thread,region) {
-	df2 <- df1 %>% filter(Thread==thread);
-	df3 <- df2 %>% filter(str_detect(Region, region));
-
-	# somando os contadores para mesma linha,regiao
-	df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
-	 group_by(Thread,Region,line) %>%
-	 summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
-	 PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame();
-
-	lines <- unique(df3$line);
-
+	lines <- unique(df3$line)
 	sizeOfLines=length(lines)
 	count=1
-	x=0	
 	nrow=nrow(df3)
+	loc=1
 	i=1
 	j=3
 
@@ -1884,43 +1883,43 @@ exportByThreadAndRegion <- function(thread,region) {
 
 	while(count < sizeOfLines) {
 		if(count + 1 < sizeOfLines) {
-			duration <- 0
-			papi_tot_inst <- 0
-			papi_ref_cyc <- 0
-			papi_l2_tcm <- 0
-            	papi_l2_tca <- 0
-
+				duration <- 0
+				papi_tot_inst <- 0
+				papi_ref_cyc <- 0
+				papi_l2_tcm <- 0
+	                        papi_l2_tca <- 0
+				
 			while(i < nrow) {
+				
 				#está no intervalo desejado, serão agrupados os contadores (somados)
-				if(df3[i,j]==lines[count] || df3[i,j]==lines[count+1]) {
+				if(df3[i,j] == lines[count] || df3[i,j] == lines[count+1]) {
             	                duration <- df3[i,4] + duration
 					papi_tot_inst <- df3[i,5] + papi_tot_inst
 					papi_ref_cyc <- df3[i,6] + papi_ref_cyc
 					papi_l2_tcm <- df3[i,7] + papi_l2_tcm
 				        papi_l2_tca <- df3[i,8] + papi_l2_tca
-				}
-				
-				if(duration > 0) {
-		        		m_final[index_final,1] <- lines[count]
-					m_final[index_final,2] <- lines[count+1]
-					m_final[index_final,3] <- duration
-					m_final[index_final,4] <- papi_tot_inst
-					m_final[index_final,5] <- papi_ref_cyc
-					m_final[index_final,6] <- papi_l2_tcm
-					m_final[index_final,7] <- papi_l2_tca
-					index_final <- index_final + 1
+					loc <- loc + 1
 				}
 				i <- i + 1
 			}
-			x <- x + 1
+			i <- loc
+                    
+			m_final[index_final,1] <- lines[count]
+			m_final[index_final,2] <- lines[count+1]
+			m_final[index_final,3] <- duration
+                    m_final[index_final,4] <- papi_tot_inst
+			m_final[index_final,5] <- papi_ref_cyc
+			m_final[index_final,6] <- papi_l2_tcm
+			m_final[index_final,7] <- papi_l2_tca
+			index_final <- index_final + 1
 		}
 		count <- count + 1
 	}
 
-	df_final <- data.frame(m_final);
+	df_final <- data.frame(m_final)
 	df_final$X8 <- thread
     df_final$V9 <- region
-	df_final <- unique(df_final);
+	df_final <- unique(df_final)
 	return (df_final)
 }
 
@@ -1928,9 +1927,35 @@ exportByThreadAndRegion(thread,region);
 #+end_src
 
 #+RESULTS:
-:    X1  X2       X3    X4   X5  X6   X7 X8       V9
-: 1 196 253 0.096711  9244 1416 538 1571  1 parallel
-: 2 196 253 0.108782 13112 1642 577 1714  1 parallel
+#+begin_example
+  Thread    Region line Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
+1      1 parallel_  196 0.096711         9244         1416         538
+2      1 parallel_  253 0.012071         3868          226          39
+3      1 parallel_  266 0.014656         3888          237          59
+4      1 parallel_  281 0.015630         3908          225          24
+5      1 parallel_  323 1.149141       264294        18450        3962
+6      1 parallel_  344 2.312714       262836        23045        8118
+  PAPI_L2_TCA
+1        1571
+2         143
+3         272
+4         170
+5       18889
+6       22032
+    X1  X2        X3       X4      X5     X6     X7 X8       V9
+1  196 253  0.108782    13112    1642    577   1714  1 parallel
+2  253 266  0.014656     3888     237     59    272  1 parallel
+3  266 281  0.015630     3908     225     24    170  1 parallel
+4  281 323  1.149141   264294   18450   3962  18889  1 parallel
+5  323 344  2.312714   262836   23045   8118  22032  1 parallel
+6  344 488  2.398812   541734   27053   2521  20690  1 parallel
+7  488 522 95.651829 20356111 1004739 119276 617219  1 parallel
+8  522 646  2.619152   538831   30474   3940  18374  1 parallel
+9  646 736  0.027157     3793     667    227    594  1 parallel
+10 736 836  0.013245     3812     186     59    401  1 parallel
+11 836 862  0.022951     3831     439    113    677  1 parallel
+12  NA  NA        NA       NA      NA     NA     NA  1 parallel
+#+end_example
 
 
 - A saida do script R acima apresenta um agrupamento inicial dos
