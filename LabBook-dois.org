@@ -1729,8 +1729,9 @@ df <- read.csv("exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/traces.cs
 #+end_src
 A continuar pelo Gabriel.
 
-** STARTED [12:34:41; 07.02.2017] Analisando a aplicação CG com R  :Gabriel:
+** WAITING [12:34:41; 07.02.2017] Analisando a aplicação CG com R  :Gabriel:
 
+- State "WAITING"    from "STARTED"    [2017-02-12 Dom 17:37]
 - State "STARTED"    from "WAITING"    [2017-02-09 Qui 11:25]
 - State "WAITING"    from              [2017-02-07 Ter 12:34]
 - Primeiramente, copiei os rastros da =hype2= para minha máquina, visto
@@ -1858,19 +1859,17 @@ library(reshape);
 thread=1
 region='parallel'
 
-df2 <- df1 %>% filter(Thread==thread)
-df3 <- df2 %>% filter(str_detect(Region, region))
-
-# somando os contadores para mesma linha,regiao
-df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
- group_by(Thread,Region,line) %>%
- summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
- PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame()
-
 head(df3)
+
 exportByThreadAndRegion <- function(thread,region) {
-#	df2 <- df1 %>% filter(Thread==thread)
-#	df3 <- df2 %>% filter(str_detect(Region, region))    
+	df2 <- df1 %>% filter(Thread==thread)
+	df3 <- df2 %>% filter(str_detect(Region, region))
+
+	# somando os contadores para mesma linha,regiao
+	df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
+	 group_by(Thread,Region,line) %>%
+	 summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
+	 PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame()
 
 	lines <- unique(df3$line)
 	sizeOfLines=length(lines)
@@ -1891,9 +1890,6 @@ exportByThreadAndRegion <- function(thread,region) {
 	vectorTmp <- NULL
 	m_final <- matrix(ncol = 7,nrow=sizeOfLines-1)
 	index_final=1
-
-print(nrow);
-print(sizeOfLines);
 
 	while(i < nrow) {
 
@@ -1970,8 +1966,6 @@ exportByThreadAndRegion(thread,region);
 4         170
 5       18889
 6       22032
-[1] 13
-[1] 13
     X1  X2        X3       X4      X5     X6     X7 X8       V9
 1  196 253  0.108782    13112    1642    577   1714  1 parallel
 2  253 266  0.026727     7756     463     98    415  1 parallel
@@ -2003,3 +1997,38 @@ exportByThreadAndRegion(thread,region);
   chamada de acordo com o número de threads e regiões possíveis.
 
 
+- Como já consigo agregar os contadores de hardware por thread e por
+  região, vou utilizar a função criada. A partir dela é possível obter
+  um frame de dados com diferentes métodos de uma thread, logo será
+  necessário chamar essa função N vezes Z, onde N é as variações de
+  métodos de código e Z representa o número de threads.
+
+#+begin_src R :results output :session *R* :exports both
+regions <- unique(df1$Region)
+threads <- unique(df1$Thread)
+
+resultFrame <- NULL
+
+for(k in regions){
+	for(l in threads) {
+		frameTmp <- exportByThreadAndRegion(l, k)
+		resultFrame <- rbind(resultFrame,frameTmp)
+	}
+}
+
+resultFrame <-  resultFrame %>% dplyr::rename(startL=X1,endL=X2,duration=X3,tot_inst=X4,tot_cyc=X5,l2_tcm=X6,l2_tca=X7,thread=X8,parallelR=V9)
+resultFrame <- resultFrame %>% dplyr::mutate(ipc = tot_inst / tot_cyc, l2misses_rate = l2_tcm / l2_tca) %>% select(-tot_inst,tot_cyc,-l2_tcm,-l2_tca)
+head(resultFrame)
+#+end_src
+
+#+RESULTS:
+:   startL endL duration tot_cyc thread parallelR       ipc l2misses_rate
+: 1    196  253 0.118973    1527     40 parallel_  8.550753    0.32680196
+: 2    253  266 0.026003     416     40 parallel_ 18.548077    0.11471322
+: 3    266  281 0.024472     389     40 parallel_ 19.938303    0.13020833
+: 4    281  323 1.125844   14326     40 parallel_ 18.812579    0.14294621
+: 5    323  344 2.251016   26512     40 parallel_ 19.983140    0.11230437
+: 6    344  488 3.672486   41262     40 parallel_ 19.554457    0.09723976
+
+- Aguardando a opinião do professor Lucas sobre essa agregação de
+  dados que fiz.
