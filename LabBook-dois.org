@@ -1741,6 +1741,7 @@ ls /tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
 #+end_src
 
 #+RESULTS:
+: 
 : profile.cubex  scorep.cfg  traces  traces.csv  traces.def  traces.otf2
 
 - O csv gerado já está conforme o tratamento preliminar realizado pelo
@@ -1868,61 +1869,82 @@ df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_
 
 head(df3)
 exportByThreadAndRegion <- function(thread,region) {
+#	df2 <- df1 %>% filter(Thread==thread)
+#	df3 <- df2 %>% filter(str_detect(Region, region))    
+
 	lines <- unique(df3$line)
 	sizeOfLines=length(lines)
 	count=1
 	nrow=nrow(df3)
-	loc=1
 	i=1
 	j=3
+    initL=0
+	endL=0
+	duration=0
+	papi_tot_inst=0
+	papi_ref_cyc=0
+	papi_l2_tcm=0
+    papi_l2_tca=0
 
 	#localizar intervalos
 	vectorTmp <- NULL
 	m_final <- matrix(ncol = 7,nrow=sizeOfLines-1)
 	index_final=1
 
-	while(count < sizeOfLines) {
-		if(count + 1 < sizeOfLines) {
-				duration <- 0
-				papi_tot_inst <- 0
-				papi_ref_cyc <- 0
-				papi_l2_tcm <- 0
-	                        papi_l2_tca <- 0
-				
-			while(i < nrow) {
-				
-				#está no intervalo desejado, serão agrupados os contadores (somados)
-				if(df3[i,j] == lines[count] || df3[i,j] == lines[count+1]) {
-            	                duration <- df3[i,4] + duration
+	while(i < nrow) {
+
+            duration <- 0
+		papi_tot_inst <- 0
+		papi_ref_cyc <- 0
+		papi_l2_tcm <- 0
+            papi_l2_tca <- 0
+		initL <- 0
+		endL <- 0
+		
+		if (i + 1 < nrow) {
+			count=1
+			while(count < sizeOfLines) { 
+
+                            if(lines[count] == df3[i,j]) {
+           	                	initL <- df3[i,j]
+					duration <- df3[i,4] + duration
 					papi_tot_inst <- df3[i,5] + papi_tot_inst
 					papi_ref_cyc <- df3[i,6] + papi_ref_cyc
 					papi_l2_tcm <- df3[i,7] + papi_l2_tcm
-				        papi_l2_tca <- df3[i,8] + papi_l2_tca
-					loc <- loc + 1
+			        	papi_l2_tca <- df3[i,8] + papi_l2_tca
 				}
-				i <- i + 1
+			
+				else if(lines[count] == df3[i+1,j]) {
+    	                        endL <- df3[i+1,j]
+           		                duration <- df3[i+1,4] + duration
+					papi_tot_inst <- df3[i+1,5] + papi_tot_inst
+					papi_ref_cyc <- df3[i+1,6] + papi_ref_cyc
+					papi_l2_tcm <- df3[i+1,7] + papi_l2_tcm
+				        papi_l2_tca <- df3[i+1,8] + papi_l2_tca
+				}
+
+				count <- count + 1
 			}
-			i <- loc
-                    
-			m_final[index_final,1] <- lines[count]
-			m_final[index_final,2] <- lines[count+1]
+	
+			m_final[index_final,1] <- initL
+			m_final[index_final,2] <- endL
 			m_final[index_final,3] <- duration
-                    m_final[index_final,4] <- papi_tot_inst
+	        	m_final[index_final,4] <- papi_tot_inst
 			m_final[index_final,5] <- papi_ref_cyc
 			m_final[index_final,6] <- papi_l2_tcm
 			m_final[index_final,7] <- papi_l2_tca
 			index_final <- index_final + 1
 		}
-		count <- count + 1
-	}
+		i <- i + 1
+    }
 
 	df_final <- data.frame(m_final)
+	df_final <- df_final %>% filter(is.na(X3)==FALSE) %>% as.data.frame();
 	df_final$X8 <- thread
     df_final$V9 <- region
-	df_final <- unique(df_final)
+	df_final <- unique(df_final);
 	return (df_final)
 }
-
 exportByThreadAndRegion(thread,region);
 #+end_src
 
@@ -1944,17 +1966,16 @@ exportByThreadAndRegion(thread,region);
 6       22032
     X1  X2        X3       X4      X5     X6     X7 X8       V9
 1  196 253  0.108782    13112    1642    577   1714  1 parallel
-2  253 266  0.014656     3888     237     59    272  1 parallel
-3  266 281  0.015630     3908     225     24    170  1 parallel
-4  281 323  1.149141   264294   18450   3962  18889  1 parallel
-5  323 344  2.312714   262836   23045   8118  22032  1 parallel
-6  344 488  2.398812   541734   27053   2521  20690  1 parallel
-7  488 522 95.651829 20356111 1004739 119276 617219  1 parallel
-8  522 646  2.619152   538831   30474   3940  18374  1 parallel
-9  646 736  0.027157     3793     667    227    594  1 parallel
-10 736 836  0.013245     3812     186     59    401  1 parallel
-11 836 862  0.022951     3831     439    113    677  1 parallel
-12  NA  NA        NA       NA      NA     NA     NA  1 parallel
+2  253 266  0.026727     7756     463     98    415  1 parallel
+3  266 281  0.030286     7796     462     83    442  1 parallel
+4  281 323  1.164771   268202   18675   3986  19059  1 parallel
+5  323 344  3.461855   527130   41495  12080  40921  1 parallel
+6  344 488  4.711526   804570   50098  10639  42722  1 parallel
+7  488 522 98.050641 20897845 1031792 121797 637909  1 parallel
+8  522 646 98.270981 20894942 1035213 123216 635593  1 parallel
+9  646 736  2.646309   542624   31141   4167  18968  1 parallel
+10 736 836  0.040402     7605     853    286    995  1 parallel
+11 836 862  0.036196     7643     625    172   1078  1 parallel
 #+end_example
 
 
