@@ -1878,6 +1878,7 @@ exportByThreadAndRegion <- function(thread,region) {
 	nrow=nrow(df3)
 	i=1
 	j=3
+	loc=1
     initL=0
 	endL=0
 	duration=0
@@ -1891,6 +1892,9 @@ exportByThreadAndRegion <- function(thread,region) {
 	m_final <- matrix(ncol = 7,nrow=sizeOfLines-1)
 	index_final=1
 
+print(nrow);
+print(sizeOfLines);
+
 	while(i < nrow) {
 
             duration <- 0
@@ -1902,7 +1906,7 @@ exportByThreadAndRegion <- function(thread,region) {
 		endL <- 0
 		
 		if (i + 1 < nrow) {
-			count=1
+			count <- loc
 			while(count < sizeOfLines) { 
 
                             if(lines[count] == df3[i,j]) {
@@ -1912,6 +1916,7 @@ exportByThreadAndRegion <- function(thread,region) {
 					papi_ref_cyc <- df3[i,6] + papi_ref_cyc
 					papi_l2_tcm <- df3[i,7] + papi_l2_tcm
 			        	papi_l2_tca <- df3[i,8] + papi_l2_tca
+					loc <- count
 				}
 			
 				else if(lines[count] == df3[i+1,j]) {
@@ -1921,6 +1926,7 @@ exportByThreadAndRegion <- function(thread,region) {
 					papi_ref_cyc <- df3[i+1,6] + papi_ref_cyc
 					papi_l2_tcm <- df3[i+1,7] + papi_l2_tcm
 				        papi_l2_tca <- df3[i+1,8] + papi_l2_tca
+                                	loc <- count
 				}
 
 				count <- count + 1
@@ -1964,6 +1970,8 @@ exportByThreadAndRegion(thread,region);
 4         170
 5       18889
 6       22032
+[1] 13
+[1] 13
     X1  X2        X3       X4      X5     X6     X7 X8       V9
 1  196 253  0.108782    13112    1642    577   1714  1 parallel
 2  253 266  0.026727     7756     463     98    415  1 parallel
