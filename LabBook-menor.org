@@ -2627,3 +2627,10 @@ df %>% filter(!(Value %in% c("Working", "Blocked"))) %>% ggplot() +
 Parece promissor, pois o estado =GOMP_Section_State= parece corresponder
 ao que precisamos. Poderias rastrear as três aplicações que vinhamos
 estudando com esse rastreador?
+* 2017-02-20 Próximos passos
+De nada adianta olhar para os contadores se não detectar as regiões
+paralelas no rastro. Veja o uso de eztrace (seção anterior) para
+rastrear uma aplicação OpenMP pequena; sinto que as regiões paralelas
+são corretamente capturadas. Faltaria então registrar os contadores e
+fazer o experimento com as três aplicações principais que tu vens
+usando para confirmar.
