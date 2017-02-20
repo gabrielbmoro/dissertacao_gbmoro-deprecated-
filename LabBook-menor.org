@@ -2233,3 +2233,397 @@ Extrae (da suite Paraver) do BSC
 
 EZTrace (INRIA)
 - Parece ser mais promissor
+* 2017-02-20 Tentativa de usar eztrace
+Seguindo este tutorial:
+http://eztrace.gforge.inria.fr/tutorials/tutorial_openmp/
+** Download e instalação de EZTrace
+#+begin_src shell :results output
+cd /tmp/
+wget http://gforge.inria.fr/frs/download.php/file/36177/eztrace-1.1-5.tar.gz
+tar xfz ./eztrace-1.1-5.tar.gz
+cd eztrace-1.1-5/
+./configure --prefix=$HOME/install/eztrace-1.1-5/ 2>&1 > /dev/null
+make -j 4  2>&1 > /dev/null
+make install 2>&1 > /dev/null
+#+end_src
+** Download, compilação e rastreamento da applicação FFT de exemplo
+#+begin_src shell :results output
+cd /tmp/
+wget http://eztrace.gforge.inria.fr/tutorials/tutorial_openmp/fft_openmp.tgz
+tar xfz fft_openmp.tgz
+cd fft_openmp
+make
+ls -lh
+#+end_src
+
+#+RESULTS:
+: gcc -fopenmp  -fopenmp -lm  fft_openmp.c   -o fft_openmp
+: total 40K
+: -rwxr-xr-x 1 schnorr schnorr 18K Feb 20 22:57 fft_openmp
+: -rw-r--r-- 1 schnorr schnorr 13K Sep 13  2013 fft_openmp.c
+: -rw-r--r-- 1 schnorr schnorr  95 Sep 13  2013 Makefile
+
+Tentando do primeiro jeito vemos que não funciona.
+
+#+begin_src shell :results output
+cd /tmp/fft_openmp/
+~/install/eztrace-1.1-5/bin/eztrace -t omp ./fft_openmp 2>&1 > /tmp/log.txt
+cat /tmp/log.txt
+#+end_src
+
+#+RESULTS:
+: /home/schnorr/install/eztrace-1.1-5/lib//libeztrace-autostart-omp.so: undefined symbol: POMP2_Finalize
+
+Mas do segundo jeito (usando =eztrace_cc=) sim:
+
+#+begin_src shell :results output
+cd /tmp/fft_openmp/
+~/install/eztrace-1.1-5/bin/eztrace_cc gcc -o fft_openmp fft_openmp.c -fopenmp -lm
+~/install/eztrace-1.1-5/bin/eztrace -t omp ./fft_openmp 2>&1 > /tmp/log.txt
+cat /tmp/log.txt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Starting EZTrace... done
+Stopping EZTrace... saving trace  /tmp/schnorr_eztrace_log_rank_1
+20 February 2017 11:00:41 PM
+
+FFT_OPENMP
+  C/OpenMP version
+
+  Demonstrate an implementation of the Fast Fourier Transform
+  of a complex data vector, using OpenMP for parallel execution.
+
+  Number of processors available = 4
+  Number of threads =              4
+
+  Accuracy check:
+
+    FFT ( FFT ( X(1:N) ) ) == N * X(1:N)
+
+             N      NITS    Error         Time          Time/Call     MFLOPS
+
+             2         1  7.859082e-17  5.267997e-06  2.633999e-06      7.593019
+
+FFT_OPENMP:
+  Normal end of execution.
+
+20 February 2017 11:00:41 PM
+#+end_example
+
+Vamos converter o rastro para Pajé.
+
+#+begin_src shell :results output
+cd /tmp/
+~/install/eztrace-1.1-5/bin/eztrace_convert -t PAJE /tmp/schnorr_eztrace_log_rank_1
+ls -larth eztrace_output.trace
+#+end_src
+
+#+RESULTS:
+: module stdio loaded
+: module pthread loaded
+: module papi loaded
+: module omp loaded
+: module memory loaded
+: 5 modules loaded
+: Setting trace type to PAJE
+: 185 events handled
+: -rw-r--r-- 1 schnorr schnorr 29K Feb 20 23:01 eztrace_output.trace
+
+O arquivo gerado no formato Pajé tem alguns erros, veja:
+
+#+begin_src shell :results output
+cat /tmp/eztrace_output.trace | ~/dev/pajeng/b/pj_dump 2>&1 > /tmp/log.txt
+cat /tmp/log.txt
+#+end_src
+
+#+RESULTS:
+: PajeTypeException: Trying to redefine the value identified by 'GOMP_Task' for the type 'ST_Thread' in (Line: 175, Fields: '5, Contents: '5 ST_Thread GOMP_Task 0.0 1.0 1.0 GOMP_Untied_Task')
+
+Para resolver seguindo o formato Paje, basta substituir =GOMP_Task= por
+=GOMP_Untied_Task=, nessa linha, da seguinte forma.
+
+#+begin_src shell :results output
+cat /tmp/eztrace_output.trace | sed "s/GOMP_Task\" \"0.0/GOMP_Untied_Task\" \"0.0/" | ~/dev/pajeng/b/pj_dump 2>&1 > /tmp/log.txt
+cat /tmp/log.txt
+#+end_src
+
+#+RESULTS:
+: PajeLinkException: Illegal event in (Line: 223, Fields: '7, Contents: '40 1.0844808000000e+01 GOMP_Section_Link C_Prog P#0_T#3116046208 p#0_section#0_thread#0 0_0_0'), the key was already used for another link
+
+Outros erros surgem, relacionados aos links. Para resolver, a forma
+mais simples é removê-los, da seguinte forma (todas as linhas que
+começam por 40 - StartLink - e 41 - EndLink.
+
+#+begin_src shell :results output
+cat /tmp/eztrace_output.trace \
+    | sed "s/GOMP_Task\" \"0.0/GOMP_Untied_Task\" \"0.0/" \
+    | grep -v -e ^40 -e ^41 \
+	| ~/dev/pajeng/b/pj_dump --user-defined 2>&1 > /tmp/log.txt
+cat /tmp/log.txt | grep ^State
+#+end_src
+
+#+RESULTS:
+#+begin_example
+State, P#0_T#3116046208, Thread state, 0.000000, 10.907597, 10.907597, 0.000000, Working
+State, P#0_T#3116046208, Thread state, 0.059488, 0.077888, 0.018400, 1.000000, Blocked
+State, P#0_T#3116046208, Thread state, 0.078186, 0.095206, 0.017020, 1.000000, Blocked
+State, P#0_T#3116046208, Thread state, 0.095437, 0.101920, 0.006483, 1.000000, Blocked
+State, P#0_T#3116046208, Thread state, 10.831846, 10.844808, 0.012962, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.833007, 10.842834, 0.009827, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.843033, 10.844034, 0.001001, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3116046208, Thread state, 10.855736, 10.857245, 0.001509, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.855912, 10.856540, 0.000628, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.856703, 10.857065, 0.000362, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3116046208, Thread state, 10.858509, 10.859538, 0.001029, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.858672, 10.858965, 0.000293, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.859126, 10.859392, 0.000266, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3116046208, Thread state, 10.870282, 10.871336, 0.001054, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.870460, 10.870696, 0.000236, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.870861, 10.871161, 0.000300, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3116046208, Thread state, 10.872326, 10.873562, 0.001236, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.872495, 10.872864, 0.000369, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.873023, 10.873364, 0.000341, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3116046208, Thread state, 10.877254, 10.878470, 0.001216, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.877427, 10.877668, 0.000241, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.877820, 10.878269, 0.000449, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3116046208, Thread state, 10.880009, 10.881136, 0.001127, 1.000000, GOMP_Section_State
+State, P#0_T#3116046208, Thread state, 10.880220, 10.880459, 0.000239, 2.000000, GOMP_For
+State, P#0_T#3116046208, Thread state, 10.880614, 10.880975, 0.000361, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 3.549714, 10.907597, 7.357883, 0.000000, Working
+State, P#0_T#3067451136, Thread state, 10.836011, 10.844852, 0.008841, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.836592, 10.837006, 0.000414, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.837369, 10.844226, 0.006857, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 10.855816, 10.857199, 0.001383, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.856009, 10.856264, 0.000255, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.856442, 10.856994, 0.000552, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 10.858563, 10.859594, 0.001031, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.858803, 10.858994, 0.000191, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.859151, 10.859432, 0.000281, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 10.870243, 10.871347, 0.001104, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.870409, 10.870657, 0.000248, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.870829, 10.871180, 0.000351, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 10.872294, 10.873518, 0.001224, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.872455, 10.872655, 0.000200, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.872821, 10.873308, 0.000487, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 10.877296, 10.878835, 0.001539, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.877449, 10.877823, 0.000374, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.877983, 10.878679, 0.000696, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3067451136, Thread state, 10.880045, 10.881057, 0.001012, 1.000000, GOMP_Section_State
+State, P#0_T#3067451136, Thread state, 10.880210, 10.880394, 0.000184, 2.000000, GOMP_For
+State, P#0_T#3067451136, Thread state, 10.880594, 10.880905, 0.000311, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 7.426892, 10.907597, 3.480705, 0.000000, Working
+State, P#0_T#3058730752, Thread state, 10.836012, 10.844860, 0.008848, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.836629, 10.837087, 0.000458, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.837396, 10.844211, 0.006815, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 10.855735, 10.857193, 0.001458, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.855908, 10.856262, 0.000354, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.856451, 10.856989, 0.000538, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 10.858518, 10.859603, 0.001085, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.858699, 10.858881, 0.000182, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.859054, 10.859430, 0.000376, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 10.870248, 10.871355, 0.001107, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.870415, 10.870647, 0.000232, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.870819, 10.871187, 0.000368, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 10.872297, 10.873500, 0.001203, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.872460, 10.872652, 0.000192, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.872813, 10.873292, 0.000479, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 10.877232, 10.878384, 0.001152, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.877389, 10.877585, 0.000196, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.877705, 10.878244, 0.000539, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3058730752, Thread state, 10.879974, 10.881078, 0.001104, 1.000000, GOMP_Section_State
+State, P#0_T#3058730752, Thread state, 10.880120, 10.880304, 0.000184, 2.000000, GOMP_For
+State, P#0_T#3058730752, Thread state, 10.880511, 10.880922, 0.000411, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.809101, 10.907597, 0.098496, 0.000000, Working
+State, P#0_T#3050010368, Thread state, 10.831594, 10.844876, 0.013282, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.833018, 10.835877, 0.002859, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.836757, 10.844055, 0.007298, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.855802, 10.857178, 0.001376, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.855998, 10.856248, 0.000250, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.856408, 10.856985, 0.000577, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.858550, 10.859677, 0.001127, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.858755, 10.858960, 0.000205, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.859118, 10.859516, 0.000398, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.870237, 10.871422, 0.001185, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.870432, 10.870654, 0.000222, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.870833, 10.871252, 0.000419, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.872239, 10.873484, 0.001245, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.872426, 10.872644, 0.000218, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.872785, 10.873274, 0.000489, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.877170, 10.878418, 0.001248, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.877349, 10.877598, 0.000249, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.877758, 10.878274, 0.000516, 2.000000, GOMP_Implicit_Barrier
+State, P#0_T#3050010368, Thread state, 10.879912, 10.881053, 0.001141, 1.000000, GOMP_Section_State
+State, P#0_T#3050010368, Thread state, 10.880079, 10.880254, 0.000175, 2.000000, GOMP_For
+State, P#0_T#3050010368, Thread state, 10.880411, 10.880892, 0.000481, 2.000000, GOMP_Implicit_Barrier
+#+end_example
+
+Temos o comportamento das quatro threads, em CSV.
+** Verificando o código FFT para entender o rastro eztrace :ATTACH:
+:PROPERTIES:
+:Attachments: fft_openmp.c
+:ID:       69f3f277-2c42-49e0-929c-b179ba4777d0
+:END:
+** Vamos preparar o CSV
+#+begin_src shell :results output
+cat /tmp/log.txt | grep ^State > /tmp/log.csv
+#+end_src
+
+#+RESULTS:
+** Carregar no R :ATTACH:
+:PROPERTIES:
+:Attachments: log.csv
+:ID:       41ef20f2-7701-41ab-9b3d-92802f171d11
+:END:
+
+#+begin_src R :results output :session :exports both
+library(dplyr);
+df <- read.csv("data/41/ef20f2-7701-41ab-9b3d-92802f171d11/log.csv", header=FALSE, strip.white=TRUE);
+df <- df %>%
+    rename(Nature = V1,
+           Thread = V2,
+           Type = V3,
+           Start = V4,
+           End = V5,
+           Duration = V6,
+           Imbrication = V7,
+           Value = V8) %>%
+    select(Thread, Start, End, Duration, Imbrication, Value);
+dft <- df %>%
+    select(Thread) %>%
+    unique %>%
+    mutate(ThreadId = 1:n());
+df <- df %>%
+    left_join(dft, by="Thread") %>%
+    select(-Thread) %>%
+    rename(Thread=ThreadId) %>%
+    select(Thread, Start, End, Duration, Imbrication, Value);
+df;
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   Thread     Start       End  Duration Imbrication                 Value
+1       1  0.000000 10.907597 10.907597           0               Working
+2       1  0.059488  0.077888  0.018400           1               Blocked
+3       1  0.078186  0.095206  0.017020           1               Blocked
+4       1  0.095437  0.101920  0.006483           1               Blocked
+5       1 10.831846 10.844808  0.012962           1    GOMP_Section_State
+6       1 10.833007 10.842834  0.009827           2              GOMP_For
+7       1 10.843033 10.844034  0.001001           2 GOMP_Implicit_Barrier
+8       1 10.855736 10.857245  0.001509           1    GOMP_Section_State
+9       1 10.855912 10.856540  0.000628           2              GOMP_For
+10      1 10.856703 10.857065  0.000362           2 GOMP_Implicit_Barrier
+11      1 10.858509 10.859538  0.001029           1    GOMP_Section_State
+12      1 10.858672 10.858965  0.000293           2              GOMP_For
+13      1 10.859126 10.859392  0.000266           2 GOMP_Implicit_Barrier
+14      1 10.870282 10.871336  0.001054           1    GOMP_Section_State
+15      1 10.870460 10.870696  0.000236           2              GOMP_For
+16      1 10.870861 10.871161  0.000300           2 GOMP_Implicit_Barrier
+17      1 10.872326 10.873562  0.001236           1    GOMP_Section_State
+18      1 10.872495 10.872864  0.000369           2              GOMP_For
+19      1 10.873023 10.873364  0.000341           2 GOMP_Implicit_Barrier
+20      1 10.877254 10.878470  0.001216           1    GOMP_Section_State
+21      1 10.877427 10.877668  0.000241           2              GOMP_For
+22      1 10.877820 10.878269  0.000449           2 GOMP_Implicit_Barrier
+23      1 10.880009 10.881136  0.001127           1    GOMP_Section_State
+24      1 10.880220 10.880459  0.000239           2              GOMP_For
+25      1 10.880614 10.880975  0.000361           2 GOMP_Implicit_Barrier
+26      2  3.549714 10.907597  7.357883           0               Working
+27      2 10.836011 10.844852  0.008841           1    GOMP_Section_State
+28      2 10.836592 10.837006  0.000414           2              GOMP_For
+29      2 10.837369 10.844226  0.006857           2 GOMP_Implicit_Barrier
+30      2 10.855816 10.857199  0.001383           1    GOMP_Section_State
+31      2 10.856009 10.856264  0.000255           2              GOMP_For
+32      2 10.856442 10.856994  0.000552           2 GOMP_Implicit_Barrier
+33      2 10.858563 10.859594  0.001031           1    GOMP_Section_State
+34      2 10.858803 10.858994  0.000191           2              GOMP_For
+35      2 10.859151 10.859432  0.000281           2 GOMP_Implicit_Barrier
+36      2 10.870243 10.871347  0.001104           1    GOMP_Section_State
+37      2 10.870409 10.870657  0.000248           2              GOMP_For
+38      2 10.870829 10.871180  0.000351           2 GOMP_Implicit_Barrier
+39      2 10.872294 10.873518  0.001224           1    GOMP_Section_State
+40      2 10.872455 10.872655  0.000200           2              GOMP_For
+41      2 10.872821 10.873308  0.000487           2 GOMP_Implicit_Barrier
+42      2 10.877296 10.878835  0.001539           1    GOMP_Section_State
+43      2 10.877449 10.877823  0.000374           2              GOMP_For
+44      2 10.877983 10.878679  0.000696           2 GOMP_Implicit_Barrier
+45      2 10.880045 10.881057  0.001012           1    GOMP_Section_State
+46      2 10.880210 10.880394  0.000184           2              GOMP_For
+47      2 10.880594 10.880905  0.000311           2 GOMP_Implicit_Barrier
+48      3  7.426892 10.907597  3.480705           0               Working
+49      3 10.836012 10.844860  0.008848           1    GOMP_Section_State
+50      3 10.836629 10.837087  0.000458           2              GOMP_For
+51      3 10.837396 10.844211  0.006815           2 GOMP_Implicit_Barrier
+52      3 10.855735 10.857193  0.001458           1    GOMP_Section_State
+53      3 10.855908 10.856262  0.000354           2              GOMP_For
+54      3 10.856451 10.856989  0.000538           2 GOMP_Implicit_Barrier
+55      3 10.858518 10.859603  0.001085           1    GOMP_Section_State
+56      3 10.858699 10.858881  0.000182           2              GOMP_For
+57      3 10.859054 10.859430  0.000376           2 GOMP_Implicit_Barrier
+58      3 10.870248 10.871355  0.001107           1    GOMP_Section_State
+59      3 10.870415 10.870647  0.000232           2              GOMP_For
+60      3 10.870819 10.871187  0.000368           2 GOMP_Implicit_Barrier
+61      3 10.872297 10.873500  0.001203           1    GOMP_Section_State
+62      3 10.872460 10.872652  0.000192           2              GOMP_For
+63      3 10.872813 10.873292  0.000479           2 GOMP_Implicit_Barrier
+64      3 10.877232 10.878384  0.001152           1    GOMP_Section_State
+65      3 10.877389 10.877585  0.000196           2              GOMP_For
+66      3 10.877705 10.878244  0.000539           2 GOMP_Implicit_Barrier
+67      3 10.879974 10.881078  0.001104           1    GOMP_Section_State
+68      3 10.880120 10.880304  0.000184           2              GOMP_For
+69      3 10.880511 10.880922  0.000411           2 GOMP_Implicit_Barrier
+70      4 10.809101 10.907597  0.098496           0               Working
+71      4 10.831594 10.844876  0.013282           1    GOMP_Section_State
+72      4 10.833018 10.835877  0.002859           2              GOMP_For
+73      4 10.836757 10.844055  0.007298           2 GOMP_Implicit_Barrier
+74      4 10.855802 10.857178  0.001376           1    GOMP_Section_State
+75      4 10.855998 10.856248  0.000250           2              GOMP_For
+76      4 10.856408 10.856985  0.000577           2 GOMP_Implicit_Barrier
+77      4 10.858550 10.859677  0.001127           1    GOMP_Section_State
+78      4 10.858755 10.858960  0.000205           2              GOMP_For
+79      4 10.859118 10.859516  0.000398           2 GOMP_Implicit_Barrier
+80      4 10.870237 10.871422  0.001185           1    GOMP_Section_State
+81      4 10.870432 10.870654  0.000222           2              GOMP_For
+82      4 10.870833 10.871252  0.000419           2 GOMP_Implicit_Barrier
+83      4 10.872239 10.873484  0.001245           1    GOMP_Section_State
+84      4 10.872426 10.872644  0.000218           2              GOMP_For
+85      4 10.872785 10.873274  0.000489           2 GOMP_Implicit_Barrier
+86      4 10.877170 10.878418  0.001248           1    GOMP_Section_State
+87      4 10.877349 10.877598  0.000249           2              GOMP_For
+88      4 10.877758 10.878274  0.000516           2 GOMP_Implicit_Barrier
+89      4 10.879912 10.881053  0.001141           1    GOMP_Section_State
+90      4 10.880079 10.880254  0.000175           2              GOMP_For
+91      4 10.880411 10.880892  0.000481           2 GOMP_Implicit_Barrier
+#+end_example
+** Representação simples
+#+begin_src R :results output :session :exports both
+sapply(df, class);
+#+end_src
+
+#+RESULTS:
+:      Thread       Start         End    Duration Imbrication       Value 
+:   "integer"   "numeric"   "numeric"   "numeric"   "numeric"    "factor"
+
+#+begin_src R :results output graphics :file img/eztrace_001.png :exports both :width 600 :height 400 :session
+library(ggplot2);
+df %>% filter(!(Value %in% c("Working", "Blocked"))) %>% ggplot() +
+    theme_bw(base_size=12) +
+    xlab("Time [ms]") +
+    ylab("Thread") +
+    scale_fill_brewer(palette = "Set1") +
+    geom_rect(aes(fill=Value,
+                  xmin=Start,
+                  xmax=End,
+                  ymin=Thread,
+                  ymax=Thread-0.9)) +
+    facet_wrap(~Imbrication, ncol=1);
+#+end_src
+
+#+RESULTS:
+[[file:img/eztrace_001.png]]
+
+Parece promissor, pois o estado =GOMP_Section_State= parece corresponder
+ao que precisamos. Poderias rastrear as três aplicações que vinhamos
+estudando com esse rastreador?
