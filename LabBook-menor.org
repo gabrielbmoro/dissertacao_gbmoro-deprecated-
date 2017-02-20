@@ -2162,3 +2162,74 @@ df %>%
 
 Acabo de descobrir que esse rastro (exp7) utiliza a versão 3.0 do
 NAS, que não é a última.
+* 2017-02-09 Novo olhar para CG (exp5)
+** Ler os dados
+#+begin_src R :results output :session :exports both
+df0 <- read.csv("scripts/execLocal1/cg.B.x-4threads_exp5/traces_parallelregions.csv", header=FALSE, strip.white=TRUE);
+df0 <- df0 %>% select(2, 4, 5, 6, 8) %>% rename(Container=V2, Start=V4, End=V5, Duration=V6, Value=V8);
+head(df0);
+#+end_src
+
+#+RESULTS:
+:   Container        Start          End     Duration                    Value
+: 1      zero     1.040083     1.053624     0.013541 !$omp parallel @cg.f:185
+: 2      zero     1.057177     1.063913     0.006736 !$omp parallel @cg.f:185
+: 3      zero  8345.835045 25213.400111 16867.565066  !$omp barrier @cg.f:805
+: 4      zero 25227.942463 25235.141154     7.198691  !$omp barrier @cg.f:883
+: 5      zero 25235.153436 25235.189693     0.036257  !$omp barrier @cg.f:896
+: 6      zero 28591.264528 28591.299142     0.034614  !$omp barrier @cg.f:984
+** Listar todas as threads
+#+begin_src R :results output :session :exports both
+df0 %>% select(Container) %>% unique;
+#+end_src
+
+#+RESULTS:
+:          Container
+: 1             zero
+: 40088   8589934592
+: 76373   4294967296
+: 112658 12884901888
+
+** Ver a ordem das regiões de uma delas
+#+begin_src R :results output :session :exports both
+df0 %>%
+    filter(Container == "4294967296") %>%
+    arrange(Start) %>%
+    mutate(Value = gsub("!.omp ", "", Value)) %>%
+    mutate(Operation = gsub("@.*$", "", Value)) %>%
+    mutate(File = gsub(".*@", "", Value)) %>%
+    mutate(File = gsub(":.*$", "", File)) %>%
+    mutate(Line = gsub(".*:", "", Value)) %>%
+    select(-Value) %>% head(n=20);
+#+end_src
+
+#+RESULTS:
+#+begin_example
+   Container        Start          End     Duration         Operation File Line
+1       zero     1.040083     1.053624     0.013541         parallel  cg.f  185
+2       zero     1.057177     1.063913     0.006736         parallel  cg.f  185
+3       zero  8345.835045 25213.400111 16867.565066          barrier  cg.f  805
+4       zero 25227.942463 25235.141154     7.198691          barrier  cg.f  883
+5       zero 25235.153436 25235.189693     0.036257          barrier  cg.f  896
+6       zero 28591.264528 28591.299142     0.034614          barrier  cg.f  984
+7       zero 28591.438597 28591.484499     0.045902          barrier  cg.f  994
+8       zero 28591.488709 28591.544375     0.055666          barrier  cg.f 1007
+9       zero 28591.548929 28738.871958   147.323029               do  cg.f 1009
+10      zero 28738.871958 28748.106292     9.234334 implicit barrier  cg.f 1024
+11      zero 28748.106292 28748.130268     0.023976               do  cg.f 1009
+12      zero 28748.142748 28748.245233     0.102485               do  cg.f 1025
+13      zero 28748.245233 28748.257454     0.012221 implicit barrier  cg.f 1029
+14      zero 28748.257454 28748.261676     0.004222               do  cg.f 1025
+15      zero 28748.270331 28748.274207     0.003876         parallel  cg.f  185
+16      zero 28748.274207 28748.278517     0.004310          barrier  cg.f  196
+17      zero 28748.278517 28748.281768     0.003251         parallel  cg.f  185
+18      zero 28748.281768 28765.734916    17.453148               do  cg.f  207
+19      zero 28765.734916 28765.789951     0.055035         parallel  cg.f  185
+20      zero 28765.789951 28768.899077     3.109126               do  cg.f  218
+#+end_example
+* 2017-02-20 Outras ferramentas de rastreamento
+Extrae (da suite Paraver) do BSC
+- Parece não ser promissor, mas não olhei muito a fundo
+
+EZTrace (INRIA)
+- Parece ser mais promissor
