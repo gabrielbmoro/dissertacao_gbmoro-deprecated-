@@ -2032,3 +2032,23 @@ head(resultFrame)
 
 - Aguardando a opinião do professor Lucas sobre essa agregação de
   dados que fiz.
+
+* [20:40:10; 26.02.2017] Instalando o Extrae                        :Gabriel:
+
+- Instalando Extrae para realizar novos experimentos.
+
+#+begin_src sh :results output :exports both
+pathOfInstallation=/home/gabrielbmoro/Programas/
+
+cd $pathOfInstallation
+
+wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9.tar.bz2
+tar jxf extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9.tar.bz2
+mv apps/BSCTOOLS/extrae/3.4.3/extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9 .
+rm -rf apps
+rm -rf *.tar.bz2
+
+#+end_src
+
+#+RESULTS:
+: extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9
