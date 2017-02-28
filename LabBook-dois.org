@@ -2041,20 +2041,46 @@ head(resultFrame)
 pathOfInstallation=/home/gabrielbmoro/Programas/
 
 cd $pathOfInstallation
+#wget https://ftp.tools.bsc.es/tracking/tracking-2.6.5-linux_x86_64.tar.gz
 
-wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9.tar.bz2
+#tar xvf tracking-2.6.5-linux-x86-64
 
-tar jxf extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9.tar.bz2
+#mv tracking-2.6.5-linux-x86-64 extrae
 
-mv apps/BSCTOOLS/extrae/3.4.3/extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9 .
+#rm -rf *.tar.gz
 
-rm -rf apps
-rm -rf *.tar.bz2
+#sed -i '1iexport EXTRAE_HOME='"$pathOfInstallation"'extrae' ~/.
 
-mv extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9 extrae
+cd extrae/etc
 
-sed -i '1iexport EXTRAE_HOME='"$pathOfInstallation"'extrae/bin:$PATH' ~/.bashrc
-
+sudo ./configured.sh
 #+end_src
 
+#+RESULTS:
+#+begin_example
+EXTRAE_HOME points to /home/gabrielbmoro/Programas/extrae and the directory exists .. OK
+Loaded specs for Extrae from /home/gabrielbmoro/Programas/extrae/etc/extrae-vars.sh
 
+Extrae was configured with:
+$ ../configure --prefix=/apps/BSCTOOLS/extrae/3.4.3/openmpi+libgomp4.9 --enable-posix-clock --with-mpi=/apps/OPENMPI/1.8.1-mellanox --with-load-balancing=/apps/PM/dlb/latest/openmpi --with-papi=/apps/BSCTOOLS/deps/papi/5.5.1 --with-dyninst=/apps/BSCTOOLS/deps/dyninst/9.3.0 --with-dwarf=/apps/BSCTOOLS/deps/libdwarf/20160613 --with-elf=/apps/BSCTOOLS/deps/libelf/0.148 --with-unwind=/apps/BSCTOOLS/deps/libunwind/1.2-rc1 --with-boost=/apps/BSCTOOLS/deps/boost/1.61.0 --with-binutils=/apps/BSCTOOLS/deps/binutils/2.24 --with-xml-prefix=/apps/BSCTOOLS/deps/libxml/2.9.4 --enable-online --with-synapse=/apps/BSCTOOLS/synapse/2.0.0 --with-spectral=/apps/BSCTOOLS/spectral/3.4.0 --with-clustering=/apps/BSCTOOLS/clusteringsuite/2.6.6 --enable-sampling
+
+CC was gcc
+CFLAGS was -g -O2 -fno-optimize-sibling-calls -Wall -W
+CXX was g++
+CXXFLAGS was -g -O2 -fno-optimize-sibling-calls -Wall -W
+
+MPI_HOME points to /apps/OPENMPI/1.8.1-mellanox and the directory does NOT exist .. FAILED
+LIBXML2_HOME points to /apps/BSCTOOLS/deps/libxml/2.9.4 and the directory does NOT exist .. FAILED
+PAPI_HOME points to /apps/BSCTOOLS/deps/papi/5.5.1 and the directory does NOT exist .. FAILED
+DYNINST_HOME points to /apps/BSCTOOLS/deps/dyninst/9.3.0 and the directory does NOT exist .. FAILED
+DWARF_HOME points to /apps/BSCTOOLS/deps/libdwarf/20160613 and the directory does NOT exist .. FAILED
+UNWIND_HOME points to /apps/BSCTOOLS/deps/libunwind/1.2-rc1 and the directory does NOT exist .. FAILED
+LIBERTY_HOME points to /apps/BSCTOOLS/deps/binutils/2.24 and the directory does NOT exist .. FAILED
+BFD_HOME points to /apps/BSCTOOLS/deps/binutils/2.24 and the directory does NOT exist .. FAILED
+
+IO instrumentation is: ENABLED
+Dynamic memory instrumentation is: ENABLED
+
+Please, report bugs to tools@bsc.es
+
+#+end_example
