@@ -2043,12 +2043,18 @@ pathOfInstallation=/home/gabrielbmoro/Programas/
 cd $pathOfInstallation
 
 wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9.tar.bz2
+
 tar jxf extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9.tar.bz2
+
 mv apps/BSCTOOLS/extrae/3.4.3/extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9 .
+
 rm -rf apps
 rm -rf *.tar.bz2
 
+mv extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9 extrae
+
+sed -i '1iexport EXTRAE_HOME='"$pathOfInstallation"'extrae/bin:$PATH' ~/.bashrc
+
 #+end_src
 
-#+RESULTS:
-: extrae-3.4.3-Linux_x86_64_openmpi+libgomp4.9
+
