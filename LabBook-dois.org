@@ -1,5 +1,5 @@
-#+TITLE: LabBook
 #+AUTHOR: Gabriel Bronzatti Moro and Lucas M. Schnorr
+#+TITLE: LabBook
 #+LATEX_HEADER: \usepackage[margin=2cm,a4paper]{geometry}
 #+STARTUP: overview indent
 #+TAGS: Gabriel(G) Lucas(L) noexport(n) deprecated(d)
@@ -2037,53 +2037,106 @@ head(resultFrame)
 
 - Instalando Extrae para realizar novos experimentos.
 
-#+begin_src sh :results output :exports both
+#+begin_src sh :results output :exports both :tangle scripts/instalaExtrae.bash
+#!/bin/bash
 
+pathOfDownload="$HOME/Downloads/"
+pathOfInstallation="$HOME/Programas/"
 
-#variaveis auxiliares
-pathOfDownload=/home/gabriel-moro/Downloads/
-pathOfInstallation=/home/gabriel-moro/Programas/
+function instalaPrerequisitos() {
+      currentDir=$(pwd)
 
-#instalando o pré-requisitos
+	cd $pathOfDownload
 
-cd $pathOfDownload
+	wget http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.2.tar.gz
+	tar vxf libunwind-1.2.tar.gz
+	./libunwind-1.2/configure
+	cd libunwind
+	make
+	sudo make install
+	rm -rf *libunwind-1.2*
 
-wget http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.2.tar.gz
-tar vxf libunwind-1.2.tar.gz
-./libunwind-1.2/configure
-cd libunwind-1.2
-make
-sudo make install
-rm -rf *libunwind-1.2*
+	cd $pathOfDownload
 
-cd $pathOfDownload
+   	wget http://icl.utk.edu/projects/papi/downloads/papi-5.5.1.tar.gz
+    	tar vxf papi-5.5.1.tar.gz
+    	./papi-5.5.1/src/configure
+    	cd papi-5.5.1/src/
+    	make
+    	sudo make install
+    	rm -rf *papi-5.5.1*
 
-wget http://icl.utk.edu/projects/papi/downloads/papi-5.5.1.tar.gz
-tar vxf papi-5.5.1.tar.gz
-./papi-5.5.1/src/configure
-cd papi-5.5.1/src/
-make
-sudo make install
-rm -rf *papi-5.5.1*
+	cd $currentDir
 
-#instalação do extrae
+}
 
-cd $pathOfInstallation
-wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-src.tar.bz2
-tar xvjf extrae-3.4.3-src.tar.bz2
-rm -rf *.bz2
-PREFIX=/home/gabrielbmoro/Programas/extrae-3.4.3/
+function instalaExtrae() {
+
+    
+    cd $pathOfDownload
+ 
+
+    #instalação do extrae
+
+    cd $pathOfInstallation
+#    wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-src.tar.bz2
+#    tar xvjf extrae-3.4.3-src.tar.bz2
+#    rm -rf *.bz2
+
+    PREFIX="$HOME/Programas/extrae-3.4.3/"
+
+    cd $PREFIX
+
 
  ./configure --prefix=$PREFIX --enable-openmp --without-mpi \
---with-libunwind=/usr/local/lib \
---with-libunwind-headers=/usr/local/include \
---without-unwind \
---without-dwarf \
---without-dyninst \
---without-elf \
---with-papi-headers=/usr/local/include \
---with-papi-libs=/usr/local/lib \
---with-papi=/usr/local/bin \
---without-binutils \
+		--with-unwind=/usr/local/bin \
+		--with-unwind-libs=/usr/local/lib \
+		--with-unwind-headers=/usr/local/include \
+		--without-dwarf \
+		--without-dyninst \
+		--without-elf \
+		--with-papi-headers=/usr/local/include \
+		--with-papi-libs=/usr/local/lib \
+		--with-papi=/usr/local/bin \
+		--without-binutils 
+
+}
+
+
+#instalaPrerequisitos
+
+instalaExtrae
 
 #+end_src
+
+
+- Verificando instalação 
+
+#+begin_src sh :results output :exports both
+cd $HOME/Programas/extrae-3.4.3
+make check | grep -i FAIL
+#+end_src
+
+#+RESULTS:
+#+begin_example
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+# XFAIL: 0
+# FAIL:  0
+#+end_example
