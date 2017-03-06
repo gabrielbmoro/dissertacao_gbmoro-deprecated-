@@ -2041,9 +2041,10 @@ head(resultFrame)
 #!/bin/bash
 
 pathOfDownload="$HOME/Downloads/"
-pathOfInstallation="$HOME/Programas/"
+pathOfInstallation="$HOME/Programs/"
 
 function instalaPrerequisitos() {
+
       currentDir=$(pwd)
 
 	cd $pathOfDownload
@@ -2079,16 +2080,19 @@ function instalaExtrae() {
     #instalação do extrae
 
     cd $pathOfInstallation
-#    wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-src.tar.bz2
-#    tar xvjf extrae-3.4.3-src.tar.bz2
-#    rm -rf *.bz2
+    wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-src.tar.bz2
+    tar xvjf extrae-3.4.3-src.tar.bz2
+    rm -rf *.bz2
 
     PREFIX="$HOME/Programas/extrae-3.4.3/"
 
     cd $PREFIX
 
-
- ./configure --prefix=$PREFIX --enable-openmp --without-mpi \
+    ./configure --prefix=$PREFIX --with-bfd=$PREFIX \
+		--enable-openmp \
+		--with-libgomp=auto \
+		--without-mpi \
+		--enable-instrument-dynamic-memory \
 		--with-unwind=/usr/local/bin \
 		--with-unwind-libs=/usr/local/lib \
 		--with-unwind-headers=/usr/local/include \
@@ -2098,15 +2102,19 @@ function instalaExtrae() {
 		--with-papi-headers=/usr/local/include \
 		--with-papi-libs=/usr/local/lib \
 		--with-papi=/usr/local/bin \
+		--enable-sampling \
 		--without-binutils 
+
+    make
+
+    make install 2> mierr
 
 }
 
 
-#instalaPrerequisitos
+instalaPrerequisitos
 
 instalaExtrae
-
 #+end_src
 
 
@@ -2140,3 +2148,20 @@ make check | grep -i FAIL
 # XFAIL: 0
 # FAIL:  0
 #+end_example
+
+
+- Definindo variável de ambiente =EXTRAE_HOME=
+
+#+begin_src sh :results output :exports both
+cd $HOME/Programs/extrae-3.4.3/
+sed -i "1iexport EXTRAE_HOME=$(pwd)" ~/.bashrc
+#+end_src
+
+- A cada utilização, deverá ser disparada a seguinte linha de comando
+  para configurar para a nova seção a variável de ambiente definida:
+
+#+begin_src sh :results output :exports both
+source ${EXTRAE_HOME}/etc/extrae.sh
+
+export LD_PRELOAD=${EXTRAE_HOME}/lib/libomptrace #como usamos openmp
+#+end_src
