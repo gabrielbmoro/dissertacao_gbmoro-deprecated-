@@ -2033,213 +2033,25 @@ head(resultFrame)
 - Aguardando a opinião do professor Lucas sobre essa agregação de
   dados que fiz.
 
-* [20:40:10; 26.02.2017] Instalando o Extrae                        :Gabriel:
-
-- Instalando Extrae para realizar novos experimentos.
-
-#+begin_src sh :results output :exports both :tangle scripts/instalaExtrae.bash
-#!/bin/bash
-
-pathOfDownload="$HOME/Downloads/"
-pathOfInstallation="$HOME/Programs/"
-
-function instalaPrerequisitos() {
-
-      currentDir=$(pwd)
-
-	cd $pathOfDownload
-
-	wget http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.2.tar.gz
-	tar vxf libunwind-1.2.tar.gz
-	./libunwind-1.2/configure
-	cd libunwind
-	make
-	sudo make install
-	rm -rf *libunwind-1.2*
-
-	cd $pathOfDownload
-
-   	wget http://icl.utk.edu/projects/papi/downloads/papi-5.5.1.tar.gz
-    	tar vxf papi-5.5.1.tar.gz
-    	./papi-5.5.1/src/configure
-    	cd papi-5.5.1/src/
-    	make
-    	sudo make install
-    	rm -rf *papi-5.5.1*
-
-	cd $currentDir
-
-}
-
-function instalaExtrae() {
-
-    
-    cd $pathOfDownload
- 
-
-    #instalação do extrae
-
-    cd $pathOfInstallation
-    wget https://ftp.tools.bsc.es/extrae/extrae-3.4.3-src.tar.bz2
-    tar xvjf extrae-3.4.3-src.tar.bz2
-    rm -rf *.bz2
-
-    PREFIX="$HOME/Programas/extrae-3.4.3/"
-
-    cd $PREFIX
-
-    ./configure --prefix=$PREFIX --with-bfd=$PREFIX \
-		--enable-openmp \
-		--with-libgomp=auto \
-		--without-mpi \
-		--enable-instrument-dynamic-memory \
-		--with-unwind=/usr/local/bin \
-		--with-unwind-libs=/usr/local/lib \
-		--with-unwind-headers=/usr/local/include \
-		--without-dwarf \
-		--without-dyninst \
-		--without-elf \
-		--with-papi-headers=/usr/local/include \
-		--with-papi-libs=/usr/local/lib \
-		--with-papi=/usr/local/bin \
-		--enable-sampling \
-		--without-binutils 
-
-    make
-
-    make install 2> mierr
-
-}
-
-
-instalaPrerequisitos
-
-instalaExtrae
-#+end_src
-
-
-- Verificando instalação 
+* [17:03:35; 08.03.2017] Usando EZtrace                             :Gabriel:
 
 #+begin_src sh :results output :exports both
-cd $HOME/Programas/extrae-3.4.3
-make check | grep -i FAIL
+cd $HOME/Programs/
+wget https://gforge.inria.fr/frs/download.php/file/36126/eztrace-1.1-4.tar.gz
+tar vxf eztrace-1.1-4.tar.gz
+rm -rf *.tar.gz
+cd eztrace-1.1-4/
+ ./configure --prefix=$PREFIX --with-bfd=$PREFIX \
+ --enable-openmp --with-libgomp=auto --without-mpi \ 
+--enable-instrument-dynamic-memory \ 
+--with-unwind=/usr/local/bin --with-unwind-libs=/usr/local/lib \
+--with-unwind-headers=/usr/local/include \ 
+--without-dwarf --without-dyninst \
+--without-elf --with-papi-headers=/usr/local/include \ 
+--with-papi-libs=/usr/local/lib \ 
+--with-papi=/usr/local/bin --enable-sampling \ 
+--without-binutils 
+
+make -j4 2> mierr
+sudo make install
 #+end_src
-
-#+RESULTS:
-#+begin_example
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-# XFAIL: 0
-# FAIL:  0
-#+end_example
-
-
-- Definindo variável de ambiente =EXTRAE_HOME=
-
-#+begin_src sh :results output :exports both
-cd $HOME/Programs/extrae-3.4.3/
-sed -i "1iexport EXTRAE_HOME=$(pwd)" ~/.bashrc
-#+end_src
-
-- A cada utilização, deverá ser disparada a seguinte linha de comando
-  para configurar para a nova seção a variável de ambiente definida:
-
-#+begin_src sh :results output :exports both
-source ${EXTRAE_HOME}/etc/extrae.sh
-
-export LD_PRELOAD=${EXTRAE_HOME}/lib/libomptrace #como usamos openmp
-#+end_src
-
-- Estou lendo a documentação, nunca tinha utilizado o Extrae antes,
-  mas a princípio, a ferramenta utiliza uma variável de ambiente
-  chamada =EXTRAE_CONFIG_FILE=. Acredito que a partir dela seja possível
-  especificar um arquivo xml, com as configurações da instrumentação,
-  como o exemplo encontrado em:
-
-#+begin_src sh :session foo :results output :exports both 
-cd $HOME/Programas/extrae-3.4.3/example/LINUX/OMP/
-cat extrae.xml
-#+end_src
-
-#+RESULTS:
-#+begin_example
-
-<?xml version='1.0'?>
-
-<trace enabled="yes"
- home="@sub_PREFIXDIR@"
- initial-mode="detail"
- type="paraver"
-
-
-
-
-
-
-
-
-
-
-
-PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM,PAPI_L2_DCM,PAPI_L3_TCM,PAPI_BR_INS,PAPI_BR_MSP,RESOURCE_STALLS
-
-PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_VEC_SP,PAPI_SR_INS,PAPI_LD_INS,PAPI_FP_INS
-PAPI_TOT_CYC</sampling>
-
-
-
-
-
-
-
-TRACE</trace-prefix>
-5</size>
-/scratch</temporal-directory>
-/gpfs/scratch/bsc41/bsc41273</final-directory>
-
-
-5000000</size>
-
-
-
-/gpfs/scratch/bsc41/bsc41273/control</file>
-</global-ops>
-
-
-10M</minimum-time>
-    <finalize-on-signal enabled="yes" 
-      SIGUSR1="no" SIGUSR2="no" SIGINT="yes"
-      SIGQUIT="yes" SIGTERM="yes" SIGXCPU="yes"
-      SIGFPE="yes" SIGSEGV="yes" SIGABRT="yes"
-
-
-
-
-
-
-<merge enabled="yes" 
-    synchronization="default"
-    tree-fan-out="16"
-    max-memory="512"
-    joint-states="yes"
-    keep-mpits="yes"
-    sort-addresses="yes"
-    overwrite="yes"
-
-#+end_example
