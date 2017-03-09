@@ -2033,25 +2033,3 @@ head(resultFrame)
 - Aguardando a opinião do professor Lucas sobre essa agregação de
   dados que fiz.
 
-* [17:03:35; 08.03.2017] Usando EZtrace                             :Gabriel:
-
-#+begin_src sh :results output :exports both
-cd $HOME/Programs/
-wget https://gforge.inria.fr/frs/download.php/file/36126/eztrace-1.1-4.tar.gz
-tar vxf eztrace-1.1-4.tar.gz
-rm -rf *.tar.gz
-cd eztrace-1.1-4/
- ./configure --prefix=$PREFIX --with-bfd=$PREFIX \
- --enable-openmp --with-libgomp=auto --without-mpi \ 
---enable-instrument-dynamic-memory \ 
---with-unwind=/usr/local/bin --with-unwind-libs=/usr/local/lib \
---with-unwind-headers=/usr/local/include \ 
---without-dwarf --without-dyninst \
---without-elf --with-papi-headers=/usr/local/include \ 
---with-papi-libs=/usr/local/lib \ 
---with-papi=/usr/local/bin --enable-sampling \ 
---without-binutils 
-
-make -j4 2> mierr
-sudo make install
-#+end_src
