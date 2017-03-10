@@ -1731,11 +1731,15 @@ A continuar pelo Gabriel.
 
 ** WAITING [12:34:41; 07.02.2017] Analisando a aplicação CG com R  :Gabriel:
 
+- State "WAITING"    from "TODO"       [2017-03-09 Qui 21:06]
+- State "TODO"       from "WAITING"    [2017-03-09 Qui 21:06]
 - State "WAITING"    from "STARTED"    [2017-02-12 Dom 17:37]
 - State "STARTED"    from "WAITING"    [2017-02-09 Qui 11:25]
 - State "WAITING"    from              [2017-02-07 Ter 12:34]
-- Primeiramente, copiei os rastros da =hype2= para minha máquina, visto
-  que o ambiente está configurado nela.
+
+- É necessário copiar os rastros que estão na =hype2=, no seguinte path:
+  */home/gabrielbmoro/rastros/exp7-NAS-cg_mg_ft-40threads.tar.gz*. Após
+  isso, os seguintes passos podem ser realizados.
 
 #+begin_src sh :session foo :results output :exports both 
 ls /tmp/exp7-NAS-cg_mg_ft-40threads/cg.B-scorep-40threads_exp7/
@@ -1825,16 +1829,6 @@ head(df1);
 
 #+RESULTS:
 #+begin_example
-
-Attaching package: ‘dplyr’
-
-The following objects are masked from ‘package:stats’:
-
-    filter, lag
-
-The following objects are masked from ‘package:base’:
-
-    intersect, setdiff, setequal, union
        Start        End   Duration Imbrication            Region Thread
 1   11.87650   11.89433   0.017836           0         parallel_     40
 2   11.89433   11.92660   0.032266           1               do_     40
@@ -1852,184 +1846,118 @@ The following objects are masked from ‘package:base’:
 #+end_example
 
 #+begin_src R :results output :session *R* :exports both
-library(stringr);
-library(reshape);
+library(reshape2)
+library(dplyr)
 
-#selecionando primeiramente pela thread 1
-thread=1
-region='parallel'
-
-head(df3)
-
-exportByThreadAndRegion <- function(thread,region) {
-	df2 <- df1 %>% filter(Thread==thread)
-	df3 <- df2 %>% filter(str_detect(Region, region))
-
-	# somando os contadores para mesma linha,regiao
-	df3 <- df3 %>% select (Duration,Region,Thread,PAPI_TOT_INS,PAPI_REF_CYC,PAPI_L2_TCM, PAPI_L2_TCA,line) %>%
-	 group_by(Thread,Region,line) %>%
-	 summarise(Duration=sum(Duration), PAPI_TOT_INS=sum(PAPI_TOT_INS),PAPI_REF_CYC=sum(PAPI_REF_CYC),
-	 PAPI_L2_TCM=sum(PAPI_L2_TCM),PAPI_L2_TCA=sum(PAPI_L2_TCA)) %>% as.data.frame()
-
-	lines <- unique(df3$line)
-	sizeOfLines=length(lines)
-	count=1
-	nrow=nrow(df3)
-	i=1
-	j=3
-	loc=1
-    initL=0
-	endL=0
-	duration=0
-	papi_tot_inst=0
-	papi_ref_cyc=0
-	papi_l2_tcm=0
-    papi_l2_tca=0
-
-	#localizar intervalos
-	vectorTmp <- NULL
-	m_final <- matrix(ncol = 7,nrow=sizeOfLines-1)
-	index_final=1
-
-	while(i < nrow) {
-
-            duration <- 0
-		papi_tot_inst <- 0
-		papi_ref_cyc <- 0
-		papi_l2_tcm <- 0
-            papi_l2_tca <- 0
-		initL <- 0
-		endL <- 0
-		
-		if (i + 1 < nrow) {
-			count <- loc
-			while(count < sizeOfLines) { 
-
-                            if(lines[count] == df3[i,j]) {
-           	                	initL <- df3[i,j]
-					duration <- df3[i,4] + duration
-					papi_tot_inst <- df3[i,5] + papi_tot_inst
-					papi_ref_cyc <- df3[i,6] + papi_ref_cyc
-					papi_l2_tcm <- df3[i,7] + papi_l2_tcm
-			        	papi_l2_tca <- df3[i,8] + papi_l2_tca
-					loc <- count
-				}
-			
-				else if(lines[count] == df3[i+1,j]) {
-    	                        endL <- df3[i+1,j]
-           		                duration <- df3[i+1,4] + duration
-					papi_tot_inst <- df3[i+1,5] + papi_tot_inst
-					papi_ref_cyc <- df3[i+1,6] + papi_ref_cyc
-					papi_l2_tcm <- df3[i+1,7] + papi_l2_tcm
-				        papi_l2_tca <- df3[i+1,8] + papi_l2_tca
-                                	loc <- count
-				}
-
-				count <- count + 1
-			}
-	
-			m_final[index_final,1] <- initL
-			m_final[index_final,2] <- endL
-			m_final[index_final,3] <- duration
-	        	m_final[index_final,4] <- papi_tot_inst
-			m_final[index_final,5] <- papi_ref_cyc
-			m_final[index_final,6] <- papi_l2_tcm
-			m_final[index_final,7] <- papi_l2_tca
-			index_final <- index_final + 1
-		}
-		i <- i + 1
-    }
-
-	df_final <- data.frame(m_final)
-	df_final <- df_final %>% filter(is.na(X3)==FALSE) %>% as.data.frame();
-	df_final$X8 <- thread
-    df_final$V9 <- region
-	df_final <- unique(df_final);
-	return (df_final)
-}
-exportByThreadAndRegion(thread,region);
+df2 <- df1 %>% melt(c("Start","End","Duration","Imbrication","Region","Thread","ru_utime","ru_stime","line"))
+head(df2)
 #+end_src
 
 #+RESULTS:
 #+begin_example
-  Thread    Region line Duration PAPI_TOT_INS PAPI_REF_CYC PAPI_L2_TCM
-1      1 parallel_  196 0.096711         9244         1416         538
-2      1 parallel_  253 0.012071         3868          226          39
-3      1 parallel_  266 0.014656         3888          237          59
-4      1 parallel_  281 0.015630         3908          225          24
-5      1 parallel_  323 1.149141       264294        18450        3962
-6      1 parallel_  344 2.312714       262836        23045        8118
-  PAPI_L2_TCA
-1        1571
-2         143
-3         272
-4         170
-5       18889
-6       22032
-    X1  X2        X3       X4      X5     X6     X7 X8       V9
-1  196 253  0.108782    13112    1642    577   1714  1 parallel
-2  253 266  0.026727     7756     463     98    415  1 parallel
-3  266 281  0.030286     7796     462     83    442  1 parallel
-4  281 323  1.164771   268202   18675   3986  19059  1 parallel
-5  323 344  3.461855   527130   41495  12080  40921  1 parallel
-6  344 488  4.711526   804570   50098  10639  42722  1 parallel
-7  488 522 98.050641 20897845 1031792 121797 637909  1 parallel
-8  522 646 98.270981 20894942 1035213 123216 635593  1 parallel
-9  646 736  2.646309   542624   31141   4167  18968  1 parallel
-10 736 836  0.040402     7605     853    286    995  1 parallel
-11 836 862  0.036196     7643     625    172   1078  1 parallel
+       Start        End   Duration Imbrication            Region Thread
+1   11.87650   11.89433   0.017836           0         parallel_     40
+2   11.89433   11.92660   0.032266           1               do_     40
+3   11.92660  221.22084 209.294243           2 implicit_barrier_     40
+4  221.22084  221.24101   0.020166           1               do_     40
+5  221.24101  221.24811   0.007102           0         parallel_     40
+6 8024.99327 8025.06138   0.068103           0         parallel_     40
+  ru_utime ru_stime line     variable   value
+1        0        0  736 PAPI_TOT_INS    2040
+2        0        0  736 PAPI_TOT_INS   18855
+3     8000        0  739 PAPI_TOT_INS 2102041
+4        0        0  736 PAPI_TOT_INS    1771
+5        0        0  736 PAPI_TOT_INS    1763
+6        0        0  836 PAPI_TOT_INS    2013
 #+end_example
 
 
-- A saida do script R acima apresenta um agrupamento inicial dos
-  dados, da seguinte forma: primeiramente é selecionado uma thread,
-  após isso, uma função (nesse caso, =_parallel=). Com isso, podemos
-  desprezar o Start e o End, visto que podemos levar em consideração
-  apenas a duração, a partir desses resultados podemos dizer que para
-  a thread 'X', na região 'Y', quando acumula 'N' segundos temos, por
-  exemplo, o total de instruções 'W', o qual foi acumulado de acordo com
-  a duração em segundos. Claro, estou bem longe do necessário, mas um
-  passo de cada vez.
-  
-- Acredito que essa função pode ser melhorada e refinada, fiz essa
-  primeira versão. Pretendo melhorar bastante, a partir dos estudos em
-  R que estou fazendo. Após refinar essa função essa poderá ser
-  chamada de acordo com o número de threads e regiões possíveis.
-
-
-- Como já consigo agregar os contadores de hardware por thread e por
-  região, vou utilizar a função criada. A partir dela é possível obter
-  um frame de dados com diferentes métodos de uma thread, logo será
-  necessário chamar essa função N vezes Z, onde N é as variações de
-  métodos de código e Z representa o número de threads.
+- Problemas do data.frame:
+  a) As métricas devem ser agrupadas em um campo variável para
+     facilitar a agregação dos dados (está pronto com o uso do melt)
+  b) Temos que estabelecer uma faixa padrão de intervalos na marcação
+     do Tempo inicial e no Tempo final, por exemplo: vamos imaginar
+     duas threads, a primeira thread de id 2, a sua primeira coleta de
+     contadores de hardware ocorre no tempo 11.12 segundos. Já, para
+     uma thread k + 1, a primeira coleta de tempo ocorre em 11.40. Uma
+     das maneiras que vejo resolver seria excluir a coluna que
+     representa o tempo final, manter a duração e arredondar para um
+     inteiro 
 
 #+begin_src R :results output :session *R* :exports both
-regions <- unique(df1$Region)
-threads <- unique(df1$Thread)
+df3 <- df2 %>% mutate(Start = round(Start, digits=0)) %>% select(Start, -End, Duration,
+ -Imbrication, Region, Thread, -ru_utime, -ru_stime, line, variable, value)
 
-resultFrame <- NULL
+df_unique <- df3 %>% select(Start, Region, line) %>% unique()
 
-for(k in regions){
-	for(l in threads) {
-		frameTmp <- exportByThreadAndRegion(l, k)
-		resultFrame <- rbind(resultFrame,frameTmp)
-	}
-}
+df4 <- df3 %>% select(-Thread,-Start) %>% group_by(Region, line, variable) %>%
+    summarize(time=sum(Duration), value=sum(value)) %>%
+    as.data.frame()
 
-resultFrame <-  resultFrame %>% dplyr::rename(startL=X1,endL=X2,duration=X3,tot_inst=X4,tot_cyc=X5,l2_tcm=X6,l2_tca=X7,thread=X8,parallelR=V9)
-resultFrame <- resultFrame %>% dplyr::mutate(ipc = tot_inst / tot_cyc, l2misses_rate = l2_tcm / l2_tca) %>% select(-tot_inst,tot_cyc,-l2_tcm,-l2_tca)
-head(resultFrame)
+head(df4)
+
+head(df_unique)
 #+end_src
 
 #+RESULTS:
-:   startL endL duration tot_cyc thread parallelR       ipc l2misses_rate
-: 1    196  253 0.118973    1527     40 parallel_  8.550753    0.32680196
-: 2    253  266 0.026003     416     40 parallel_ 18.548077    0.11471322
-: 3    266  281 0.024472     389     40 parallel_ 19.938303    0.13020833
-: 4    281  323 1.125844   14326     40 parallel_ 18.812579    0.14294621
-: 5    323  344 2.251016   26512     40 parallel_ 19.983140    0.11230437
-: 6    344  488 3.672486   41262     40 parallel_ 19.554457    0.09723976
+#+begin_example
+  Region line     variable      time     value
+1    do_  197 PAPI_TOT_INS 217.19859 124429166
+2    do_  197 PAPI_REF_CYC 217.19859   4623788
+3    do_  197  PAPI_L2_TCM 217.19859    150765
+4    do_  197  PAPI_L2_TCA 217.19859    100134
+5    do_  208 PAPI_TOT_INS  54.41479    643630
+6    do_  208 PAPI_REF_CYC  54.41479     51074
+  Start            Region line
+1    12         parallel_  736
+2    12               do_  736
+3    12 implicit_barrier_  739
+4   221               do_  736
+5   221         parallel_  736
+6  8025         parallel_  836
+#+end_example
 
-- Aguardando a opinião do professor Lucas sobre essa agregação de
-  dados que fiz.
+- Próximo passo agora é agregar os dados pelas diferentes threads, por
+  exemplo, nesse momento, o data.frame está com várias duplicações,
+  pois duplicamos para ter os contadores como variáveis. O ideal seria
+  agrupar de maneira coesa o que temos no df4
 
+
+- Aqui em baixo estou iniciando algo, mas to achando
+  estranho. Professor considera dessa linha pra cima, a seguir to
+  trabalhando.
+
+#+begin_src R :results output :session *R* :exports both
+
+dfunique_size= nrow(df_unique)
+df4_size = nrow(df4)
+
+m_final <- matrix(ncol=6, nrow=df4_size-1)
+index_mfinal <- 1
+
+i <- 1
+j <- 1
+
+while(i < df4_size) {    
+    while(j < dfunique_size) {
+        
+        if(df4[i, 1] == df_unique[j,2] & df4[i,2] == df_unique[j,3]) {
+#            m_final[index_mfinal,1] <- df_unique[j,1]
+#            m_final[index_mfinal,2] <- df4[i,4]
+#            m_final[index_mfinal,3] <- df4[i,1]
+#            m_final[index_mfinal,4] <- df4[i,2]
+#            m_final[index_mfinal,5] <- df4[i,3]
+#            m_final[index_mfinal,6] <- df4[i,5]
+#            index_mfinal <- index_mfinal + 1
+        }
+        j <- j + 1
+    }
+    j <- 1
+    i <- i + 1
+}
+
+#+end_src
+
+#+RESULTS:
+: Error in `[<-`(`*tmp*`, index_mfinal, 1, value = 27363) (from #5) : 
+:   subscript out of bounds
